@@ -287,3 +287,5 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 html/
+AWSK/GameData.db
+AWSK/SQLite.Interop.dll

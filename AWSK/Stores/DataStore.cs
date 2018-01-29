@@ -173,8 +173,14 @@ namespace AWSK.Stores
 			return flg1 && flg2;
 		}
 		// 艦娘のデータをidから正引きする
-		public static KammusuData? KammusuDataById(int id) {
-			KammusuData? kd = null;
+		public static KammusuData KammusuDataById(int id) {
+			var kd = new KammusuData {
+				Id = 0,
+				Name = "なし",
+				Level = 0,
+				KammusuFlg = true,
+				Weapon = new List<WeaponData>()
+			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
@@ -185,7 +191,9 @@ namespace AWSK.Stores
 							kd = new KammusuData {
 								Id = id,
 								Name = reader.GetString(0),
-								KammusuFlg = (reader.GetInt32(1) == 1 ? true : false)
+								Level = 1,
+								KammusuFlg = (reader.GetInt32(1) == 1 ? true : false),
+								Weapon = new List<WeaponData>()
 							};
 						}
 					}
@@ -194,8 +202,14 @@ namespace AWSK.Stores
 			return kd;
 		}
 		// 装備のデータをidから正引きする
-		public static WeaponData? WeaponDataById(int id) {
-			WeaponData? kd = null;
+		public static WeaponData WeaponDataById(int id) {
+			var wd = new WeaponData {
+				Id = id,
+				Name = "empty",
+				Mas = 0,
+				Rf = 0,
+				WeaponFlg = true
+			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
@@ -203,28 +217,77 @@ namespace AWSK.Stores
 					cmd.CommandText = $"SELECT name, weapon_flg FROM Weapon WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
-							kd = new WeaponData {
+							wd = new WeaponData {
 								Id = id,
 								Name = reader.GetString(0),
+								Mas = 0,
+								Rf = 0,
 								WeaponFlg = (reader.GetInt32(1) == 1 ? true : false)
 							};
 						}
 					}
 				}
 			}
-			return kd;
+			return wd;
 		}
 	}
+	// 艦隊データ
+	class FleetData
+	{
+		public List<List<KammusuData>> Kammusu { get; set; } = new List<List<KammusuData>>();
+		// 文字列化するメソッド
+		public string ToString() {
+			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+			string output = "";
+			// 艦隊毎に
+			for(int fi = 0; fi < Kammusu.Count; ++fi) {
+				// 艦番毎に
+				for (int si = 0; si < Kammusu[fi].Count; ++si) {
+					var kammusu = Kammusu[fi][si];
+					// 艦番号を出力
+					if (fi == 0) {
+						output += $"({si+1})";
+					} else {
+						output += $"({fi+1}-{si+1})";
+					}
+					// 艦名と練度を出力
+					output += $"{kammusu.Name} Lv{kammusu.Level}　";
+					// 装備情報を出力
+					for (int ii = 0; ii < kammusu.Weapon.Count; ++ii) {
+						var weapon = kammusu.Weapon[ii];
+						if (ii != 0)
+							output += ",";
+						// 装備名
+						output += $"{weapon.Name}";
+						// 艦載機熟練度
+						if (weapon.Mas != 0)
+							output += $"{masList[weapon.Mas]}";
+						// 装備改修度
+						if (weapon.Rf != 0)
+							output += $"★{weapon.Rf}";
+					}
+					output += "\n";
+				}
+			}
+			return output;
+		}
+	}
+	// 艦娘データ
 	struct KammusuData
 	{
 		public int Id;
 		public string Name;
+		public int Level;
 		public bool KammusuFlg;
+		public List<WeaponData> Weapon;
 	}
+	// 装備データ
 	struct WeaponData
 	{
 		public int Id;
 		public string Name;
+		public int Mas;	// 艦載機熟練度
+		public int Rf;	// 装備改修度
 		public bool WeaponFlg;
 	}
 }

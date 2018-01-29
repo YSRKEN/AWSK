@@ -2,6 +2,7 @@
 using Codeplex.Data;
 using Reactive.Bindings;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace AWSK.ViewModels
@@ -14,12 +15,13 @@ namespace AWSK.ViewModels
 		#endregion
 
 		// JSONデータを分析する
-		private void ParseFleetData(dynamic obj) {
-			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
-			for(int fi = 1; fi <= 4; ++fi) {
+		private FleetData ParseFleetData(dynamic obj) {
+			var fleetData = new FleetData();
+			for (int fi = 1; fi <= 4; ++fi) {
 				// 定義されていない艦隊は飛ばす
 				if (!obj.IsDefined($"f{fi}"))
 					continue;
+				var kammusuList = new List<KammusuData>();
 				for (int si = 1; si <= 6; ++si) {
 					// 定義されていない艦隊は飛ばす
 					if (!obj[$"f{fi}"].IsDefined($"s{si}"))
@@ -27,37 +29,19 @@ namespace AWSK.ViewModels
 					// 中身が定義されていないようなら飛ばす
 					if (!obj[$"f{fi}"][$"s{si}"].IsDefined("id"))
 						continue;
-					// 艦番号を出力
-					if (fi == 1) {
-						Console.Write($"({si})");
-					} else {
-						Console.Write($"({fi}-{si})");
-					}
 					// idを読み取り、そこから艦名を出力
 					int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
 					int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
 					var kammusuData = DataStore.KammusuDataById(k_id);
-					if (kammusuData.HasValue) {
-						Console.Write($"{kammusuData.Value.Name} Lv{lv}　");
-					} else {
-						Console.Write($"[{k_id}] Lv{lv}　");
-					}
-					bool firstWeaponFlg = true;
+					kammusuData.Level = lv;
 					for (int ii = 1; ii <= 5; ++ii) {
 						string key = (ii == 5 ? "ix" : $"i{ii}");
 						// 定義されていない装備は飛ばす
 						if (!obj[$"f{fi}"][$"s{si}"].items.IsDefined(key))
 							continue;
 						// idを読み取り、そこから装備名を出力
-						if(!firstWeaponFlg)
-							Console.Write(",");
 						int w_id = (int)(obj[$"f{fi}"][$"s{si}"].items[key].id);
 						var weaponData = DataStore.WeaponDataById(w_id);
-						if (kammusuData.HasValue) {
-							Console.Write($"{weaponData.Value.Name}");
-						} else {
-							Console.Write($"[{w_id}]");
-						}
 						// 艦載機熟練度を出力
 						// 「装備改修度が0なら『0』、1以上なら『"1"』」といった
 						// 恐ろしい仕様があるので対策が面倒だった
@@ -69,8 +53,7 @@ namespace AWSK.ViewModels
 							} else {
 								mas = (int)(rawMas);
 							}
-							if(mas != 0)
-								Console.Write($"{masList[mas]}");
+							weaponData.Mas = mas;
 						}
 						//
 						// 装備改修度を出力
@@ -83,18 +66,15 @@ namespace AWSK.ViewModels
 							} else {
 								rf = (int)(rawRf);
 							}
-							if(rf != 0)
-								Console.Write($"★{rf}");
+							weaponData.Rf =rf;
 						}
-						//
-						if(firstWeaponFlg)
-							firstWeaponFlg = false;
+						kammusuData.Weapon.Add(weaponData);
 					}
-					Console.WriteLine("");
+					kammusuList.Add(kammusuData);
 				}
-				//
-				Console.WriteLine("");
+				fleetData.Kammusu.Add(kammusuList);
 			}
+			return fleetData;
 		}
 
 		// クリップボードからインポート
@@ -106,7 +86,8 @@ namespace AWSK.ViewModels
 					throw new Exception();
 				// クリップボードの文字列をJSONとしてパースし、艦隊データに変換する
 				var obj = DynamicJson.Parse(clipboardString);
-				ParseFleetData(obj);
+				var fleetData = ParseFleetData(obj);
+				MessageBox.Show(fleetData.ToString(), "AWSK");
 			} catch (Exception e) {
 				Console.WriteLine(e.ToString());
 				MessageBox.Show("クリップボードから艦隊データを取得できませんでした。", "AWSK");
