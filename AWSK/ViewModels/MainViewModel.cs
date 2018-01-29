@@ -12,10 +12,19 @@ namespace AWSK.ViewModels
 		public ReactiveCommand ImportClipboardTextCommand { get; } = new ReactiveCommand();
 		#endregion
 
+
+		public static async void DownloadData() {
+			if(await DataStore.DownloadDataAsync()) {
+				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
+			} else {
+				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
+			}
+		}
+
 		// コンストラクタ
 		public MainViewModel() {
 			DataStore.Initialize();
-			DataStore.DownloadData();
+			DownloadData();
 			ImportClipboardTextCommand.Subscribe(_ => MessageBox.Show("スタブ", "AWSK"));
 		}
 	}
