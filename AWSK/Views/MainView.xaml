@@ -6,7 +6,7 @@
 	xmlns:local="clr-namespace:AWSK.ViewModels"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="MainView" Height="300" Width="300">
+	Title="航空戦シミュレーター改" Height="300" Width="300">
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>
