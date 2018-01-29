@@ -13,17 +13,9 @@ namespace AWSK.ViewModels
 		public ReactiveCommand ImportClipboardTextCommand { get; } = new ReactiveCommand();
 		#endregion
 
-		// 艦娘・装備データをダウンロード
-		public async void DownloadData() {
-			if(await DataStore.DownloadDataAsync()) {
-				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
-			} else {
-				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
-			}
-		}
-
 		// JSONデータを分析する
 		private void ParseFleetData(dynamic obj) {
+			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 			for(int fi = 1; fi <= 4; ++fi) {
 				// 定義されていない艦隊は飛ばす
 				if (!obj.IsDefined($"f{fi}"))
@@ -44,7 +36,12 @@ namespace AWSK.ViewModels
 					// idを読み取り、そこから艦名を出力
 					int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
 					int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
-					Console.Write($"{k_id} Lv{lv}　");
+					var kammusuData = DataStore.KammusuDataById(k_id);
+					if (kammusuData.HasValue) {
+						Console.Write($"{kammusuData.Value.Name} Lv{lv}　");
+					} else {
+						Console.Write($"[{k_id}] Lv{lv}　");
+					}
 					bool firstWeaponFlg = true;
 					for (int ii = 1; ii <= 5; ++ii) {
 						string key = (ii == 5 ? "ix" : $"i{ii}");
@@ -55,7 +52,12 @@ namespace AWSK.ViewModels
 						if(!firstWeaponFlg)
 							Console.Write(",");
 						int w_id = (int)(obj[$"f{fi}"][$"s{si}"].items[key].id);
-						Console.Write($"{w_id}");
+						var weaponData = DataStore.WeaponDataById(w_id);
+						if (kammusuData.HasValue) {
+							Console.Write($"{weaponData.Value.Name}");
+						} else {
+							Console.Write($"[{w_id}]");
+						}
 						// 艦載機熟練度を出力
 						// 「装備改修度が0なら『0』、1以上なら『"1"』」といった
 						// 恐ろしい仕様があるので対策が面倒だった
@@ -67,7 +69,8 @@ namespace AWSK.ViewModels
 							} else {
 								mas = (int)(rawMas);
 							}
-							Console.Write($"[{mas}]");
+							if(mas != 0)
+								Console.Write($"{masList[mas]}");
 						}
 						//
 						// 装備改修度を出力
@@ -80,7 +83,8 @@ namespace AWSK.ViewModels
 							} else {
 								rf = (int)(rawRf);
 							}
-							Console.Write($"★{rf}");
+							if(rf != 0)
+								Console.Write($"★{rf}");
 						}
 						//
 						if(firstWeaponFlg)
@@ -89,7 +93,7 @@ namespace AWSK.ViewModels
 					Console.WriteLine("");
 				}
 				//
-				Console.WriteLine("\n");
+				Console.WriteLine("");
 			}
 		}
 
@@ -112,7 +116,6 @@ namespace AWSK.ViewModels
 		// コンストラクタ
 		public MainViewModel() {
 			DataStore.Initialize();
-			//DownloadData();
 			ImportClipboardTextCommand.Subscribe(ImportClipboardText);
 		}
 	}
