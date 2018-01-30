@@ -269,6 +269,35 @@ namespace AWSK.Stores
 			}
 			return wd;
 		}
+		// 装備のデータをnameから逆引きする
+		public static WeaponData WeaponDataByName(string name) {
+			var wd = new WeaponData {
+				Id = 0,
+				Name = name,
+				Mas = 0,
+				Rf = 0,
+				WeaponFlg = true
+			};
+			using (var con = new SQLiteConnection(connectionString)) {
+				con.Open();
+				using (var cmd = con.CreateCommand()) {
+					// 艦娘データを正引き
+					cmd.CommandText = $"SELECT id, weapon_flg FROM Weapon WHERE name='{name}'";
+					using (var reader = cmd.ExecuteReader()) {
+						if (reader.Read()) {
+							wd = new WeaponData {
+								Id = reader.GetInt32(0),
+								Name = name,
+								Mas = 0,
+								Rf = 0,
+								WeaponFlg = (reader.GetInt32(1) == 1 ? true : false)
+							};
+						}
+					}
+				}
+			}
+			return wd;
+		}
 		// 艦名一覧を返す
 		public static List<string> KammusuNameList() {
 			var list = new List<string>();

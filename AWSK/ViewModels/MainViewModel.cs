@@ -11,7 +11,7 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
-		#region プロパティ
+		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊を飛ばしたか？
@@ -64,6 +64,8 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<int> EnemyUnitIndex4 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex5 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex6 { get; } = new ReactiveProperty<int>(0);
+		#endregion
+		#region プロパティ(ReadOnlyReactiveCollection)
 		// 艦載機熟練度の一覧
 		public ReadOnlyReactiveCollection<string> MasList { get; }
 		// 装備改修度の一覧
@@ -95,6 +97,51 @@ namespace AWSK.ViewModels
 				return;
 			}
 		}
+		// 基地航空隊のデータを取得
+		private List<List<WeaponData>> BasedAirUnitData() {
+			// 準備
+			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
+			var basedAirUnitIndex = new[] {
+					BasedAirUnitIndex11.Value, BasedAirUnitIndex12.Value, BasedAirUnitIndex13.Value, BasedAirUnitIndex14.Value,
+					BasedAirUnitIndex21.Value, BasedAirUnitIndex22.Value, BasedAirUnitIndex23.Value, BasedAirUnitIndex24.Value,
+					BasedAirUnitIndex31.Value, BasedAirUnitIndex32.Value, BasedAirUnitIndex33.Value, BasedAirUnitIndex34.Value,
+				};
+			var basedAirUnitMas = new[] {
+					BasedAirUnitMas11.Value, BasedAirUnitMas12.Value, BasedAirUnitMas13.Value, BasedAirUnitMas14.Value,
+					BasedAirUnitMas21.Value, BasedAirUnitMas22.Value, BasedAirUnitMas23.Value, BasedAirUnitMas24.Value,
+					BasedAirUnitMas31.Value, BasedAirUnitMas32.Value, BasedAirUnitMas33.Value, BasedAirUnitMas34.Value,
+				};
+			var basedAirUnitRf = new[] {
+					BasedAirUnitRf11.Value, BasedAirUnitRf12.Value, BasedAirUnitRf13.Value, BasedAirUnitRf14.Value,
+					BasedAirUnitRf21.Value, BasedAirUnitRf22.Value, BasedAirUnitRf23.Value, BasedAirUnitRf24.Value,
+					BasedAirUnitRf31.Value, BasedAirUnitRf32.Value, BasedAirUnitRf33.Value, BasedAirUnitRf34.Value,
+				};
+			// 作成
+			var basedAirUnitData = new List<List<WeaponData>>();
+			for (int i = 0; i < basedAirUnitFlgList.Count(); ++i) {
+				// チェックを入れてない編成は無視する
+				if (!basedAirUnitFlgList[i])
+					continue;
+				//
+				var temp = new List<WeaponData>();
+				for (int j = 0; j < 4; ++j) {
+					int index = i * 4 + j;
+					// 「なし」が選択されている装備は無視する
+					if (basedAirUnitIndex[index] == 0)
+						continue;
+					// 装備名を取り出す
+					string name = BasedAirUnitList[basedAirUnitIndex[index]];
+					// 装備名から装備情報を得る
+					var weapon = DataStore.WeaponDataByName(name);
+					weapon.Mas = basedAirUnitMas[index];
+					weapon.Rf = basedAirUnitRf[index];
+					temp.Add(weapon);
+				}
+				if (temp.Count > 0)
+					basedAirUnitData.Add(temp);
+			}
+			return basedAirUnitData;
+		}
 
 		// クリップボードからインポート
 		public void ImportClipboardText() {
@@ -110,6 +157,12 @@ namespace AWSK.ViewModels
 				Console.WriteLine(e.ToString());
 				MessageBox.Show("クリップボードから艦隊データを取得できませんでした。", "AWSK");
 			}
+		}
+		// 航空戦をシミュレートする
+		public void RunSimulation() {
+			// 基地航空隊のデータを取得する
+			var basedAirUnitData = BasedAirUnitData();
+			return;
 		}
 
 		// コンストラクタ
@@ -152,7 +205,7 @@ namespace AWSK.ViewModels
 			}
 			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit1Flg, BasedAirUnit1Flg }
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
-			RunSimulationCommand.Subscribe(ImportClipboardText);	//スタブ
+			RunSimulationCommand.Subscribe(RunSimulation);
 		}
 	}
 }
