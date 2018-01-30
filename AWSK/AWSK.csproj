@@ -127,6 +127,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Behaviors\CloseWindowAttachedBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="DynamicJson.cs" />
     <Compile Include="Stores\DataStore.cs" />

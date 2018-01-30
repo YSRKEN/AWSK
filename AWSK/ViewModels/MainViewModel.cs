@@ -12,6 +12,8 @@ namespace AWSK.ViewModels
 	class MainViewModel
 	{
 		#region プロパティ
+		// trueにすると画面を閉じる
+		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊を飛ばしたか？
 		public ReactiveProperty<bool> BasedAirUnit1Flg { get; } = new ReactiveProperty<bool>(true);
 		public ReactiveProperty<bool> BasedAirUnit2Flg { get; } = new ReactiveProperty<bool>(false);
@@ -89,12 +91,9 @@ namespace AWSK.ViewModels
 				break;
 			case DataStoreStatus.Failed:
 				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
+				CloseWindow.Value = true;
 				return;
 			}
-			// 画面表示の初期化
-			var kammusuNameList = DataStore.KammusuNameList();
-			var weaponNameList = DataStore.WeaponNameList();
-			return;
 		}
 
 		// クリップボードからインポート
