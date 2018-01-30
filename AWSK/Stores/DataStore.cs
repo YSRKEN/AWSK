@@ -299,7 +299,7 @@ namespace AWSK.Stores
 	{
 		public List<List<KammusuData>> Kammusu { get; set; } = new List<List<KammusuData>>();
 		// 文字列化するメソッド
-		public string ToString() {
+		public override string ToString() {
 			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 			string output = "";
 			// 艦隊毎に
