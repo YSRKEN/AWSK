@@ -7,10 +7,26 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
+		#region プロパティ
+		// データベースからデータを拾ったか？
+		public ReactiveProperty<bool> ReadyDataStoreFlg = new ReactiveProperty<bool>(false);
+		#endregion
+
 		#region コマンド
 		// クリップボードからインポート
-		public ReactiveCommand ImportClipboardTextCommand { get; } = new ReactiveCommand();
+		public ReactiveCommand ImportClipboardTextCommand { get; }
 		#endregion
+
+		// その他初期化用コード
+		private async void Initialize() {
+			// データベースの初期化
+			ReadyDataStoreFlg.Value = await DataStore.Initialize();
+			if (ReadyDataStoreFlg.Value) {
+				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
+			} else {
+				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
+			}
+		}
 
 		// クリップボードからインポート
 		public void ImportClipboardText() {
@@ -30,8 +46,12 @@ namespace AWSK.ViewModels
 
 		// コンストラクタ
 		public MainViewModel() {
-			DataStore.Initialize();
+			// プロパティ・コマンドを設定
+			ImportClipboardTextCommand = ReadyDataStoreFlg.ToReactiveCommand();
+			// データベースを初期化
 			ImportClipboardTextCommand.Subscribe(ImportClipboardText);
+			// その他初期化
+			Initialize();
 		}
 	}
 }

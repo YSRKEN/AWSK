@@ -108,7 +108,7 @@ namespace AWSK.Stores
 		}
 
 		// データベースの初期化処理
-		public static async void Initialize() {
+		public static async Task<bool> Initialize() {
 			// テーブルが存在しない場合、テーブルを作成し、ついでにデータをダウンロードする
 			bool createTableFlg = false;
 			using (var con = new SQLiteConnection(connectionString)) {
@@ -159,11 +159,9 @@ namespace AWSK.Stores
 				}
 			}
 			if (createTableFlg) {
-				if (await DownloadDataAsync()) {
-					MessageBox.Show("ダウンロードに成功しました。", "AWSK");
-				} else {
-					MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
-				}
+				return await DownloadDataAsync();
+			} else {
+				return true;
 			}
 		}
 		// データをダウンロードする
