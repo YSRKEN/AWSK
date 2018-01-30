@@ -20,12 +20,24 @@ namespace AWSK.ViewModels
 		// その他初期化用コード
 		private async void Initialize() {
 			// データベースの初期化
-			ReadyDataStoreFlg.Value = await DataStore.Initialize();
-			if (ReadyDataStoreFlg.Value) {
+			var status = await DataStore.Initialize();
+			switch (status) {
+			case DataStoreStatus.Exist:
+				ReadyDataStoreFlg.Value = true;
+				break;
+			case DataStoreStatus.Success:
+				ReadyDataStoreFlg.Value = true;
 				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
-			} else {
+				break;
+			case DataStoreStatus.Failed:
+				ReadyDataStoreFlg.Value = false;
 				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
+				return;
 			}
+			// 画面表示の初期化
+			var kammusuNameList = DataStore.KammusuNameList();
+			var weaponNameList = DataStore.WeaponNameList();
+			return;
 		}
 
 		// クリップボードからインポート

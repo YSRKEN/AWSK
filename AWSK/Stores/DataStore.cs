@@ -108,7 +108,7 @@ namespace AWSK.Stores
 		}
 
 		// データベースの初期化処理
-		public static async Task<bool> Initialize() {
+		public static async Task<DataStoreStatus> Initialize() {
 			// テーブルが存在しない場合、テーブルを作成し、ついでにデータをダウンロードする
 			bool createTableFlg = false;
 			using (var con = new SQLiteConnection(connectionString)) {
@@ -159,9 +159,13 @@ namespace AWSK.Stores
 				}
 			}
 			if (createTableFlg) {
-				return await DownloadDataAsync();
+				if(await DownloadDataAsync()) {
+					return DataStoreStatus.Success;
+				} else {
+					return DataStoreStatus.Failed;
+				}
 			} else {
-				return true;
+				return DataStoreStatus.Exist;
 			}
 		}
 		// データをダウンロードする
@@ -227,6 +231,38 @@ namespace AWSK.Stores
 				}
 			}
 			return wd;
+		}
+		// 艦名一覧を返す
+		public static List<string> KammusuNameList() {
+			var list = new List<string>();
+			using (var con = new SQLiteConnection(connectionString)) {
+				con.Open();
+				using (var cmd = con.CreateCommand()) {
+					cmd.CommandText = $"SELECT name FROM Kammusu WHERE kammusu_flg=1";
+					using (var reader = cmd.ExecuteReader()) {
+						while (reader.Read()) {
+							list.Add(reader.GetString(0));
+						}
+					}
+				}
+			}
+			return list;
+		}
+		// 装備名一覧を返す
+		public static List<string> WeaponNameList() {
+			var list = new List<string>();
+			using (var con = new SQLiteConnection(connectionString)) {
+				con.Open();
+				using (var cmd = con.CreateCommand()) {
+					cmd.CommandText = $"SELECT name FROM Weapon WHERE weapon_flg=1";
+					using (var reader = cmd.ExecuteReader()) {
+						while (reader.Read()) {
+							list.Add(reader.GetString(0));
+						}
+					}
+				}
+			}
+			return list;
 		}
 		// JSONデータを分析する
 		public static FleetData ParseFleetData(string jsonString) {
@@ -351,4 +387,6 @@ namespace AWSK.Stores
 		public int Rf;	// 装備改修度
 		public bool WeaponFlg;
 	}
+	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
+	enum DataStoreStatus { Exist, Success, Failed }
 }
