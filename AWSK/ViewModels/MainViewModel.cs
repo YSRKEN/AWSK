@@ -3,6 +3,7 @@ using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 
 namespace AWSK.ViewModels
@@ -66,6 +67,8 @@ namespace AWSK.ViewModels
 		public ReadOnlyReactiveCollection<string> MasList { get; }
 		// 装備改修度の一覧
 		public ReadOnlyReactiveCollection<string> RfList { get; }
+		// 深海棲艦の艦名一覧
+		public ReadOnlyReactiveCollection<string> EnemyList { get; }
 		#endregion
 
 		#region コマンド
@@ -114,6 +117,8 @@ namespace AWSK.ViewModels
 
 		// コンストラクタ
 		public MainViewModel() {
+			// その他初期化
+			Initialize();
 			// プロパティ・コマンドを設定
 			{
 				var oc = new ObservableCollection<string>(new List<string> {
@@ -127,9 +132,24 @@ namespace AWSK.ViewModels
 					"6", "7", "8", "9", "10"});
 				RfList = oc.ToReadOnlyReactiveCollection();
 			}
+			{
+				var list = DataStore.EnemyNameList();
+				// 敵艦名のリストから、新たに表示用リストを作成
+				var list2 = new List<string>();
+				list2.Add("なし");
+				foreach (string name in list) {
+					int count = list.Where(p => p == name).Count();
+					int count2 = list2.Where(p => p.Contains(name)).Count();
+					if (count > 1) {
+						list2.Add($"{name}-{count2+1}");
+					} else {
+						list2.Add(name);
+					}
+				}
+				var oc = new ObservableCollection<string>(list2);
+				EnemyList = oc.ToReadOnlyReactiveCollection();
+			}
 			RunSimulationCommand.Subscribe(ImportClipboardText);	//スタブ
-			// その他初期化
-			Initialize();
 		}
 	}
 }

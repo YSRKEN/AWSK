@@ -248,6 +248,22 @@ namespace AWSK.Stores
 			}
 			return list;
 		}
+		// 深海棲艦の艦名一覧を返す
+		public static List<string> EnemyNameList() {
+			var list = new List<string>();
+			using (var con = new SQLiteConnection(connectionString)) {
+				con.Open();
+				using (var cmd = con.CreateCommand()) {
+					cmd.CommandText = $"SELECT name FROM Kammusu WHERE kammusu_flg=0";
+					using (var reader = cmd.ExecuteReader()) {
+						while (reader.Read()) {
+							list.Add(reader.GetString(0));
+						}
+					}
+				}
+			}
+			return list;
+		}
 		// 装備名一覧を返す
 		public static List<string> WeaponNameList() {
 			var list = new List<string>();

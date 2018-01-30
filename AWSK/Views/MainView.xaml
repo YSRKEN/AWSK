@@ -167,17 +167,23 @@
 								<RowDefinition Height="auto"/>
 							</Grid.RowDefinitions>
 							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex1.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex1.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex2.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex2.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex3.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex3.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex4.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex4.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex5.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex5.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
-								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"/>
+								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyList}"/>
 						</Grid>
 					</TabItem>
 					<!--
