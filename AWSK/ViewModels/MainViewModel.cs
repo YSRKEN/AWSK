@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows;
 
 namespace AWSK.ViewModels
@@ -11,10 +12,8 @@ namespace AWSK.ViewModels
 	class MainViewModel
 	{
 		#region プロパティ
-		// データベースからデータを拾ったか？
-		public ReactiveProperty<bool> ReadyDataStoreFlg { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊を飛ばしたか？
-		public ReactiveProperty<bool> BasedAirUnit1Flg { get; } = new ReactiveProperty<bool>(false);
+		public ReactiveProperty<bool> BasedAirUnit1Flg { get; } = new ReactiveProperty<bool>(true);
 		public ReactiveProperty<bool> BasedAirUnit2Flg { get; } = new ReactiveProperty<bool>(false);
 		public ReactiveProperty<bool> BasedAirUnit3Flg { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊の装備の選択番号
@@ -75,7 +74,7 @@ namespace AWSK.ViewModels
 
 		#region コマンド
 		// シミュレーションを実行
-		public ReactiveCommand RunSimulationCommand { get; } = new ReactiveCommand();
+		public ReactiveCommand RunSimulationCommand { get; }
 		#endregion
 
 		// その他初期化用コード
@@ -84,14 +83,11 @@ namespace AWSK.ViewModels
 			var status = await DataStore.Initialize();
 			switch (status) {
 			case DataStoreStatus.Exist:
-				ReadyDataStoreFlg.Value = true;
 				break;
 			case DataStoreStatus.Success:
-				ReadyDataStoreFlg.Value = true;
 				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
 				break;
 			case DataStoreStatus.Failed:
-				ReadyDataStoreFlg.Value = false;
 				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
 				return;
 			}
@@ -155,6 +151,8 @@ namespace AWSK.ViewModels
 				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
 				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
 			}
+			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit1Flg, BasedAirUnit1Flg }
+				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(ImportClipboardText);	//スタブ
 		}
 	}
