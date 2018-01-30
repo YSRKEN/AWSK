@@ -6,7 +6,7 @@
 	xmlns:local="clr-namespace:AWSK.ViewModels"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="航空戦シミュレーター改" Height="300" Width="760">
+	Title="航空戦シミュレーター改" Height="330" Width="760">
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>
@@ -40,9 +40,12 @@
 					<RowDefinition Height="auto"/>
 				</Grid.RowDefinitions>
 				<!-- 基地航空隊のラベル設定 -->
-				<CheckBox Grid.Column="0" Grid.Row="0" Content="第一航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
-				<CheckBox Grid.Column="3" Grid.Row="0" Content="第二航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
-				<CheckBox Grid.Column="6" Grid.Row="0" Content="第三航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<CheckBox Grid.Column="0" Grid.Row="0" Content="第一航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"
+						IsChecked="{Binding BasedAirUnit1Flg.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<CheckBox Grid.Column="3" Grid.Row="0" Content="第二航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"
+						IsChecked="{Binding BasedAirUnit2Flg.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<CheckBox Grid.Column="6" Grid.Row="0" Content="第三航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"
+						IsChecked="{Binding BasedAirUnit3Flg.Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<TextBlock Grid.Column="1" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
 				<TextBlock Grid.Column="4" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
 				<TextBlock Grid.Column="7" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
@@ -50,44 +53,80 @@
 				<TextBlock Grid.Column="5" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
 				<TextBlock Grid.Column="8" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
 				<!-- 基地航空隊の装備設定 -->
-				<ComboBox Grid.Column="0" Grid.Row="1" Width="100" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="0" Grid.Row="2" Width="100" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="0" Grid.Row="3" Width="100" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="0" Grid.Row="4" Width="100" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="3" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="3" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="3" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="3" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="6" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="6" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="6" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"/>
-				<ComboBox Grid.Column="6" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="0" Grid.Row="1" Width="100" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex11.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="0" Grid.Row="2" Width="100" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex12.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="0" Grid.Row="3" Width="100" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex13.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="0" Grid.Row="4" Width="100" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex14.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="3" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex21.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="3" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex22.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="3" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex23.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="3" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex24.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="6" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex31.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="6" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex32.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="6" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex33.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="6" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitIndex34.Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<!-- 基地航空隊の熟練度設定 -->
-				<ComboBox Grid.Column="1" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="1" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="1" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="1" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="4" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="4" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="4" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="4" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="7" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="7" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="7" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="7" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="1" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas11.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="1" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas12.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="1" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas13.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="1" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas14.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="4" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas21.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="4" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas22.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="4" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas23.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="4" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas24.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="7" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas31.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="7" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas32.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="7" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas33.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="7" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitMas34.Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<!-- 基地航空隊の改修度設定 -->
-				<ComboBox Grid.Column="2" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="2" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="2" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="2" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="5" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="5" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="5" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="5" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"/>
-				<ComboBox Grid.Column="8" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="8" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="8" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
-				<ComboBox Grid.Column="8" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="2" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf11.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="2" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf12.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="2" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf13.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="2" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf14.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="5" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf21.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="5" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf22.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="5" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf23.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="5" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"
+					SelectedIndex="{Binding BasedAirUnitRf24.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="8" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitRf31.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="8" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitRf32.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="8" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitRf33.Value, UpdateSourceTrigger=PropertyChanged}"/>
+				<ComboBox Grid.Column="8" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"
+					SelectedIndex="{Binding BasedAirUnitRf34.Value, UpdateSourceTrigger=PropertyChanged}"/>
 			</Grid>
 		</GroupBox>
 		<GroupBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Header="敵艦隊">
@@ -103,14 +142,21 @@
 								<RowDefinition Height="auto"/>
 								<RowDefinition Height="auto"/>
 							</Grid.RowDefinitions>
-							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"/>
-							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"/>
-							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"/>
-							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"/>
-							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"/>
-							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex1.Value, UpdateSourceTrigger=PropertyChanged}"/>
+							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex2.Value, UpdateSourceTrigger=PropertyChanged}"/>
+							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex3.Value, UpdateSourceTrigger=PropertyChanged}"/>
+							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex4.Value, UpdateSourceTrigger=PropertyChanged}"/>
+							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex5.Value, UpdateSourceTrigger=PropertyChanged}"/>
+							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
+								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"/>
 						</Grid>
 					</TabItem>
+					<!--
 					<TabItem Header="第二艦隊">
 						<Grid>
 							<Grid.RowDefinitions>
@@ -129,12 +175,14 @@
 							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"/>
 						</Grid>
 					</TabItem>
+					-->
 				</TabControl>
 			</Grid>
 		</GroupBox>
 		<GroupBox Grid.Row="1" Grid.Column="0" Header="各種操作">
 			<Grid>
-				<Button Content="基地航空隊のシミュレーションを行う" FontSize="24" FontWeight="Bold" Margin="5,5,5,5"/>
+				<Button Content="基地航空隊のシミュレーションを行う" FontSize="24" FontWeight="Bold" Margin="5,5,5,5"
+					Command="{Binding RunSimulationCommand}"/>
 			</Grid>
 		</GroupBox>
 	</Grid>
