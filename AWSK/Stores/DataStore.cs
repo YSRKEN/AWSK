@@ -12,6 +12,33 @@ namespace AWSK.Stores
 	{
 		// 接続用文字列
 		private const string connectionString = @"Data Source=GameData.db";
+		// 装備の種類(type1)の名称
+		private static Dictionary<string, int> WeaponType1 = new Dictionary<string, int> {
+			{ "主砲", 1},
+			{ "魚雷", 2},
+			{ "艦上機", 3},
+			{ "対空装備", 4},
+			{ "索敵装備", 5},
+			{ "缶・女神・バルジ", 6},
+			{ "対潜装備", 7},
+			{ "大発・探照灯", 8},
+			{ "ドラム缶", 9},
+			{ "艦艇修理施設", 10},
+			{ "照明弾", 11},
+			{ "艦隊司令部", 12},
+			{ "航空要員", 13},
+			{ "高射装置", 14},
+			{ "WG42", 15},
+			{ "熟練見張員", 16},
+			{ "大型飛行艇", 17},
+			{ "戦闘糧食", 18},
+			{ "洋上補給", 19},
+			{ "特二式内火艇", 20},
+			{ "陸上攻撃機", 21},
+			{ "局地戦闘機", 22},
+			{ "分解済彩雲", 23},
+			{ "潜水艦電探", 24},
+		};
 
 		// 艦娘のデータをダウンロードする
 		private static async Task<bool> DownloadKammusuDataAsync() {
@@ -80,10 +107,15 @@ namespace AWSK.Stores
 						// IDや装備名などを取得
 						int id = (int)weapon.id;
 						string name = weapon.name;
+						var type = weapon.type;
 						// 艦娘用の装備か？
 						bool weaponFlg = (id <= 500);
 						// コマンドを記録する
-						commandList.Add($"INSERT INTO Weapon VALUES({id},'{name}','{(weaponFlg ? 1 : 0)}')");
+						string sql = "INSERT INTO Weapon VALUES(";
+						sql += $"{id},'{name}',";
+						sql += $"{type[0]},{type[1]},{type[2]},{type[3]},{type[4]},";
+						sql += $"{(weaponFlg ? 1 : 0)})";
+						commandList.Add(sql);
 					}
 				}
 				// データベースに書き込む
@@ -149,6 +181,11 @@ namespace AWSK.Stores
 							CREATE TABLE [Weapon](
 							[id] INTEGER NOT NULL PRIMARY KEY,
 							[name] TEXT NOT NULL DEFAULT '',
+							[type1] INTEGER NOT NULL DEFAULT 0,
+							[type2] INTEGER NOT NULL DEFAULT 0,
+							[type3] INTEGER NOT NULL DEFAULT 0,
+							[type4] INTEGER NOT NULL DEFAULT 0,
+							[type5] INTEGER NOT NULL DEFAULT 0,
 							[weapon_flg] INTEGER NOT NULL)
 						";
 							cmd.CommandText = sql;
@@ -271,6 +308,29 @@ namespace AWSK.Stores
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					cmd.CommandText = $"SELECT name FROM Weapon WHERE weapon_flg=1";
+					using (var reader = cmd.ExecuteReader()) {
+						while (reader.Read()) {
+							list.Add(reader.GetString(0));
+						}
+					}
+				}
+			}
+			return list;
+		}
+		// 基地航空隊に使用できる装備名一覧を返す
+		// (表示用に最適化済)
+		public static List<string> BasedAirUnitNameList() {
+			var list = new List<string>();
+			list.Add("なし");
+			// 基地航空隊を飛ばせる条件：
+			// ・type1=3 AND type2 not in (15, 16)
+			// ・type1 in (17, 21, 22)
+			// ・type1=5 AND type2 in (7, 36, 43)
+			// ※type1→type2→type3で詳細度が上がるので、その順にソートした
+			using (var con = new SQLiteConnection(connectionString)) {
+				con.Open();
+				using (var cmd = con.CreateCommand()) {
+					cmd.CommandText = $"SELECT name FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
 					using (var reader = cmd.ExecuteReader()) {
 						while (reader.Read()) {
 							list.Add(reader.GetString(0));

@@ -69,6 +69,8 @@ namespace AWSK.ViewModels
 		public ReadOnlyReactiveCollection<string> RfList { get; }
 		// 深海棲艦の艦名一覧
 		public ReadOnlyReactiveCollection<string> EnemyList { get; }
+		// 基地航空隊に使用できる装備の一覧
+		public ReadOnlyReactiveCollection<string> BasedAirUnitList { get; }
 		#endregion
 
 		#region コマンド
@@ -148,6 +150,10 @@ namespace AWSK.ViewModels
 				}
 				var oc = new ObservableCollection<string>(list2);
 				EnemyList = oc.ToReadOnlyReactiveCollection();
+			}
+			{
+				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
+				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
 			}
 			RunSimulationCommand.Subscribe(ImportClipboardText);	//スタブ
 		}

@@ -54,29 +54,41 @@
 				<TextBlock Grid.Column="8" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
 				<!-- 基地航空隊の装備設定 -->
 				<ComboBox Grid.Column="0" Grid.Row="1" Width="100" Height="24" Margin="2,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex11.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex11.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="0" Grid.Row="2" Width="100" Height="24" Margin="2,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex12.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex12.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="0" Grid.Row="3" Width="100" Height="24" Margin="2,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex13.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex13.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="0" Grid.Row="4" Width="100" Height="24" Margin="2,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex14.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex14.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="3" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex21.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex21.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="3" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex22.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex22.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="3" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex23.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex23.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="3" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex24.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex24.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="6" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex31.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex31.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="6" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex32.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex32.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="6" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex33.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex33.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<ComboBox Grid.Column="6" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"
-					SelectedIndex="{Binding BasedAirUnitIndex34.Value, UpdateSourceTrigger=PropertyChanged}"/>
+					SelectedIndex="{Binding BasedAirUnitIndex34.Value, UpdateSourceTrigger=PropertyChanged}"
+					ItemsSource="{Binding BasedAirUnitList}"/>
 				<!-- 基地航空隊の熟練度設定 -->
 				<ComboBox Grid.Column="1" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitMas11.Value, UpdateSourceTrigger=PropertyChanged}"
