@@ -59,9 +59,7 @@ namespace AWSK.ViewModels
 		// コンストラクタ
 		public MainViewModel() {
 			// プロパティ・コマンドを設定
-			ImportClipboardTextCommand = ReadyDataStoreFlg.ToReactiveCommand();
-			// データベースを初期化
-			ImportClipboardTextCommand.Subscribe(ImportClipboardText);
+
 			// その他初期化
 			Initialize();
 		}

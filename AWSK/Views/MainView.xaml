@@ -6,12 +6,136 @@
 	xmlns:local="clr-namespace:AWSK.ViewModels"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="航空戦シミュレーター改" Height="300" Width="300">
+	Title="航空戦シミュレーター改" Height="300" Width="760">
 	<Window.DataContext>
 		<local:MainViewModel/>
 	</Window.DataContext>
-	<Grid>
-		<Button Content="クリップボードからインポート" Width="160" Height="24"
-			Command="{Binding ImportClipboardTextCommand}"/>
+	<Grid Margin="5,5,5,5">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto"/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="auto"/>
+			<ColumnDefinition Width="auto"/>
+		</Grid.ColumnDefinitions>
+		<GroupBox Grid.Row="0" Grid.Column="0" Header="基地航空隊">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition Width="auto"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="auto"/>
+					<RowDefinition Height="auto"/>
+					<RowDefinition Height="auto"/>
+					<RowDefinition Height="auto"/>
+					<RowDefinition Height="auto"/>
+				</Grid.RowDefinitions>
+				<!-- 基地航空隊のラベル設定 -->
+				<CheckBox Grid.Column="0" Grid.Row="0" Content="第一航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<CheckBox Grid.Column="3" Grid.Row="0" Content="第二航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<CheckBox Grid.Column="6" Grid.Row="0" Content="第三航空隊" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="1" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="4" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="7" Grid.Row="0" Text="熟練度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="2" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="5" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<TextBlock Grid.Column="8" Grid.Row="0" Text="改修度" Margin="2,5,2,5" HorizontalAlignment="Center"/>
+				<!-- 基地航空隊の装備設定 -->
+				<ComboBox Grid.Column="0" Grid.Row="1" Width="100" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="0" Grid.Row="2" Width="100" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="0" Grid.Row="3" Width="100" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="0" Grid.Row="4" Width="100" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="3" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="3" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="3" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="3" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="6" Grid.Row="1" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="6" Grid.Row="2" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="6" Grid.Row="3" Width="100" Height="24" Margin="5,5,2,5"/>
+				<ComboBox Grid.Column="6" Grid.Row="4" Width="100" Height="24" Margin="5,5,2,5"/>
+				<!-- 基地航空隊の熟練度設定 -->
+				<ComboBox Grid.Column="1" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="1" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="1" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="1" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="4" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="4" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="4" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="4" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="7" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="7" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="7" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="7" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+				<!-- 基地航空隊の改修度設定 -->
+				<ComboBox Grid.Column="2" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="2" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="2" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="2" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="5" Grid.Row="1" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="5" Grid.Row="2" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="5" Grid.Row="3" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="5" Grid.Row="4" Width="40" Height="24" Margin="2,5,5,5"/>
+				<ComboBox Grid.Column="8" Grid.Row="1" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="8" Grid.Row="2" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="8" Grid.Row="3" Width="40" Height="24" Margin="2,5,2,5"/>
+				<ComboBox Grid.Column="8" Grid.Row="4" Width="40" Height="24" Margin="2,5,2,5"/>
+			</Grid>
+		</GroupBox>
+		<GroupBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Header="敵艦隊">
+			<Grid>
+				<TabControl>
+					<TabItem Header="第一艦隊">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+							</Grid.RowDefinitions>
+							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"/>
+						</Grid>
+					</TabItem>
+					<TabItem Header="第二艦隊">
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+								<RowDefinition Height="auto"/>
+							</Grid.RowDefinitions>
+							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"/>
+							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"/>
+						</Grid>
+					</TabItem>
+				</TabControl>
+			</Grid>
+		</GroupBox>
+		<GroupBox Grid.Row="1" Grid.Column="0" Header="各種操作">
+			<Grid>
+				<Button Content="基地航空隊のシミュレーションを行う" FontSize="24" FontWeight="Bold" Margin="5,5,5,5"/>
+			</Grid>
+		</GroupBox>
 	</Grid>
 </Window>
