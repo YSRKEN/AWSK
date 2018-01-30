@@ -30,18 +30,18 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<int> BasedAirUnitIndex33 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> BasedAirUnitIndex34 { get; } = new ReactiveProperty<int>(0);
 		// 基地航空隊の艦載機熟練度
-		public ReactiveProperty<int> BasedAirUnitMas11 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas12 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas13 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas14 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas21 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas22 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas23 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas24 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas31 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas32 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas33 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitMas34 { get; } = new ReactiveProperty<int>(0);
+		public ReactiveProperty<int> BasedAirUnitMas11 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas12 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas13 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas14 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas21 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas22 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas23 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas24 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas31 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas32 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas33 { get; } = new ReactiveProperty<int>(7);
+		public ReactiveProperty<int> BasedAirUnitMas34 { get; } = new ReactiveProperty<int>(7);
 		// 基地航空隊の装備改修度
 		public ReactiveProperty<int> BasedAirUnitRf11 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> BasedAirUnitRf12 { get; } = new ReactiveProperty<int>(0);
