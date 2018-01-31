@@ -16,10 +16,15 @@ namespace AWSK.ViewModels
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
+		// 基地航空隊をどれほど送り込むか？
 		// 基地航空隊を飛ばしたか？
-		public ReactiveProperty<bool> BasedAirUnit1Flg { get; } = new ReactiveProperty<bool>(true);
-		public ReactiveProperty<bool> BasedAirUnit2Flg { get; } = new ReactiveProperty<bool>(false);
-		public ReactiveProperty<bool> BasedAirUnit3Flg { get; } = new ReactiveProperty<bool>(false);
+		public ReactiveProperty<int> BasedAirUnit1Mode { get; } = new ReactiveProperty<int>(0);
+		public ReactiveProperty<int> BasedAirUnit2Mode { get; } = new ReactiveProperty<int>(0);
+		public ReactiveProperty<int> BasedAirUnit3Mode { get; } = new ReactiveProperty<int>(0);
+		// 基地航空隊を飛ばしたか？
+		public ReadOnlyReactiveProperty<bool> BasedAirUnit1Flg { get; }
+		public ReadOnlyReactiveProperty<bool> BasedAirUnit2Flg { get; }
+		public ReadOnlyReactiveProperty<bool> BasedAirUnit3Flg { get; }
 		// 基地航空隊の装備の選択番号
 		public ReactiveProperty<int> BasedAirUnitIndex11 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> BasedAirUnitIndex12 { get; } = new ReactiveProperty<int>(0);
@@ -201,6 +206,9 @@ namespace AWSK.ViewModels
 			// その他初期化
 			Initialize();
 			// プロパティ・コマンドを設定
+			BasedAirUnit1Flg = BasedAirUnit1Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
+			BasedAirUnit2Flg = BasedAirUnit2Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
+			BasedAirUnit3Flg = BasedAirUnit3Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
 			{
 				var oc = new ObservableCollection<string>(new List<string> {
 					"--", "|", "||", "|||", "/", "//", "///", ">>"
@@ -237,7 +245,7 @@ namespace AWSK.ViewModels
 				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
 				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
 			}
-			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit1Flg, BasedAirUnit1Flg }
+			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit2Flg, BasedAirUnit3Flg }
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
 		}
