@@ -59,6 +59,7 @@ namespace AWSK.Stores
 						int id = int.Parse(kammusu.id);
 						string name = kammusu.name;
 						int antiair = (int)(kammusu.max_aac);
+						int slotsize = (int)(kammusu.slot);
 						var slot = kammusu.carry;
 						var firstWeapon = kammusu.equip;
 						// 艦娘・深海棲艦のデータと呼べないものは無視する
@@ -70,7 +71,7 @@ namespace AWSK.Stores
 						bool kammusuFlg = (id <= 1500);
 						// コマンドを記録する
 						string sql = "INSERT INTO Kammusu VALUES(";
-						sql += $"{id},'{name}',{antiair},";
+						sql += $"{id},'{name}',{antiair},{slotsize},";
 						{
 							int count = 0;
 							foreach (var size in slot) {
@@ -188,6 +189,7 @@ namespace AWSK.Stores
 								[id] INTEGER NOT NULL PRIMARY KEY,
 								[name] TEXT NOT NULL DEFAULT '',
 								[antiair] INTEGER NOT NULL DEFAULT 0,
+								[slotsize] INTEGER NOT NULL DEFAULT 0,
 								[slot1] INTEGER NOT NULL DEFAULT 0,
 								[slot2] INTEGER NOT NULL DEFAULT 0,
 								[slot3] INTEGER NOT NULL DEFAULT 0,
@@ -257,26 +259,34 @@ namespace AWSK.Stores
 				Id = 0,
 				Name = "なし",
 				Level = 0,
+				AntiAir = 0,
+				SlotSize = 0,
 				KammusuFlg = true,
-				Weapon = new List<WeaponData>()
+				Weapon = new List<WeaponData>(),
+				Slot = new List<int>(),
 			};
 			var weaponList = new List<int>();
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, kammusu_flg, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
+					cmd.CommandText = $"SELECT name, antiair, slotsize, kammusu_flg, slot1, slot2, slot3, slot4, slot5, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							kd = new KammusuData {
 								Id = id,
 								Name = reader.GetString(0),
 								Level = 1,
-								KammusuFlg = (reader.GetInt32(1) == 1 ? true : false),
-								Weapon = new List<WeaponData>()
+								AntiAir = reader.GetInt32(1),
+								SlotSize = reader.GetInt32(2),
+								KammusuFlg = (reader.GetInt32(3) == 1 ? true : false),
+								Weapon = new List<WeaponData>(),
+								Slot = new List<int>(),
 							};
 							for(int i = 0; i < 5; ++i) {
-								int wId = reader.GetInt32(2 + i);
+								int size = reader.GetInt32(4 + i);
+								kd.Slot.Add(size);
+								int wId = reader.GetInt32(9 + i);
 								if (wId > 0) {
 									weaponList.Add(wId);
 								}
@@ -563,8 +573,11 @@ namespace AWSK.Stores
 		public int Id;
 		public string Name;
 		public int Level;
+		public int AntiAir;
+		public int SlotSize;
 		public bool KammusuFlg;
 		public List<WeaponData> Weapon;
+		public List<int> Slot;
 	}
 	// 装備データ
 	struct WeaponData
