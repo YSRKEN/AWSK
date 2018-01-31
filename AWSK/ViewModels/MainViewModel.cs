@@ -11,6 +11,8 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
+		private List<int> enemyIdList = new List<int>();
+
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
@@ -142,9 +144,31 @@ namespace AWSK.ViewModels
 			}
 			return basedAirUnitData;
 		}
-		// 敵艦隊のデータを取得(スタブ)
+		// 敵艦隊のデータを取得
 		private FleetData GetEnemyData() {
 			var fleetData = new FleetData();
+			// 艦隊データを格納するインスタンスを作成
+			var kammusuList = new List<KammusuData>();
+			// 準備
+			var enemyUnitIndex = new[] {
+				EnemyUnitIndex1.Value, EnemyUnitIndex2.Value, EnemyUnitIndex3.Value,
+				EnemyUnitIndex4.Value, EnemyUnitIndex5.Value, EnemyUnitIndex6.Value,
+				};
+			// 作成
+			foreach(int enemyIndex in enemyUnitIndex) {
+				// 「なし」が選択されている敵艦は無視する
+				if (enemyIndex == 0)
+					continue;
+				// idを算出する
+				int enemyId = enemyIdList[enemyIndex];
+				// idから敵艦情報を得る
+				var enemy = DataStore.KammusuDataById(enemyId, true);
+				// 追加
+				kammusuList.Add(enemy);
+			}
+			// インスタンスを代入
+			if (kammusuList.Count > 0)
+				fleetData.Kammusu.Add(kammusuList);
 			return fleetData;
 		}
 
@@ -193,15 +217,18 @@ namespace AWSK.ViewModels
 				var list = DataStore.EnemyNameList();
 				// 敵艦名のリストから、新たに表示用リストを作成
 				var list2 = new List<string>();
+				enemyIdList = new List<int>();
 				list2.Add("なし");
-				foreach (string name in list) {
-					int count = list.Where(p => p == name).Count();
-					int count2 = list2.Where(p => p.Contains(name)).Count();
+				enemyIdList.Add(0);
+				foreach (var pair in list) {
+					int count = list.Values.Where(p => p == pair.Value).Count();
+					int count2 = list2.Where(p => p.Contains(pair.Value)).Count();
 					if (count > 1) {
-						list2.Add($"{name}-{count2+1}");
+						list2.Add($"{pair.Value}-{count2+1}");
 					} else {
-						list2.Add(name);
+						list2.Add(pair.Value);
 					}
+					enemyIdList.Add(pair.Key);
 				}
 				var oc = new ObservableCollection<string>(list2);
 				EnemyList = oc.ToReadOnlyReactiveCollection();

@@ -229,7 +229,8 @@ namespace AWSK.Stores
 			return flg1 && flg2;
 		}
 		// 艦娘のデータをidから正引きする
-		public static KammusuData KammusuDataById(int id) {
+		// setWeaponFlgが有効だと、初期装備を握って登場する
+		public static KammusuData KammusuDataById(int id, bool setWeaponFlg = false) {
 			var kd = new KammusuData {
 				Id = 0,
 				Name = "なし",
@@ -237,11 +238,12 @@ namespace AWSK.Stores
 				KammusuFlg = true,
 				Weapon = new List<WeaponData>()
 			};
+			var weaponList = new List<int>();
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, kammusu_flg FROM Kammusu WHERE id={id}";
+					cmd.CommandText = $"SELECT name, kammusu_flg, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							kd = new KammusuData {
@@ -251,8 +253,22 @@ namespace AWSK.Stores
 								KammusuFlg = (reader.GetInt32(1) == 1 ? true : false),
 								Weapon = new List<WeaponData>()
 							};
+							for(int i = 0; i < 5; ++i) {
+								int wId = reader.GetInt32(2 + i);
+								if (wId > 0) {
+									weaponList.Add(wId);
+								}
+							}
 						}
 					}
+				}
+			}
+			// setWeaponFlgが立っていた場合、装備データを復元する
+			if (setWeaponFlg) {
+				// N+1クエリの懸念もあるが、順序は重要なのでやむを得ずこうした
+				foreach(int wId in weaponList) {
+					var weapon = WeaponDataById(wId);
+					kd.Weapon.Add(weapon);
 				}
 			}
 			return kd;
@@ -331,16 +347,16 @@ namespace AWSK.Stores
 			}
 			return list;
 		}
-		// 深海棲艦の艦名一覧を返す
-		public static List<string> EnemyNameList() {
-			var list = new List<string>();
+		// 深海棲艦の艦名一覧をid付きで返す
+		public static Dictionary<int, string> EnemyNameList() {
+			var list = new Dictionary<int, string>();
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
-					cmd.CommandText = $"SELECT name FROM Kammusu WHERE kammusu_flg=0";
+					cmd.CommandText = $"SELECT id, name FROM Kammusu WHERE kammusu_flg=0";
 					using (var reader = cmd.ExecuteReader()) {
 						while (reader.Read()) {
-							list.Add(reader.GetString(0));
+							list[reader.GetInt32(0)] = reader.GetString(1);
 						}
 					}
 				}
