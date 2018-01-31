@@ -58,6 +58,7 @@ namespace AWSK.Stores
 						// IDや艦名などを取得
 						int id = int.Parse(kammusu.id);
 						string name = kammusu.name;
+						var firstWeapon = kammusu.equip;
 						// 艦娘・深海棲艦のデータと呼べないものは無視する
 						if (name == "なし")
 							continue;
@@ -66,7 +67,18 @@ namespace AWSK.Stores
 						// 艦娘か？
 						bool kammusuFlg = (id <= 1500);
 						// コマンドを記録する
-						commandList.Add($"INSERT INTO Kammusu VALUES({id},'{name}','{(kammusuFlg ? 1 : 0)}')");
+						string sql = "INSERT INTO Kammusu VALUES(";
+						sql += $"{id},'{name}',";
+						int count = 0;
+						foreach(var wId in firstWeapon) {
+							sql += $"{wId},";
+							++count;
+						}
+						for(int wi = count; wi < 5; ++wi) {
+							sql += "0,";
+						}
+						sql += $"'{(kammusuFlg ? 1 : 0)}')";
+						commandList.Add(sql);
 					}
 				}
 				// データベースに書き込む
@@ -160,6 +172,11 @@ namespace AWSK.Stores
 								CREATE TABLE [Kammusu](
 								[id] INTEGER NOT NULL PRIMARY KEY,
 								[name] TEXT NOT NULL DEFAULT '',
+								[weapon1] INTEGER NOT NULL DEFAULT 0,
+								[weapon2] INTEGER NOT NULL DEFAULT 0,
+								[weapon3] INTEGER NOT NULL DEFAULT 0,
+								[weapon4] INTEGER NOT NULL DEFAULT 0,
+								[weapon5] INTEGER NOT NULL DEFAULT 0,
 								[kammusu_flg] INTEGER NOT NULL)
 							";
 							cmd.CommandText = sql;

@@ -98,7 +98,7 @@ namespace AWSK.ViewModels
 			}
 		}
 		// 基地航空隊のデータを取得
-		private List<List<WeaponData>> BasedAirUnitData() {
+		private List<List<WeaponData>> GetBasedAirUnitData() {
 			// 準備
 			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
 			var basedAirUnitIndex = new[] {
@@ -142,6 +142,11 @@ namespace AWSK.ViewModels
 			}
 			return basedAirUnitData;
 		}
+		// 敵艦隊のデータを取得(スタブ)
+		private FleetData GetEnemyData() {
+			var fleetData = new FleetData();
+			return fleetData;
+		}
 
 		// クリップボードからインポート
 		public void ImportClipboardText() {
@@ -160,8 +165,10 @@ namespace AWSK.ViewModels
 		}
 		// 航空戦をシミュレートする
 		public void RunSimulation() {
-			// 基地航空隊のデータを取得する
-			var basedAirUnitData = BasedAirUnitData();
+			// 基地航空隊のデータを取得
+			var basedAirUnitData = GetBasedAirUnitData();
+			// 敵艦隊のデータを取得
+			var enemyData = GetEnemyData();
 			return;
 		}
 
