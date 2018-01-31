@@ -58,6 +58,8 @@ namespace AWSK.Stores
 						// IDや艦名などを取得
 						int id = int.Parse(kammusu.id);
 						string name = kammusu.name;
+						int antiair = (int)(kammusu.max_aac);
+						var slot = kammusu.carry;
 						var firstWeapon = kammusu.equip;
 						// 艦娘・深海棲艦のデータと呼べないものは無視する
 						if (name == "なし")
@@ -68,14 +70,26 @@ namespace AWSK.Stores
 						bool kammusuFlg = (id <= 1500);
 						// コマンドを記録する
 						string sql = "INSERT INTO Kammusu VALUES(";
-						sql += $"{id},'{name}',";
-						int count = 0;
-						foreach(var wId in firstWeapon) {
-							sql += $"{wId},";
-							++count;
+						sql += $"{id},'{name}',{antiair},";
+						{
+							int count = 0;
+							foreach (var size in slot) {
+								sql += $"{size},";
+								++count;
+							}
+							for (int wi = count; wi < 5; ++wi) {
+								sql += "0,";
+							}
 						}
-						for(int wi = count; wi < 5; ++wi) {
-							sql += "0,";
+						{
+							int count = 0;
+							foreach (var wId in firstWeapon) {
+								sql += $"{wId},";
+								++count;
+							}
+							for (int wi = count; wi < 5; ++wi) {
+								sql += "0,";
+							}
 						}
 						sql += $"'{(kammusuFlg ? 1 : 0)}')";
 						commandList.Add(sql);
@@ -119,12 +133,13 @@ namespace AWSK.Stores
 						// IDや装備名などを取得
 						int id = (int)weapon.id;
 						string name = weapon.name;
+						int antiair = (int)weapon.aac;
 						var type = weapon.type;
 						// 艦娘用の装備か？
 						bool weaponFlg = (id <= 500);
 						// コマンドを記録する
 						string sql = "INSERT INTO Weapon VALUES(";
-						sql += $"{id},'{name}',";
+						sql += $"{id},'{name}',{antiair},";
 						sql += $"{type[0]},{type[1]},{type[2]},{type[3]},{type[4]},";
 						sql += $"{(weaponFlg ? 1 : 0)})";
 						commandList.Add(sql);
@@ -172,6 +187,12 @@ namespace AWSK.Stores
 								CREATE TABLE [Kammusu](
 								[id] INTEGER NOT NULL PRIMARY KEY,
 								[name] TEXT NOT NULL DEFAULT '',
+								[antiair] INTEGER NOT NULL DEFAULT 0,
+								[slot1] INTEGER NOT NULL DEFAULT 0,
+								[slot2] INTEGER NOT NULL DEFAULT 0,
+								[slot3] INTEGER NOT NULL DEFAULT 0,
+								[slot4] INTEGER NOT NULL DEFAULT 0,
+								[slot5] INTEGER NOT NULL DEFAULT 0,
 								[weapon1] INTEGER NOT NULL DEFAULT 0,
 								[weapon2] INTEGER NOT NULL DEFAULT 0,
 								[weapon3] INTEGER NOT NULL DEFAULT 0,
@@ -198,6 +219,7 @@ namespace AWSK.Stores
 							CREATE TABLE [Weapon](
 							[id] INTEGER NOT NULL PRIMARY KEY,
 							[name] TEXT NOT NULL DEFAULT '',
+							[antiair] INTEGER NOT NULL DEFAULT 0,
 							[type1] INTEGER NOT NULL DEFAULT 0,
 							[type2] INTEGER NOT NULL DEFAULT 0,
 							[type3] INTEGER NOT NULL DEFAULT 0,

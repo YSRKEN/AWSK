@@ -1,4 +1,5 @@
-﻿using AWSK.Stores;
+﻿using AWSK.Models;
+using AWSK.Stores;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
@@ -202,7 +203,8 @@ namespace AWSK.ViewModels
 			// 敵艦隊のデータを取得
 			var enemyData = GetEnemyData();
 			MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
-			return;
+			// シミュレーションを行う
+			Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData);
 		}
 
 		// コンストラクタ

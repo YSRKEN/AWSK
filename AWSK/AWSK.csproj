@@ -130,6 +130,7 @@
     <Compile Include="Behaviors\CloseWindowAttachedBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="DynamicJson.cs" />
+    <Compile Include="Models\Simulator.cs" />
     <Compile Include="Stores\DataStore.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">
@@ -172,9 +173,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
       <Visible>False</Visible>

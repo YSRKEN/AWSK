@@ -290,4 +290,4 @@ html/
 AWSK/GameData.db
 AWSK/SQLite.Interop.dll
 weapon_list.csv
-kammusu_list.csv
+kammusu_list.tsv
