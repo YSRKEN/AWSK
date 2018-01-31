@@ -507,6 +507,34 @@ namespace AWSK.Stores
 			return output;
 		}
 	}
+	// 基地航空隊データ
+	class BasedAirUnitData
+	{
+		public List<List<WeaponData>> Weapon { get; set; } = new List<List<WeaponData>>();
+		public List<int> SallyCount { get; set; } = new List<int>();
+		// 文字列化するメソッド
+		public override string ToString() {
+			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+			string output = "";
+			// 航空隊毎に
+			for(int ui = 0; ui < Weapon.Count; ++ui) {
+				output += $"第{(ui + 1)}航空隊(出撃回数：{SallyCount[ui]})\n";
+				// 中隊毎に
+				for (int wi = 0; wi < Weapon[ui].Count; ++wi) {
+					var weapon = Weapon[ui][wi];
+					output += $"　{weapon.Name}";
+					// 艦載機熟練度
+					if (weapon.Mas != 0)
+						output += $"{masList[weapon.Mas]}";
+					// 装備改修度
+					if (weapon.Rf != 0)
+						output += $"★{weapon.Rf}";
+					output += "\n";
+				}
+			}
+			return output;
+		}
+	}
 	// 艦娘データ
 	struct KammusuData
 	{

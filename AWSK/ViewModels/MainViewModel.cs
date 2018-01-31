@@ -105,9 +105,10 @@ namespace AWSK.ViewModels
 			}
 		}
 		// 基地航空隊のデータを取得
-		private List<List<WeaponData>> GetBasedAirUnitData() {
+		private BasedAirUnitData GetBasedAirUnitData() {
 			// 準備
 			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
+			var basedAirUnitModeList = new[] { BasedAirUnit1Mode.Value, BasedAirUnit2Mode.Value, BasedAirUnit3Mode.Value };
 			var basedAirUnitIndex = new[] {
 					BasedAirUnitIndex11.Value, BasedAirUnitIndex12.Value, BasedAirUnitIndex13.Value, BasedAirUnitIndex14.Value,
 					BasedAirUnitIndex21.Value, BasedAirUnitIndex22.Value, BasedAirUnitIndex23.Value, BasedAirUnitIndex24.Value,
@@ -124,7 +125,7 @@ namespace AWSK.ViewModels
 					BasedAirUnitRf31.Value, BasedAirUnitRf32.Value, BasedAirUnitRf33.Value, BasedAirUnitRf34.Value,
 				};
 			// 作成
-			var basedAirUnitData = new List<List<WeaponData>>();
+			var basedAirUnitData = new BasedAirUnitData();
 			for (int i = 0; i < basedAirUnitFlgList.Count(); ++i) {
 				// チェックを入れてない編成は無視する
 				if (!basedAirUnitFlgList[i])
@@ -144,8 +145,10 @@ namespace AWSK.ViewModels
 					weapon.Rf = basedAirUnitRf[index];
 					temp.Add(weapon);
 				}
-				if (temp.Count > 0)
-					basedAirUnitData.Add(temp);
+				if (temp.Count > 0) {
+					basedAirUnitData.Weapon.Add(temp);
+					basedAirUnitData.SallyCount.Add(basedAirUnitModeList[i]);
+				}
 			}
 			return basedAirUnitData;
 		}
@@ -198,6 +201,7 @@ namespace AWSK.ViewModels
 			var basedAirUnitData = GetBasedAirUnitData();
 			// 敵艦隊のデータを取得
 			var enemyData = GetEnemyData();
+			MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
 			return;
 		}
 
