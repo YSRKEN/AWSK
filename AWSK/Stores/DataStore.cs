@@ -310,23 +310,33 @@ namespace AWSK.Stores
 			var wd = new WeaponData {
 				Id = id,
 				Name = "empty",
+				Type = new List<int> { 0, 0, 0, 0, 0 },
+				AntiAir = 0,
 				Mas = 0,
 				Rf = 0,
-				WeaponFlg = true
+				WeaponFlg = true,
 			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, weapon_flg FROM Weapon WHERE id={id}";
+					cmd.CommandText = $"SELECT name, antiair, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = id,
 								Name = reader.GetString(0),
+								Type = new List<int> {
+									reader.GetInt32(3),
+									reader.GetInt32(4),
+									reader.GetInt32(5),
+									reader.GetInt32(6),
+									reader.GetInt32(7)
+								},
+								AntiAir = reader.GetInt32(1),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(1) == 1 ? true : false)
+								WeaponFlg = (reader.GetInt32(2) == 1 ? true : false)
 							};
 						}
 					}
@@ -339,23 +349,33 @@ namespace AWSK.Stores
 			var wd = new WeaponData {
 				Id = 0,
 				Name = name,
+				Type = new List<int> { 0, 0, 0, 0, 0 },
+				AntiAir = 0,
 				Mas = 0,
 				Rf = 0,
-				WeaponFlg = true
+				WeaponFlg = true,
 			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT id, weapon_flg FROM Weapon WHERE name='{name}'";
+					cmd.CommandText = $"SELECT id, antiair, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = reader.GetInt32(0),
 								Name = name,
+								Type = new List<int> {
+									reader.GetInt32(3),
+									reader.GetInt32(4),
+									reader.GetInt32(5),
+									reader.GetInt32(6),
+									reader.GetInt32(7)
+								},
+								AntiAir = reader.GetInt32(1),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(1) == 1 ? true : false)
+								WeaponFlg = (reader.GetInt32(2) == 1 ? true : false)
 							};
 						}
 					}
@@ -538,6 +558,22 @@ namespace AWSK.Stores
 			}
 			return output;
 		}
+		// 搭載数を抽出するメソッド
+		public List<List<List<int>>> GetSlotData() {
+			var slotData = new List<List<List<int>>>();
+			foreach(var kammusuList in Kammusu) {
+				var list1 = new List<List<int>>();
+				foreach (var kammusu in kammusuList) {
+					var list2 = new List<int>();
+					for(int si = 0; si < kammusu.SlotSize; ++si) {
+						list2.Add(kammusu.Slot[si]);
+					}
+					list1.Add(list2);
+				}
+				slotData.Add(list1);
+			}
+			return slotData;
+		}
 	}
 	// 基地航空隊データ
 	class BasedAirUnitData
@@ -566,6 +602,24 @@ namespace AWSK.Stores
 			}
 			return output;
 		}
+		// 搭載数を抽出するメソッド
+		public List<List<int>> GetSlotData() {
+			var slotData = new List<List<int>>();
+			foreach(var weaponList in Weapon) {
+				var list = new List<int>();
+				foreach (var weapon in weaponList) {
+					// 搭載数は、偵察機が4機・それ以外は18機
+					if((weapon.Type[0] == 5 && weapon.Type[1] == 7)
+						|| weapon.Type[0] == 17) {
+						list.Add(4);
+					} else {
+						list.Add(18);
+					}
+				}
+				slotData.Add(list);
+			}
+			return slotData;
+		}
 	}
 	// 艦娘データ
 	struct KammusuData
@@ -584,8 +638,10 @@ namespace AWSK.Stores
 	{
 		public int Id;
 		public string Name;
-		public int Mas;	// 艦載機熟練度
-		public int Rf;	// 装備改修度
+		public List<int> Type;	//装備種
+		public int AntiAir;		//対空
+		public int Mas;			//艦載機熟練度
+		public int Rf;			//装備改修度
 		public bool WeaponFlg;
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
