@@ -15,7 +15,7 @@ namespace AWSK.Models
 			for(int wi = 0; wi < weaponList.Count; ++wi) {
 				var weapon = weaponList[wi];
 				// 補正後対空値
-				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * 0;
+				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * weapon.Intercept;
 				// 補正後制空能力
 				int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slotData[wi]) + weapon.AntiAirBonus));
 				// 加算
@@ -44,10 +44,12 @@ namespace AWSK.Models
 				var enemySlotData = enemy.GetSlotData();
 				// 指定した回数だけ基地航空隊をぶつける
 				for (int si = 0; si < friend.SallyCount.Count; ++si) {
-					for (int ci = 0; ci < friend.SallyCount[si]; ++si) {
+					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
 						// 基地航空隊・敵艦隊の制空値を計算する
 						int friendAntiAirValue = CalcAntiAirValue(friend.Weapon[si], friendSlotData[si]);
 						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData);
+						// 制空状況を判断する
+
 						continue;
 					}
 				}

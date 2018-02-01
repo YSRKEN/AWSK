@@ -135,12 +135,17 @@ namespace AWSK.Stores
 						int id = (int)weapon.id;
 						string name = weapon.name;
 						int antiair = (int)weapon.aac;
+						int intercept = 0;
 						var type = weapon.type;
+						// 局戦・陸戦は迎撃値を読み取るようにした
+						if (type[0] == 22 && type[2] == 48) {
+							intercept = (int)weapon.evasion;
+						}
 						// 艦娘用の装備か？
 						bool weaponFlg = (id <= 500);
 						// コマンドを記録する
 						string sql = "INSERT INTO Weapon VALUES(";
-						sql += $"{id},'{name}',{antiair},";
+						sql += $"{id},'{name}',{antiair},{intercept},";
 						sql += $"{type[0]},{type[1]},{type[2]},{type[3]},{type[4]},";
 						sql += $"{(weaponFlg ? 1 : 0)})";
 						commandList.Add(sql);
@@ -222,6 +227,7 @@ namespace AWSK.Stores
 							[id] INTEGER NOT NULL PRIMARY KEY,
 							[name] TEXT NOT NULL DEFAULT '',
 							[antiair] INTEGER NOT NULL DEFAULT 0,
+							[intercept] INTEGER NOT NULL DEFAULT 0,
 							[type1] INTEGER NOT NULL DEFAULT 0,
 							[type2] INTEGER NOT NULL DEFAULT 0,
 							[type3] INTEGER NOT NULL DEFAULT 0,
@@ -237,7 +243,7 @@ namespace AWSK.Stores
 				}
 			}
 			if (createTableFlg) {
-				if(await DownloadDataAsync()) {
+				if (await DownloadDataAsync()) {
 					return DataStoreStatus.Success;
 				} else {
 					return DataStoreStatus.Failed;
@@ -283,7 +289,7 @@ namespace AWSK.Stores
 								Weapon = new List<WeaponData>(),
 								Slot = new List<int>(),
 							};
-							for(int i = 0; i < 5; ++i) {
+							for (int i = 0; i < 5; ++i) {
 								int size = reader.GetInt32(4 + i);
 								kd.Slot.Add(size);
 								int wId = reader.GetInt32(9 + i);
@@ -298,7 +304,7 @@ namespace AWSK.Stores
 			// setWeaponFlgが立っていた場合、装備データを復元する
 			if (setWeaponFlg) {
 				// N+1クエリの懸念もあるが、順序は重要なのでやむを得ずこうした
-				foreach(int wId in weaponList) {
+				foreach (int wId in weaponList) {
 					var weapon = WeaponDataById(wId);
 					kd.Weapon.Add(weapon);
 				}
@@ -312,6 +318,7 @@ namespace AWSK.Stores
 				Name = "empty",
 				Type = new List<int> { 0, 0, 0, 0, 0 },
 				AntiAir = 0,
+				Intercept = 0,
 				Mas = 0,
 				Rf = 0,
 				WeaponFlg = true,
@@ -320,23 +327,24 @@ namespace AWSK.Stores
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, antiair, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
+					cmd.CommandText = $"SELECT name, antiair, intercept, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = id,
 								Name = reader.GetString(0),
 								Type = new List<int> {
-									reader.GetInt32(3),
 									reader.GetInt32(4),
 									reader.GetInt32(5),
 									reader.GetInt32(6),
-									reader.GetInt32(7)
+									reader.GetInt32(7),
+									reader.GetInt32(8)
 								},
 								AntiAir = reader.GetInt32(1),
+								Intercept = reader.GetInt32(2),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(2) == 1 ? true : false)
+								WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
 							};
 						}
 					}
@@ -351,6 +359,7 @@ namespace AWSK.Stores
 				Name = name,
 				Type = new List<int> { 0, 0, 0, 0, 0 },
 				AntiAir = 0,
+				Intercept = 0,
 				Mas = 0,
 				Rf = 0,
 				WeaponFlg = true,
@@ -359,23 +368,24 @@ namespace AWSK.Stores
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT id, antiair, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
+					cmd.CommandText = $"SELECT id, antiair, intercept, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = reader.GetInt32(0),
 								Name = name,
 								Type = new List<int> {
-									reader.GetInt32(3),
 									reader.GetInt32(4),
 									reader.GetInt32(5),
 									reader.GetInt32(6),
-									reader.GetInt32(7)
+									reader.GetInt32(7),
+									reader.GetInt32(8)
 								},
 								AntiAir = reader.GetInt32(1),
+								Intercept = reader.GetInt32(2),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(2) == 1 ? true : false)
+								WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
 							};
 						}
 					}
@@ -527,15 +537,15 @@ namespace AWSK.Stores
 			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 			string output = "";
 			// 艦隊毎に
-			for(int fi = 0; fi < Kammusu.Count; ++fi) {
+			for (int fi = 0; fi < Kammusu.Count; ++fi) {
 				// 艦番毎に
 				for (int si = 0; si < Kammusu[fi].Count; ++si) {
 					var kammusu = Kammusu[fi][si];
 					// 艦番号を出力
 					if (fi == 0) {
-						output += $"({si+1})";
+						output += $"({si + 1})";
 					} else {
-						output += $"({fi+1}-{si+1})";
+						output += $"({fi + 1}-{si + 1})";
 					}
 					// 艦名と練度を出力
 					output += $"{kammusu.Name} Lv{kammusu.Level}　";
@@ -561,11 +571,11 @@ namespace AWSK.Stores
 		// 搭載数を抽出するメソッド
 		public List<List<List<int>>> GetSlotData() {
 			var slotData = new List<List<List<int>>>();
-			foreach(var kammusuList in Kammusu) {
+			foreach (var kammusuList in Kammusu) {
 				var list1 = new List<List<int>>();
 				foreach (var kammusu in kammusuList) {
 					var list2 = new List<int>();
-					for(int si = 0; si < kammusu.SlotSize; ++si) {
+					for (int si = 0; si < kammusu.SlotSize; ++si) {
 						list2.Add(kammusu.Slot[si]);
 					}
 					list1.Add(list2);
@@ -585,7 +595,7 @@ namespace AWSK.Stores
 			string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 			string output = "";
 			// 航空隊毎に
-			for(int ui = 0; ui < Weapon.Count; ++ui) {
+			for (int ui = 0; ui < Weapon.Count; ++ui) {
 				output += $"第{(ui + 1)}航空隊(出撃回数：{SallyCount[ui]})\n";
 				// 中隊毎に
 				for (int wi = 0; wi < Weapon[ui].Count; ++wi) {
@@ -605,11 +615,11 @@ namespace AWSK.Stores
 		// 搭載数を抽出するメソッド
 		public List<List<int>> GetSlotData() {
 			var slotData = new List<List<int>>();
-			foreach(var weaponList in Weapon) {
+			foreach (var weaponList in Weapon) {
 				var list = new List<int>();
 				foreach (var weapon in weaponList) {
 					// 搭載数は、偵察機が4機・それ以外は18機
-					if((weapon.Type[0] == 5 && weapon.Type[1] == 7)
+					if ((weapon.Type[0] == 5 && weapon.Type[1] == 7)
 						|| weapon.Type[0] == 17) {
 						list.Add(4);
 					} else {
@@ -638,12 +648,13 @@ namespace AWSK.Stores
 	{
 		public int Id;
 		public string Name;
-		public List<int> Type;	//装備種
-		public int AntiAir;		//対空
-		public int Mas;			//艦載機熟練度
-		public int Rf;			//装備改修度
+		public List<int> Type;  //装備種
+		public int AntiAir;     //対空
+		public int Intercept;   //迎撃
+		public int Mas;         //艦載機熟練度
+		public int Rf;          //装備改修度
 		public bool WeaponFlg;
-		public int AntiAirBonus {	// 艦載機熟練度
+		public int AntiAirBonus {   // 艦載機熟練度
 			get {
 				// 艦戦・水戦制空ボーナス
 				var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22 };
@@ -652,9 +663,11 @@ namespace AWSK.Stores
 				// 内部熟練ボーナス
 				var masBonus = new int[] { 0, 1, 1, 2, 2, 2, 2, 3 };
 				// 装備種を判断し、そこから制空ボーナスを算出
-				if((Type[0] == 3 && Type[2] == 6) || Type[1] == 36) {
+				// 艦戦・水戦・陸戦・局戦は+25
+				if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
 					return pfwfBonus[Mas] + masBonus[Mas];
-				}else if (Type[1] == 43) {
+				// 水爆は+9
+				} else if (Type[1] == 43) {
 					return wbBonus[Mas] + masBonus[Mas];
 				} else {
 					return masBonus[Mas];
