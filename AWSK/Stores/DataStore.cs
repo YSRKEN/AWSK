@@ -643,6 +643,24 @@ namespace AWSK.Stores
 		public int Mas;			//艦載機熟練度
 		public int Rf;			//装備改修度
 		public bool WeaponFlg;
+		public int AntiAirBonus {	// 艦載機熟練度
+			get {
+				// 艦戦・水戦制空ボーナス
+				var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22 };
+				// 水爆制空ボーナス
+				var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6 };
+				// 内部熟練ボーナス
+				var masBonus = new int[] { 0, 1, 1, 2, 2, 2, 2, 3 };
+				// 装備種を判断し、そこから制空ボーナスを算出
+				if((Type[0] == 3 && Type[2] == 6) || Type[1] == 36) {
+					return pfwfBonus[Mas] + masBonus[Mas];
+				}else if (Type[1] == 43) {
+					return wbBonus[Mas] + masBonus[Mas];
+				} else {
+					return masBonus[Mas];
+				}
+			}
+		}
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
 	enum DataStoreStatus { Exist, Success, Failed }
