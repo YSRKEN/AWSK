@@ -101,11 +101,17 @@ namespace AWSK.Models
 					result[aav] = 1;
 				}
 			}
-			// 結果を取得する
-			var result2 = result.OrderBy((x) => x.Key);
-			Console.WriteLine("制空値,%");
-			foreach(var pair in result2) {
-				Console.WriteLine($"{pair.Key},{100.0 * pair.Value / loopCount}");
+			// 結果を取得する(確率分布・上側確率・下側確率)
+			int sum1 = loopCount, sum2 = 0;
+			var result2 = new List<List<int>>();
+			foreach(var pair in result.OrderBy((x) => x.Key)) {
+				sum2 += pair.Value;
+				result2.Add(new List<int> { pair.Key, pair.Value, sum1, sum2 });
+				sum1 -= pair.Value;
+			}
+			Console.WriteLine("制空値,確率分布,上側確率,下側確率");
+			foreach (var record in result2) {
+				Console.WriteLine($"{record[0]},{100.0 * record[1] / loopCount},{100.0 * record[2] / loopCount},{100.0 * record[3] / loopCount}");
 			}
 		}
 	}
