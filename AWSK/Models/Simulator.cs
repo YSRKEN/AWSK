@@ -40,13 +40,13 @@ namespace AWSK.Models
 		// 制空状況を判断する
 		enum AirWarStatus { Best, Good, Even, Bad, Worst }
 		private static AirWarStatus JudgeAirWarStatus(int friend, int enemy) {
-			if(friend * 3 >= enemy) {
+			if(friend >= enemy * 3) {
 				return AirWarStatus.Best;
-			}else if(friend * 3 >= enemy * 2) {
-				return AirWarStatus.Good;
 			}else if(friend * 2 >= enemy * 3) {
+				return AirWarStatus.Good;
+			}else if(friend * 3 >= enemy * 2) {
 				return AirWarStatus.Even;
-			}else if(friend >= enemy * 3) {
+			}else if(friend * 3 >= enemy) {
 				return AirWarStatus.Bad;
 			} else {
 				return AirWarStatus.Worst;
@@ -76,7 +76,16 @@ namespace AWSK.Models
 		// 航空戦の基地航空隊におけるシミュレーションを行う
 		public static void BasedAirUnitSimulation(BasedAirUnitData friend, FleetData enemy) {
 			// シミュレーションを行う
-			var result = new Dictionary<int, int>();
+			var finalAAV = new Dictionary<int, int>();
+			var awsCount = new List<List<List<int>>>();
+			for (int si = 0; si < friend.SallyCount.Count; ++si) {
+				var temp1 = new List<List<int>>();
+				for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
+					var temp2 = new List<int> { 0, 0, 0, 0, 0 };
+					temp1.Add(temp2);
+				}
+				awsCount.Add(temp1);
+			}
 			for(int li = 0; li < loopCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
 				var friendSlotData = friend.GetSlotData();
@@ -89,29 +98,46 @@ namespace AWSK.Models
 						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData);
 						// 制空状況を判断する
 						var airWarStatus = JudgeAirWarStatus(friendAntiAirValue, enemyAntiAirValue);
+						++awsCount[si][ci][(int)airWarStatus];
 						// St1撃墜を行う
 						LostEnemySlotBySt1(enemy, ref enemySlotData, airWarStatus);
 					}
 				}
 				// 最終制空値を読み取る
 				int aav = CalcAntiAirValue(enemy, enemySlotData);
-				if (result.ContainsKey(aav)) {
-					++result[aav];
+				if (finalAAV.ContainsKey(aav)) {
+					++finalAAV[aav];
 				} else {
-					result[aav] = 1;
+					finalAAV[aav] = 1;
 				}
 			}
 			// 結果を取得する(確率分布・上側確率・下側確率)
-			int sum1 = loopCount, sum2 = 0;
-			var result2 = new List<List<int>>();
-			foreach(var pair in result.OrderBy((x) => x.Key)) {
-				sum2 += pair.Value;
-				result2.Add(new List<int> { pair.Key, pair.Value, sum1, sum2 });
-				sum1 -= pair.Value;
+			{
+				int sum1 = loopCount, sum2 = 0;
+				var temp = new List<List<int>>();
+				foreach (var pair in finalAAV.OrderBy((x) => x.Key)) {
+					sum2 += pair.Value;
+					temp.Add(new List<int> { pair.Key, pair.Value, sum1, sum2 });
+					sum1 -= pair.Value;
+				}
+				Console.WriteLine("制空値,確率分布(%),上側確率(%),下側確率(%)");
+				foreach (var record in temp) {
+					Console.WriteLine($"{record[0]},{100.0 * record[1] / loopCount},{100.0 * record[2] / loopCount},{100.0 * record[3] / loopCount}");
+				}
 			}
-			Console.WriteLine("制空値,確率分布,上側確率,下側確率");
-			foreach (var record in result2) {
-				Console.WriteLine($"{record[0]},{100.0 * record[1] / loopCount},{100.0 * record[2] / loopCount},{100.0 * record[3] / loopCount}");
+			// 結果を取得する(制空状況のカウント)
+			{
+				Console.WriteLine("制空状況");
+				for (int si = 0; si < friend.SallyCount.Count; ++si) {
+					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
+						Console.Write($"　第{si+1}航空隊　{ci+1}回目：");
+						Console.Write($"確保{100.0 * awsCount[si][ci][0] / loopCount}% ");
+						Console.Write($"優勢{100.0 * awsCount[si][ci][1] / loopCount}% ");
+						Console.Write($"均衡{100.0 * awsCount[si][ci][2] / loopCount}% ");
+						Console.Write($"劣勢{100.0 * awsCount[si][ci][3] / loopCount}% ");
+						Console.WriteLine($"喪失{100.0 * awsCount[si][ci][4] / loopCount}%");
+					}
+				}
 			}
 		}
 	}
