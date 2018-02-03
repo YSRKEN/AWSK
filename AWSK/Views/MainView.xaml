@@ -7,7 +7,7 @@
 	xmlns:b="clr-namespace:AWSK.Behaviors"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="航空戦シミュレーター改" Height="350" Width="810" ResizeMode="NoResize"
+	Title="航空戦シミュレーター改" Height="370" Width="810" ResizeMode="NoResize"
 	b:CloseWindowAttachedBehavior.Close="{Binding CloseWindow.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
 	<Window.DataContext>
 		<local:MainViewModel/>
@@ -291,7 +291,24 @@
 		</GroupBox>
 		<GroupBox Grid.Row="1" Grid.Column="0" Header="各種操作">
 			<Grid>
-				<Button Content="基地航空隊のシミュレーションを行う" FontSize="24" FontWeight="Bold" Margin="5,5,5,5"
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="auto"/>
+					<ColumnDefinition/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition/>
+					<RowDefinition/>
+				</Grid.RowDefinitions>
+				<TextBlock Grid.Column="0" Grid.Row="0" Text="試行回数" Margin="5,5,5,5" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Center"/>
+				<ComboBox Grid.Column="0" Grid.Row="1" Margin="5,5,5,5" VerticalAlignment="Center" Height="24" Width="80" HorizontalContentAlignment="Center"
+					SelectedIndex="{Binding SimulationCountIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+					<ComboBoxItem Content="1000回"/>
+					<ComboBoxItem Content="1万回"/>
+					<ComboBoxItem Content="10万回"/>
+					<ComboBoxItem Content="100万回"/>
+				</ComboBox>
+				<Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+					Content="基地航空隊のシミュレーションを行う" FontSize="24" FontWeight="Bold" Margin="5,5,5,5"
 					Command="{Binding RunSimulationCommand}"/>
 			</Grid>
 		</GroupBox>

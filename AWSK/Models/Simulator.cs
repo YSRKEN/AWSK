@@ -7,8 +7,6 @@ namespace AWSK.Models
 {
 	static class Simulator
 	{
-		// シミュレーションの試行回数
-		private static int loopCount = 10000;
 		// 乱数の起点
 		private static Random random = new Random();
 
@@ -97,6 +95,7 @@ namespace AWSK.Models
 		public static void BasedAirUnitSimulation(
 			BasedAirUnitData friend,
 			FleetData enemy,
+			int simulationCount,
 			out Dictionary<int, int> finalAAV,
 			out List<List<List<int>>> awsCount) {
 			// シミュレーションを行う
@@ -110,7 +109,7 @@ namespace AWSK.Models
 				}
 				awsCount.Add(temp1);
 			}
-			for(int li = 0; li < loopCount; ++li) {
+			for(int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
 				var friendSlotData = friend.GetSlotData();
 				var enemySlotData = enemy.GetSlotData();

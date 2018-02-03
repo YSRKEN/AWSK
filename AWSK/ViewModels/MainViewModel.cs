@@ -77,6 +77,8 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<string> BasedAirUnit2AAV { get; } = new ReactiveProperty<string>("");
 		public ReactiveProperty<string> BasedAirUnit3AAV { get; } = new ReactiveProperty<string>("");
 		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
+		// シミュレーションの反復回数
+		public ReactiveProperty<int> SimulationCountIndex { get; } = new ReactiveProperty<int>(1);
 		#endregion
 		#region プロパティ(ReadOnlyReactiveCollection)
 		// 艦載機熟練度の一覧
@@ -294,10 +296,11 @@ namespace AWSK.ViewModels
 			// 敵艦隊のデータを取得
 			var enemyData = GetEnemyData();
 			// シミュレーションを行う
+			var simulationCount = new[] { 1000, 10000, 100000, 1000000 };
 			{
 				Dictionary<int, int> finalAAV;
 				List<List<List<int>>> awsCount;
-				Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData, out finalAAV, out awsCount);
+				Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out finalAAV, out awsCount);
 				var vm = new ResultViewModel(finalAAV, awsCount);
 				var view = new Views.ResultView { DataContext = vm };
 				view.Show();
