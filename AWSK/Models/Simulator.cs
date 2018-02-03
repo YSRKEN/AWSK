@@ -48,6 +48,23 @@ namespace AWSK.Models
 			}
 		}
 
+		// 制空状況を文字列で返す
+		public static string JudgeAirWarStatusStr(int friend, int enemy) {
+			switch(JudgeAirWarStatus(friend, enemy)) {
+			case AirWarStatus.Best:
+				return "制空権確保";
+			case AirWarStatus.Good:
+				return "航空優勢";
+			case AirWarStatus.Even:
+				return "制空均衡";
+			case AirWarStatus.Bad:
+				return "航空劣勢";
+			case AirWarStatus.Worst:
+				return "制空権喪失";
+			default:
+				return "";
+			}
+		}
 		// 制空値を計算する(1艦)
 		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData) {
 			int sum = 0;

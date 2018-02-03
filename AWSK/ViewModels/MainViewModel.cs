@@ -234,38 +234,42 @@ namespace AWSK.ViewModels
 			}
 			return output;
 		}
+		// 基地航空隊の指定されたインデックスにおける制空値を返す
+		private int GetBasedAirUnitAAV(int index) {
+			var bauData = GetBasedAirUnitData();
+			var bauIndex = GetBasedAirUnitIndex();
+			if (bauIndex[index] < 0) {
+				return 0;
+			}
+			return Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[index]], bauData.GetSlotData()[bauIndex[index]]);
+		}
+		// 敵艦隊の制空値を返す
+		private int GetEnemyUnitAAV() {
+			var enemyData = GetEnemyData();
+			return Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData());
+		}
 		// 基地航空隊の制空値変更処理
 		private void ReCalcBasedAirUnit1AAV() {
-			var bauData = GetBasedAirUnitData();
-			var bauIndex = GetBasedAirUnitIndex();
-			if (bauIndex[0] < 0) {
-				BasedAirUnit1AAV.Value = $"制空値：0";
-				return;
-			}
-			BasedAirUnit1AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[0]], bauData.GetSlotData()[bauIndex[0]])}";
+			int aav1 = GetBasedAirUnitAAV(0);
+			int aav2 = GetEnemyUnitAAV();
+			BasedAirUnit1AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
 		}
 		private void ReCalcBasedAirUnit2AAV() {
-			var bauData = GetBasedAirUnitData();
-			var bauIndex = GetBasedAirUnitIndex();
-			if (bauIndex[1] < 0) {
-				BasedAirUnit2AAV.Value = $"制空値：0";
-				return;
-			}
-			BasedAirUnit2AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[1]], bauData.GetSlotData()[bauIndex[1]])}";
+			int aav1 = GetBasedAirUnitAAV(1);
+			int aav2 = GetEnemyUnitAAV();
+			BasedAirUnit2AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
 		}
 		private void ReCalcBasedAirUnit3AAV() {
-			var bauData = GetBasedAirUnitData();
-			var bauIndex = GetBasedAirUnitIndex();
-			if (bauIndex[2] < 0) {
-				BasedAirUnit3AAV.Value = $"制空値：0";
-				return;
-			}
-			BasedAirUnit3AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[2]], bauData.GetSlotData()[bauIndex[2]])}";
+			int aav1 = GetBasedAirUnitAAV(2);
+			int aav2 = GetEnemyUnitAAV();
+			BasedAirUnit3AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
 		}
 		// 敵艦隊の制空値変更処理
 		private void ReCalcEnemyUnitAAV() {
-			var enemyData = GetEnemyData();
-			EnemyUnitAAV.Value = $"制空値：{Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData())}";
+			EnemyUnitAAV.Value = $"制空値：{GetEnemyUnitAAV()}";
+			ReCalcBasedAirUnit1AAV();
+			ReCalcBasedAirUnit2AAV();
+			ReCalcBasedAirUnit3AAV();
 		}
 
 		// クリップボードからインポート

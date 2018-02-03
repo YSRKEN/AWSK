@@ -222,11 +222,11 @@
 					ItemsSource="{Binding RfList}"
 					IsEnabled="{Binding BasedAirUnit3Flg.Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<!-- 基地航空隊の制空値 -->
-				<TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5"
+				<TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
 					Text="{Binding BasedAirUnit1AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-				<TextBlock Grid.Column="4" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5"
+				<TextBlock Grid.Column="4" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
 					Text="{Binding BasedAirUnit2AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-				<TextBlock Grid.Column="8" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5"
+				<TextBlock Grid.Column="8" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
 					Text="{Binding BasedAirUnit3AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 			</Grid>
 		</GroupBox>
@@ -262,7 +262,7 @@
 							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<TextBlock Grid.Row="6" Height="24" Margin="5,5,5,5"
+							<TextBlock Grid.Row="6" Height="24" Margin="5,5,5,5" HorizontalAlignment="Center" FontWeight="Bold"
 								Text="{Binding EnemyUnitAAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 						</Grid>
 					</TabItem>
