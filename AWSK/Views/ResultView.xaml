@@ -7,12 +7,18 @@
 	xmlns:oxy="http://oxyplot.org/wpf"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="計算結果" Height="400" Width="500">
+	Title="計算結果" Height="400" Width="700">
 	<Window.DataContext>
 		<local:ResultViewModel/>
 	</Window.DataContext>
 	<Grid>
-		<oxy:PlotView Margin="5,5,5,5"
-			Model="{Binding GraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="400"/>
+			<ColumnDefinition/>
+		</Grid.ColumnDefinitions>
+		<oxy:PlotView Grid.Column="0" Margin="5,5,5,5"
+			Model="{Binding LastAAVGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+		<oxy:PlotView Grid.Column="1" Margin="5,5,5,5"
+			Model="{Binding AwsCountGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 	</Grid>
 </Window>

@@ -9,10 +9,11 @@ namespace AWSK.ViewModels
 {
 	class ResultViewModel
 	{
-		public ReactiveProperty<PlotModel> GraphModel { get; } = new ReactiveProperty<PlotModel>();
+		public ReactiveProperty<PlotModel> LastAAVGraphModel { get; } = new ReactiveProperty<PlotModel>();
+		public ReactiveProperty<PlotModel> AwsCountGraphModel { get; } = new ReactiveProperty<PlotModel>();
 
 		// グラフモデルを作成する
-		private PlotModel CreateGraphModel(Dictionary<int, int> finalAAV, List<List<List<int>>> awsCount) {
+		private PlotModel CreateLastAAVGraphModel(Dictionary<int, int> finalAAV) {
 			var graphModel = new PlotModel();
 			// X軸・Y軸を追加する
 			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "制空値" });
@@ -27,13 +28,52 @@ namespace AWSK.ViewModels
 			}
 			lineSeries.Title = "下側確率";
 			graphModel.Series.Add(lineSeries);
+			graphModel.InvalidatePlot(true);
+			return graphModel;
+		}
+		private PlotModel CreateAwsCountGraphModel(List<List<List<int>>> awsCount) {
+			var graphModel = new PlotModel();
+			graphModel.IsLegendVisible = false;
+			// 横軸・縦軸を追加する
+			graphModel.Axes.Add(new LinearAxis {
+				Position = AxisPosition.Left, Title = "割合(％)", Minimum = 0, Maximum = 100,
+				MinimumPadding = 0, AbsoluteMinimum = 0});
+			{
+				var categoryAxis = new CategoryAxis { Position = AxisPosition.Bottom };
+				var labelList = new List<string>();
+				for (int si = 0; si < awsCount.Count; ++si) {
+					for (int ci = 0; ci < awsCount[si].Count; ++ci) {
+						labelList.Add($"{si + 1}-{ci + 1}");
+					}
+				}
+				categoryAxis.ItemsSource = labelList;
+				graphModel.Axes.Add(categoryAxis);
+			}
+			// グラフ要素を追加する
+			// 各制空状態(k)毎に入力することに注意
+			var columnLabel = new[] { "制空権確保", "航空優勢", "制空均衡", "航空劣勢", "制空権喪失" };
+			for (int k = 0; k < 5; ++k) {
+				var columnSeries = new ColumnSeries();
+				columnSeries.IsStacked = true;
+				columnSeries.Title = $"{columnLabel[k]}";
+				for (int si = 0; si < awsCount.Count; ++si) {
+					for (int ci = 0; ci < awsCount[si].Count; ++ci) {
+						int all_sum = awsCount[si][ci].Sum();
+						// 各制空状態毎に入力する
+						columnSeries.Items.Add(new ColumnItem(100.0 * awsCount[si][ci][k] / all_sum));
+					}
+				}
+				graphModel.Series.Add(columnSeries);
+			}
+			graphModel.InvalidatePlot(true);
 			return graphModel;
 		}
 
 		// コンストラクタ
 		public ResultViewModel() { }
 		public ResultViewModel(Dictionary<int, int> finalAAV, List<List<List<int>>> awsCount) {
-			GraphModel.Value = CreateGraphModel(finalAAV, awsCount);
+			LastAAVGraphModel.Value = CreateLastAAVGraphModel(finalAAV);
+			AwsCountGraphModel.Value = CreateAwsCountGraphModel(awsCount);
 		}
 	}
 }

@@ -119,7 +119,7 @@ namespace AWSK.Models
 				}
 			}
 			finalAAV = finalAAV.OrderBy((x) => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
-			/*// 結果を取得する(確率分布・上側確率・下側確率)
+			// 結果を取得する(確率分布・上側確率・下側確率)
 			{
 				int sum1 = loopCount, sum2 = 0;
 				var temp = new List<List<int>>();
@@ -146,7 +146,7 @@ namespace AWSK.Models
 						Console.WriteLine($"喪失{100.0 * awsCount[si][ci][4] / loopCount}%");
 					}
 				}
-			}*/
+			}
 		}
 	}
 }
