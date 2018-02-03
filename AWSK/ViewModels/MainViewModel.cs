@@ -180,6 +180,24 @@ namespace AWSK.ViewModels
 				fleetData.Kammusu.Add(kammusuList);
 			return fleetData;
 		}
+		// 装備名から、基地航空隊の中隊を選択する(デバッグ用)
+		// LINQにおけるIndexの取り方：
+		// http://shirakamisauto.hatenablog.com/entry/2016/06/27/080017
+		private int BAUIndex(string name) {
+			return BasedAirUnitList
+				.Select((c, i) => new { Content = c, Index = i })
+				.Where(pair => pair.Content == name)
+				.Select(pair => pair.Index)
+				.First();
+		}
+		// 艦名から、敵艦を選択する(デバッグ用)
+		private int EUIndex(string name) {
+			return EnemyList
+				.Select((c, i) => new { Content = c, Index = i })
+				.Where(pair => pair.Content == name)
+				.Select(pair => pair.Index)
+				.First();
+		}
 
 		// クリップボードからインポート
 		public void ImportClipboardText() {
@@ -202,7 +220,7 @@ namespace AWSK.ViewModels
 			var basedAirUnitData = GetBasedAirUnitData();
 			// 敵艦隊のデータを取得
 			var enemyData = GetEnemyData();
-			MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
+			//MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
 			// シミュレーションを行う
 			Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData);
 		}
@@ -254,6 +272,17 @@ namespace AWSK.ViewModels
 			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit2Flg, BasedAirUnit3Flg }
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
+			// デバッグ用に編成を予めセットしておく
+			// 参考：http://5-4.blog.jp/archives/1063413608.html
+			BasedAirUnit2Mode.Value = 1;
+			BasedAirUnitIndex21.Value = BAUIndex("烈風改");
+			BasedAirUnitIndex22.Value = BAUIndex("一式陸攻(野中隊)");
+			BasedAirUnitIndex23.Value = BAUIndex("一式陸攻 二二型甲");
+			BasedAirUnitIndex24.Value = BAUIndex("一式陸攻 二二型甲");
+			EnemyUnitIndex1.Value = EUIndex("空母ヲ級改flagship-4");
+			EnemyUnitIndex2.Value = EUIndex("戦艦タ級flagship");
+			EnemyUnitIndex3.Value = EUIndex("重巡ネ級elite");
+			EnemyUnitIndex4.Value = EUIndex("軽巡ツ級elite");
 		}
 	}
 }
