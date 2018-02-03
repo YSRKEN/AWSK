@@ -220,7 +220,6 @@ namespace AWSK.ViewModels
 			var basedAirUnitData = GetBasedAirUnitData();
 			// 敵艦隊のデータを取得
 			var enemyData = GetEnemyData();
-			//MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
 			// シミュレーションを行う
 			{
 				Dictionary<int, int> finalAAV;

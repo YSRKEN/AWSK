@@ -36,8 +36,7 @@ namespace AWSK.ViewModels
 			graphModel.IsLegendVisible = false;
 			// 横軸・縦軸を追加する
 			graphModel.Axes.Add(new LinearAxis {
-				Position = AxisPosition.Left, Title = "割合(％)", Minimum = 0, Maximum = 100,
-				MinimumPadding = 0, AbsoluteMinimum = 0});
+				Position = AxisPosition.Left, Title = "割合(％)", Minimum = 0, Maximum = 100});
 			{
 				var categoryAxis = new CategoryAxis { Position = AxisPosition.Bottom };
 				var labelList = new List<string>();
