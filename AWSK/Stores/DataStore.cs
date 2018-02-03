@@ -674,6 +674,19 @@ namespace AWSK.Stores
 				}
 			}
 		}
+		public bool HasAAV {   // 航空戦に参加するか？
+			get {
+				// 艦戦・艦攻・艦爆・爆戦・噴式(カ号・三式指揮連絡機を除く)
+				if(Type[0] == 3 && Type[1] != 15 && Type[1] != 16) {
+					return true;
+				}
+				// 水戦・水爆
+				if(Type[0] == 5&& (Type[1] == 36 || Type[1] == 43)) {
+					return true;
+				}
+				return false;
+			}
+		}
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
 	enum DataStoreStatus { Exist, Success, Failed }

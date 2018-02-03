@@ -17,6 +17,9 @@ namespace AWSK.Models
 			int sum = 0;
 			for(int wi = 0; wi < weaponList.Count; ++wi) {
 				var weapon = weaponList[wi];
+				// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
+				if (!weapon.HasAAV)
+					continue;
 				// 補正後対空値
 				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * weapon.Intercept;
 				// 補正後制空能力
