@@ -72,6 +72,11 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<int> EnemyUnitIndex4 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex5 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex6 { get; } = new ReactiveProperty<int>(0);
+		// 基地航空隊・敵艦隊の制空値
+		public ReactiveProperty<string> BasedAirUnit1AAV { get; } = new ReactiveProperty<string>("");
+		public ReactiveProperty<string> BasedAirUnit2AAV { get; } = new ReactiveProperty<string>("");
+		public ReactiveProperty<string> BasedAirUnit3AAV { get; } = new ReactiveProperty<string>("");
+		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
 		#endregion
 		#region プロパティ(ReadOnlyReactiveCollection)
 		// 艦載機熟練度の一覧
@@ -198,6 +203,70 @@ namespace AWSK.ViewModels
 				.Select(pair => pair.Index)
 				.First();
 		}
+		// 基地航空隊のうち、どのデータが選択されているかを検出する
+		// 例：戻り値が{0, -1, 1}だった場合、インデックス0が第1航空隊、
+		// インデックス1が第3航空隊で、第2航空隊は有効になっていない
+		private List<int> GetBasedAirUnitIndex() {
+			var output = new List<int> { -1, -1, -1 };
+			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
+			var basedAirUnitIndex = new[] {
+				BasedAirUnitIndex11.Value, BasedAirUnitIndex12.Value, BasedAirUnitIndex13.Value, BasedAirUnitIndex14.Value,
+				BasedAirUnitIndex21.Value, BasedAirUnitIndex22.Value, BasedAirUnitIndex23.Value, BasedAirUnitIndex24.Value,
+				BasedAirUnitIndex31.Value, BasedAirUnitIndex32.Value, BasedAirUnitIndex33.Value, BasedAirUnitIndex34.Value,
+			};
+			int sum = 0;
+			for (int i = 0; i < basedAirUnitFlgList.Count(); ++i) {
+				if (!basedAirUnitFlgList[i])
+					continue;
+				bool enableFlg = false;
+				for (int j = 0; j < 4; ++j) {
+					int index = i * 4 + j;
+					// 「なし」が選択されている装備は無視する
+					if (basedAirUnitIndex[index] == 0)
+						continue;
+					enableFlg = true;
+					break;
+				}
+				if (enableFlg) {
+					output[i] = sum;
+					++sum;
+				}
+			}
+			return output;
+		}
+		// 基地航空隊の制空値変更処理
+		private void ReCalcBasedAirUnit1AAV() {
+			var bauData = GetBasedAirUnitData();
+			var bauIndex = GetBasedAirUnitIndex();
+			if (bauIndex[0] < 0) {
+				BasedAirUnit1AAV.Value = $"制空値：0";
+				return;
+			}
+			BasedAirUnit1AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[0]], bauData.GetSlotData()[bauIndex[0]])}";
+		}
+		private void ReCalcBasedAirUnit2AAV() {
+			var bauData = GetBasedAirUnitData();
+			var bauIndex = GetBasedAirUnitIndex();
+			if (bauIndex[1] < 0) {
+				BasedAirUnit2AAV.Value = $"制空値：0";
+				return;
+			}
+			BasedAirUnit2AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[1]], bauData.GetSlotData()[bauIndex[1]])}";
+		}
+		private void ReCalcBasedAirUnit3AAV() {
+			var bauData = GetBasedAirUnitData();
+			var bauIndex = GetBasedAirUnitIndex();
+			if (bauIndex[2] < 0) {
+				BasedAirUnit3AAV.Value = $"制空値：0";
+				return;
+			}
+			BasedAirUnit3AAV.Value = $"制空値：{Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[2]], bauData.GetSlotData()[bauIndex[2]])}";
+		}
+		// 敵艦隊の制空値変更処理
+		private void ReCalcEnemyUnitAAV() {
+			var enemyData = GetEnemyData();
+			EnemyUnitAAV.Value = $"制空値：{Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData())}";
+		}
 
 		// クリップボードからインポート
 		public void ImportClipboardText() {
@@ -239,6 +308,7 @@ namespace AWSK.ViewModels
 			BasedAirUnit1Flg = BasedAirUnit1Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
 			BasedAirUnit2Flg = BasedAirUnit2Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
 			BasedAirUnit3Flg = BasedAirUnit3Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
+			#region 各種ReactiveCollection
 			{
 				var oc = new ObservableCollection<string>(new List<string> {
 					"--", "|", "||", "|||", "/", "//", "///", ">>"
@@ -262,7 +332,7 @@ namespace AWSK.ViewModels
 					int count = list.Values.Where(p => p == pair.Value).Count();
 					int count2 = list2.Where(p => p.Contains(pair.Value)).Count();
 					if (count > 1) {
-						list2.Add($"{pair.Value}-{count2+1}");
+						list2.Add($"{pair.Value}-{count2 + 1}");
 					} else {
 						list2.Add(pair.Value);
 					}
@@ -275,6 +345,51 @@ namespace AWSK.ViewModels
 				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
 				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
 			}
+			#endregion
+			#region 設定変更により制空値を自動計算する処理
+			BasedAirUnitIndex11.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitIndex12.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitIndex13.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitIndex14.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitIndex21.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitIndex22.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitIndex23.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitIndex24.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitIndex31.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitIndex32.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitIndex33.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitIndex34.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitMas11.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitMas12.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitMas13.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitMas14.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitMas21.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitMas22.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitMas23.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitMas24.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitMas31.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitMas32.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitMas33.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitMas34.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitRf11.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitRf12.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitRf13.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitRf14.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+			BasedAirUnitRf21.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitRf22.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitRf23.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitRf24.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+			BasedAirUnitRf31.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitRf32.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitRf33.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			BasedAirUnitRf34.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+			EnemyUnitIndex1.Subscribe(_ => ReCalcEnemyUnitAAV());
+			EnemyUnitIndex2.Subscribe(_ => ReCalcEnemyUnitAAV());
+			EnemyUnitIndex3.Subscribe(_ => ReCalcEnemyUnitAAV());
+			EnemyUnitIndex4.Subscribe(_ => ReCalcEnemyUnitAAV());
+			EnemyUnitIndex5.Subscribe(_ => ReCalcEnemyUnitAAV());
+			EnemyUnitIndex6.Subscribe(_ => ReCalcEnemyUnitAAV());
+			#endregion
 			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit2Flg, BasedAirUnit3Flg }
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);

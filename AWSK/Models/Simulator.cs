@@ -12,34 +12,6 @@ namespace AWSK.Models
 		// 乱数の起点
 		private static Random random = new Random();
 
-		// 制空値を計算する(1艦)
-		private static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData) {
-			int sum = 0;
-			for(int wi = 0; wi < weaponList.Count; ++wi) {
-				var weapon = weaponList[wi];
-				// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
-				if (!weapon.HasAAV)
-					continue;
-				// 補正後対空値
-				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * weapon.Intercept;
-				// 補正後制空能力
-				int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slotData[wi]) + weapon.AntiAirBonus));
-				// 加算
-				sum += correctedAAV;
-			}
-			return sum;
-		}
-		// 制空値を計算する(艦隊全体)
-		private static int CalcAntiAirValue(FleetData fleet, List<List<List<int>>> slotData) {
-			int sum = 0;
-			for(int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
-				for(int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
-					var kammusu = fleet.Kammusu[ui][ki];
-					sum += CalcAntiAirValue(kammusu.Weapon, slotData[ui][ki]);
-				}
-			}
-			return sum;
-		}
 		// 制空状況を判断する
 		enum AirWarStatus { Best, Good, Even, Bad, Worst }
 		private static AirWarStatus JudgeAirWarStatus(int friend, int enemy) {
@@ -76,6 +48,34 @@ namespace AWSK.Models
 			}
 		}
 
+		// 制空値を計算する(1艦)
+		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData) {
+			int sum = 0;
+			for (int wi = 0; wi < weaponList.Count; ++wi) {
+				var weapon = weaponList[wi];
+				// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
+				if (!weapon.HasAAV)
+					continue;
+				// 補正後対空値
+				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * weapon.Intercept;
+				// 補正後制空能力
+				int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slotData[wi]) + weapon.AntiAirBonus));
+				// 加算
+				sum += correctedAAV;
+			}
+			return sum;
+		}
+		// 制空値を計算する(艦隊全体)
+		public static int CalcAntiAirValue(FleetData fleet, List<List<List<int>>> slotData) {
+			int sum = 0;
+			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
+				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
+					var kammusu = fleet.Kammusu[ui][ki];
+					sum += CalcAntiAirValue(kammusu.Weapon, slotData[ui][ki]);
+				}
+			}
+			return sum;
+		}
 		// 航空戦の基地航空隊におけるシミュレーションを行う
 		public static void BasedAirUnitSimulation(
 			BasedAirUnitData friend,
