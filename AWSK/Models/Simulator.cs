@@ -77,10 +77,14 @@ namespace AWSK.Models
 		}
 
 		// 航空戦の基地航空隊におけるシミュレーションを行う
-		public static void BasedAirUnitSimulation(BasedAirUnitData friend, FleetData enemy) {
+		public static void BasedAirUnitSimulation(
+			BasedAirUnitData friend,
+			FleetData enemy,
+			out Dictionary<int, int> finalAAV,
+			out List<List<List<int>>> awsCount) {
 			// シミュレーションを行う
-			var finalAAV = new Dictionary<int, int>();
-			var awsCount = new List<List<List<int>>>();
+			finalAAV = new Dictionary<int, int>();
+			awsCount = new List<List<List<int>>>();
 			for (int si = 0; si < friend.SallyCount.Count; ++si) {
 				var temp1 = new List<List<int>>();
 				for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
@@ -114,7 +118,8 @@ namespace AWSK.Models
 					finalAAV[aav] = 1;
 				}
 			}
-			// 結果を取得する(確率分布・上側確率・下側確率)
+			finalAAV = finalAAV.OrderBy((x) => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
+			/*// 結果を取得する(確率分布・上側確率・下側確率)
 			{
 				int sum1 = loopCount, sum2 = 0;
 				var temp = new List<List<int>>();
@@ -141,7 +146,7 @@ namespace AWSK.Models
 						Console.WriteLine($"喪失{100.0 * awsCount[si][ci][4] / loopCount}%");
 					}
 				}
-			}
+			}*/
 		}
 	}
 }

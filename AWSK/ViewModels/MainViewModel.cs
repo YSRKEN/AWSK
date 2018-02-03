@@ -222,7 +222,14 @@ namespace AWSK.ViewModels
 			var enemyData = GetEnemyData();
 			//MessageBox.Show("【基地航空隊】\n" + basedAirUnitData.ToString() + "\n【敵艦隊】\n" + enemyData.ToString(), "AWSK");
 			// シミュレーションを行う
-			Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData);
+			{
+				Dictionary<int, int> finalAAV;
+				List<List<List<int>>> awsCount;
+				Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData, out finalAAV, out awsCount);
+				var vm = new ResultViewModel(finalAAV, awsCount);
+				var view = new Views.ResultView { DataContext = vm };
+				view.Show();
+			}
 		}
 
 		// コンストラクタ
