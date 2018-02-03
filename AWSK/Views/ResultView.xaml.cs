@@ -21,6 +21,7 @@ namespace AWSK.Views
 	{
 		public ResultView() {
 			InitializeComponent();
+			MouseLeftButtonDown += (o, e) => DragMove();
 		}
 	}
 }

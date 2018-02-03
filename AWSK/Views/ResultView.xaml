@@ -18,10 +18,28 @@
 			<ColumnDefinition/>
 		</Grid.ColumnDefinitions>
 		<oxy:PlotView Grid.Column="0" Margin="5,5,5,5"
-			Model="{Binding LastAAVGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+			Model="{Binding LastAAVGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+			<oxy:PlotView.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="画像をコピー"
+						Command="{Binding CopyAAVPictureCommand}"/>
+					<MenuItem Header="テキストでコピー"
+						Command="{Binding CopyAAVTextCommand}"/>
+				</ContextMenu>
+			</oxy:PlotView.ContextMenu>
+		</oxy:PlotView>
 		<!-- 参考→http://d.hatena.ne.jp/fkmt5/20150302/1425311002 -->
 		<GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"/>
 		<oxy:PlotView Grid.Column="2" Margin="5,5,5,5"
-			Model="{Binding AwsCountGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+			Model="{Binding AwsCountGraphModel.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+			<oxy:PlotView.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="画像をコピー"
+						Command="{Binding CopyAwsPictureCommand}"/>
+					<MenuItem Header="テキストでコピー"
+						Command="{Binding CopyAwsTextCommand}"/>
+				</ContextMenu>
+			</oxy:PlotView.ContextMenu>
+		</oxy:PlotView>
 	</Grid>
 </Window>

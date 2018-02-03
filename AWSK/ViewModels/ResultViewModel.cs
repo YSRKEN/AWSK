@@ -4,13 +4,24 @@ using OxyPlot.Series;
 using Reactive.Bindings;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.Windows;
 
 namespace AWSK.ViewModels
 {
 	class ResultViewModel
 	{
+		// 制空値情報および制空状況情報
+		private Dictionary<int, int> finalAAV;
+		private List<List<List<int>>> awsCount;
+		// 制空値情報のグラフおよび制空状況情報のグラフ
 		public ReactiveProperty<PlotModel> LastAAVGraphModel { get; } = new ReactiveProperty<PlotModel>();
 		public ReactiveProperty<PlotModel> AwsCountGraphModel { get; } = new ReactiveProperty<PlotModel>();
+		// 各種コマンド
+		public ReactiveCommand CopyAAVPictureCommand { get; } = new ReactiveCommand();
+		public ReactiveCommand CopyAAVTextCommand { get; } = new ReactiveCommand();
+		public ReactiveCommand CopyAwsPictureCommand { get; } = new ReactiveCommand();
+		public ReactiveCommand CopyAwsTextCommand { get; } = new ReactiveCommand();
 
 		// グラフモデルを作成する
 		private PlotModel CreateLastAAVGraphModel(Dictionary<int, int> finalAAV) {
@@ -71,8 +82,57 @@ namespace AWSK.ViewModels
 		// コンストラクタ
 		public ResultViewModel() { }
 		public ResultViewModel(Dictionary<int, int> finalAAV, List<List<List<int>>> awsCount) {
+			// グラフを描画
 			LastAAVGraphModel.Value = CreateLastAAVGraphModel(finalAAV);
 			AwsCountGraphModel.Value = CreateAwsCountGraphModel(awsCount);
+			// データをバックアップ
+			this.finalAAV = finalAAV;
+			this.awsCount = awsCount;
+			// コマンドを設定
+			CopyAAVPictureCommand.Subscribe(_ => {
+				// 制空値のグラフを画像としてクリップボードにコピー
+				var pngExporter = new OxyPlot.Wpf.PngExporter();
+				var bitmapSource = pngExporter.ExportToBitmap(LastAAVGraphModel.Value);
+				Clipboard.SetImage(bitmapSource);
+			});
+			CopyAAVTextCommand.Subscribe(_ => {
+				// 制空値の下側確率の情報をテキストとしてクリップボードにコピー
+				int loopCount = finalAAV.Values.Sum();
+				int sum1 = loopCount, sum2 = 0;
+				var temp = new List<List<int>>();
+				foreach (var pair in finalAAV.OrderBy((x) => x.Key)) {
+					sum2 += pair.Value;
+					temp.Add(new List<int> { pair.Key, pair.Value, sum1, sum2 });
+					sum1 -= pair.Value;
+				}
+				string output = "制空値,確率分布(%),上側確率(%),下側確率(%)\n";
+				foreach (var record in temp) {
+					output += $"{record[0]},{100.0 * record[1] / loopCount},{100.0 * record[2] / loopCount},{100.0 * record[3] / loopCount}\n";
+				}
+				Clipboard.SetText(output);
+			});
+			CopyAwsPictureCommand.Subscribe(_ => {
+				// 制空状況のグラフを画像としてクリップボードにコピー
+				var pngExporter = new OxyPlot.Wpf.PngExporter();
+				var bitmapSource = pngExporter.ExportToBitmap(AwsCountGraphModel.Value);
+				Clipboard.SetImage(bitmapSource);
+			});
+			CopyAwsTextCommand.Subscribe(_ => {
+				// 制空状況の詳細をテキストとしてクリップボードにコピー
+				int loopCount = finalAAV.Values.Sum();
+				string output = "航空隊,回数,確保(%),優勢(%),均衡(%),劣勢(%),喪失(%)\n";
+				for (int si = 0; si < awsCount.Count; ++si) {
+					for (int ci = 0; ci < awsCount[si].Count; ++ci) {
+						output += $"{si + 1},{ci + 1},";
+						output += $"{100.0 * awsCount[si][ci][0] / loopCount},";
+						output += $"{100.0 * awsCount[si][ci][1] / loopCount},";
+						output += $"{100.0 * awsCount[si][ci][2] / loopCount},";
+						output += $"{100.0 * awsCount[si][ci][3] / loopCount},";
+						output += $"{100.0 * awsCount[si][ci][4] / loopCount}\n";
+					}
+				}
+				Clipboard.SetText(output);
+			});
 		}
 	}
 }
