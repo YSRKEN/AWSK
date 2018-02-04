@@ -429,7 +429,7 @@ namespace AWSK.ViewModels
 			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
 			// デバッグ用に編成を予めセットしておく
 			// 参考：http://5-4.blog.jp/archives/1063413608.html
-			BasedAirUnit2Mode.Value = 1;
+			/*BasedAirUnit2Mode.Value = 1;
 			BasedAirUnitIndex21.Value = BAUIndex("烈風改");
 			BasedAirUnitIndex22.Value = BAUIndex("一式陸攻(野中隊)");
 			BasedAirUnitIndex23.Value = BAUIndex("一式陸攻 二二型甲");
@@ -437,7 +437,7 @@ namespace AWSK.ViewModels
 			EnemyUnitIndex1.Value = EUIndex("空母ヲ級改flagship-4");
 			EnemyUnitIndex2.Value = EUIndex("戦艦タ級flagship");
 			EnemyUnitIndex3.Value = EUIndex("重巡ネ級elite");
-			EnemyUnitIndex4.Value = EUIndex("軽巡ツ級elite");
+			EnemyUnitIndex4.Value = EUIndex("軽巡ツ級elite");*/
 		}
 	}
 }
