@@ -277,7 +277,7 @@ namespace AWSK.ViewModels
 			int aav1 = GetBasedAirUnitAAV(2);
 			int aav2 = GetEnemyUnitAAV();
 			int range = GetBasedAirUnitRange(2);
-			BasedAirUnit3AAV.Value = $"制空値：{aav1}){Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
+			BasedAirUnit3AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
 		}
 		// 敵艦隊の制空値変更処理
 		private void ReCalcEnemyUnitAAV() {
