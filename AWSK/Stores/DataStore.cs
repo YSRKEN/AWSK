@@ -733,7 +733,11 @@ namespace AWSK.Stores
 					return true;
 				}
 				// 水戦・水爆
-				if(Type[0] == 5&& (Type[1] == 36 || Type[1] == 43)) {
+				if(Type[0] == 5 && (Type[1] == 36 || Type[1] == 43)) {
+					return true;
+				}
+				// 陸攻・局戦・陸戦
+				if(Type[0] == 21 || Type[0] == 22) {
 					return true;
 				}
 				return false;
