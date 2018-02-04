@@ -7,7 +7,7 @@
 	xmlns:oxy="http://oxyplot.org/wpf"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="計算結果" Height="400" Width="700">
+	Title="{Binding TitleStr.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Height="400" Width="700">
 	<Window.DataContext>
 		<local:ResultViewModel/>
 	</Window.DataContext>

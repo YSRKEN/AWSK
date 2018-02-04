@@ -14,6 +14,8 @@ namespace AWSK.ViewModels
 		// 制空値情報および制空状況情報
 		private Dictionary<int, int> finalAAV;
 		private List<List<List<int>>> awsCount;
+		// タイトルバー
+		public ReactiveProperty<string> TitleStr { get; } = new ReactiveProperty<string>("計算結果");
 		// 制空値情報のグラフおよび制空状況情報のグラフ
 		public ReactiveProperty<PlotModel> LastAAVGraphModel { get; } = new ReactiveProperty<PlotModel>();
 		public ReactiveProperty<PlotModel> AwsCountGraphModel { get; } = new ReactiveProperty<PlotModel>();
@@ -78,6 +80,29 @@ namespace AWSK.ViewModels
 			graphModel.InvalidatePlot(true);
 			return graphModel;
 		}
+		// タイトルバーを設定
+		private string SetTitleBar(Dictionary<int, int> finalAAV) {
+			// 下側確率のデータを取得する
+			int allSum = finalAAV.Values.Sum();
+			int sum = 0;
+			var prob = new List<KeyValuePair<int, double>>();
+			foreach (var data in finalAAV) {
+				sum += data.Value;
+				prob.Add(new KeyValuePair<int, double>(data.Key, 100.0 * sum / allSum));
+			}
+			// 各パーセンテージを初めて超える際の制空値を取得し、文字列として返す
+			var prob2 = new double[] { 50.0, 70.0, 90.0, 95.0, 99.0 };
+			string output = "計算結果(";
+			int index = 0;
+			foreach(double prob2_ in prob2) {
+				if (index != 0)
+					output += "　";
+				output += $"{prob2_}％：{prob.Find(p => p.Value >= prob2_).Key}";
+				++index;
+			}
+			output += ")";
+			return output;
+		}
 
 		// コンストラクタ
 		public ResultViewModel() { }
@@ -88,6 +113,8 @@ namespace AWSK.ViewModels
 			// データをバックアップ
 			this.finalAAV = finalAAV;
 			this.awsCount = awsCount;
+			// タイトルバーを設定
+			TitleStr.Value = SetTitleBar(finalAAV);
 			// コマンドを設定
 			CopyAAVPictureCommand.Subscribe(_ => {
 				// 制空値のグラフを画像としてクリップボードにコピー
