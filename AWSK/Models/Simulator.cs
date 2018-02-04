@@ -72,7 +72,15 @@ namespace AWSK.Models
 				if (!weapon.HasAAV)
 					continue;
 				// 補正後対空値
-				double correctedAA = 1.0 * weapon.AntiAir + 1.0 * weapon.Rf + 1.5 * weapon.Intercept;
+				double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
+				//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
+				if((weapon.Type[0] == 3 && weapon.Type[2] == 6)
+					|| (weapon.Type[0] == 5 && weapon.Type[1] == 36)
+					|| (weapon.Type[0] == 22 && weapon.Type[2] == 48)) {
+					correctedAA += 0.2 * weapon.Rf;
+				}else if(weapon.Type[0] == 3 && weapon.Type[2] == 7 && weapon.Type[4] == 12) {
+					correctedAA += 0.25 * weapon.Rf;
+				}
 				// 補正後制空能力
 				int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slotData[wi]) + weapon.AntiAirBonus));
 				// 加算
