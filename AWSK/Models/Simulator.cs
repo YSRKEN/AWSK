@@ -64,13 +64,20 @@ namespace AWSK.Models
 			}
 		}
 		// 制空値を計算する(1艦)
-		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData) {
+		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
+		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData, bool calcFlg = false) {
 			int sum = 0;
 			for (int wi = 0; wi < weaponList.Count; ++wi) {
 				var weapon = weaponList[wi];
 				// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
-				if (!weapon.HasAAV)
-					continue;
+				// calcFlgがtrueなら、水上偵察機も制空計算に反映する
+				if (calcFlg) {
+					if (!weapon.HasAAV2)
+						continue;
+				} else {
+					if (!weapon.HasAAV)
+						continue;
+				}
 				// 補正後対空値
 				double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
 				//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
@@ -89,12 +96,13 @@ namespace AWSK.Models
 			return sum;
 		}
 		// 制空値を計算する(艦隊全体)
-		public static int CalcAntiAirValue(FleetData fleet, List<List<List<int>>> slotData) {
+		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
+		public static int CalcAntiAirValue(FleetData fleet, List<List<List<int>>> slotData, bool calcFlg = false) {
 			int sum = 0;
 			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
 				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
 					var kammusu = fleet.Kammusu[ui][ki];
-					sum += CalcAntiAirValue(kammusu.Weapon, slotData[ui][ki]);
+					sum += CalcAntiAirValue(kammusu.Weapon, slotData[ui][ki], calcFlg);
 				}
 			}
 			return sum;
@@ -150,7 +158,7 @@ namespace AWSK.Models
 					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
 						// 基地航空隊・敵艦隊の制空値を計算する
 						int friendAntiAirValue = CalcAntiAirValue(friend.Weapon[si], friendSlotData[si]);
-						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData);
+						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData, true);
 						// 制空状況を判断する
 						var airWarStatus = JudgeAirWarStatus(friendAntiAirValue, enemyAntiAirValue);
 						++awsCount[si][ci][(int)airWarStatus];
@@ -159,7 +167,7 @@ namespace AWSK.Models
 					}
 				}
 				// 最終制空値を読み取る
-				int aav = CalcAntiAirValue(enemy, enemySlotData);
+				int aav = CalcAntiAirValue(enemy, enemySlotData, true);
 				if (finalAAV.ContainsKey(aav)) {
 					++finalAAV[aav];
 				} else {

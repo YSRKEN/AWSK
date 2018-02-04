@@ -261,7 +261,7 @@ namespace AWSK.ViewModels
 		// 敵艦隊の制空値を返す
 		private int GetEnemyUnitAAV() {
 			var enemyData = GetEnemyData();
-			return Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData());
+			return Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData(), true);
 		}
 		// 基地航空隊の制空値変更処理
 		private void ReCalcBasedAirUnit1AAV() {
