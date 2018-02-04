@@ -120,6 +120,17 @@ namespace AWSK.Stores
 		private static async Task<bool> DownloadWeaponDataAsync() {
 			Console.WriteLine("装備のデータをダウンロード中……");
 			try {
+				// 戦闘行動半径だけ事前に読み取っておく
+				var BasedAirUnitRange = new Dictionary<string, int>();
+				using (var sr = new System.IO.StreamReader(@"WeaponData.csv")) {
+					while (!sr.EndOfStream) {
+						string line = sr.ReadLine();
+						var values = line.Split(',');
+						if (values[0] == "名称")
+							continue;
+						BasedAirUnitRange[values[0]] = int.Parse(values[1]);
+					}
+				}
 				// 装備データをダウンロード・パースする
 				var commandList = new List<string>();
 				using (var client = new HttpClient()) {
@@ -141,11 +152,16 @@ namespace AWSK.Stores
 						if (type[0] == 22 && type[2] == 48) {
 							intercept = (int)weapon.evasion;
 						}
+						// 戦闘行動半径の処理
+						int baurange = 0;
+						if (BasedAirUnitRange.ContainsKey(name)) {
+							baurange = BasedAirUnitRange[name];
+						}
 						// 艦娘用の装備か？
 						bool weaponFlg = (id <= 500);
 						// コマンドを記録する
 						string sql = "INSERT INTO Weapon VALUES(";
-						sql += $"{id},'{name}',{antiair},{intercept},";
+						sql += $"{id},'{name}',{antiair},{intercept},{baurange},";
 						sql += $"{type[0]},{type[1]},{type[2]},{type[3]},{type[4]},";
 						sql += $"{(weaponFlg ? 1 : 0)})";
 						commandList.Add(sql);
@@ -174,7 +190,7 @@ namespace AWSK.Stores
 
 		// データベースの初期化処理
 		public static async Task<DataStoreStatus> Initialize() {
-			// テーブルが存在しない場合、テーブルを作成し、ついでにデータをダウンロードする
+			// テーブルが存在しない場合、テーブルを作成する
 			bool createTableFlg = false;
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
@@ -228,6 +244,7 @@ namespace AWSK.Stores
 							[name] TEXT NOT NULL DEFAULT '',
 							[antiair] INTEGER NOT NULL DEFAULT 0,
 							[intercept] INTEGER NOT NULL DEFAULT 0,
+							[baurange] INTEGER NOT NULL DEFAULT 0,
 							[type1] INTEGER NOT NULL DEFAULT 0,
 							[type2] INTEGER NOT NULL DEFAULT 0,
 							[type3] INTEGER NOT NULL DEFAULT 0,
@@ -242,6 +259,7 @@ namespace AWSK.Stores
 					}
 				}
 			}
+			// テーブルを作成したならば、データをダウンロードする
 			if (createTableFlg) {
 				if (await DownloadDataAsync()) {
 					return DataStoreStatus.Success;
@@ -321,30 +339,32 @@ namespace AWSK.Stores
 				Intercept = 0,
 				Mas = 0,
 				Rf = 0,
+				BAURange = 0,
 				WeaponFlg = true,
 			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, antiair, intercept, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
+					cmd.CommandText = $"SELECT name, antiair, intercept, baurange, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = id,
 								Name = reader.GetString(0),
 								Type = new List<int> {
-									reader.GetInt32(4),
 									reader.GetInt32(5),
 									reader.GetInt32(6),
 									reader.GetInt32(7),
-									reader.GetInt32(8)
+									reader.GetInt32(8),
+									reader.GetInt32(9)
 								},
 								AntiAir = reader.GetInt32(1),
 								Intercept = reader.GetInt32(2),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
+								BAURange = reader.GetInt32(3),
+								WeaponFlg = (reader.GetInt32(4) == 1 ? true : false)
 							};
 						}
 					}
@@ -362,30 +382,32 @@ namespace AWSK.Stores
 				Intercept = 0,
 				Mas = 0,
 				Rf = 0,
+				BAURange = 0,
 				WeaponFlg = true,
 			};
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT id, antiair, intercept, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
+					cmd.CommandText = $"SELECT id, antiair, intercept, weapon_flg, baurange, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							wd = new WeaponData {
 								Id = reader.GetInt32(0),
 								Name = name,
 								Type = new List<int> {
-									reader.GetInt32(4),
 									reader.GetInt32(5),
 									reader.GetInt32(6),
 									reader.GetInt32(7),
-									reader.GetInt32(8)
+									reader.GetInt32(8),
+									reader.GetInt32(9)
 								},
 								AntiAir = reader.GetInt32(1),
 								Intercept = reader.GetInt32(2),
 								Mas = 0,
 								Rf = 0,
-								WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
+								BAURange = reader.GetInt32(3),
+								WeaponFlg = (reader.GetInt32(4) == 1 ? true : false)
 							};
 						}
 					}
@@ -653,6 +675,7 @@ namespace AWSK.Stores
 		public int Intercept;   //迎撃
 		public int Mas;         //艦載機熟練度
 		public int Rf;          //装備改修度
+		public int BAURange;    //戦闘行動半径
 		public bool WeaponFlg;
 		public int AntiAirBonus {   // 艦載機熟練度
 			get {

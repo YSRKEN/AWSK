@@ -1,4 +1,5 @@
-﻿using Prism;
+﻿using AWSK.Stores;
+using Prism;
 using System.Windows;
 
 namespace AWSK {
