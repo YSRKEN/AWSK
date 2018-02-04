@@ -245,6 +245,15 @@ namespace AWSK.ViewModels
 			}
 			return Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[index]], bauData.GetSlotData()[bauIndex[index]]);
 		}
+		// 基地航空隊の指定されたインデックスにおける戦闘行動半径を返す
+		private int GetBasedAirUnitRange(int index) {
+			var bauData = GetBasedAirUnitData();
+			var bauIndex = GetBasedAirUnitIndex();
+			if (bauIndex[index] < 0) {
+				return 0;
+			}
+			return Simulator.CalcBAURange(bauData.Weapon[bauIndex[index]]);
+		}
 		// 敵艦隊の制空値を返す
 		private int GetEnemyUnitAAV() {
 			var enemyData = GetEnemyData();
@@ -254,17 +263,20 @@ namespace AWSK.ViewModels
 		private void ReCalcBasedAirUnit1AAV() {
 			int aav1 = GetBasedAirUnitAAV(0);
 			int aav2 = GetEnemyUnitAAV();
-			BasedAirUnit1AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
+			int range = GetBasedAirUnitRange(0);
+			BasedAirUnit1AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
 		}
 		private void ReCalcBasedAirUnit2AAV() {
 			int aav1 = GetBasedAirUnitAAV(1);
 			int aav2 = GetEnemyUnitAAV();
-			BasedAirUnit2AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
+			int range = GetBasedAirUnitRange(1);
+			BasedAirUnit2AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
 		}
 		private void ReCalcBasedAirUnit3AAV() {
 			int aav1 = GetBasedAirUnitAAV(2);
 			int aav2 = GetEnemyUnitAAV();
-			BasedAirUnit3AAV.Value = $"制空値：{aav1}　{Simulator.JudgeAirWarStatusStr(aav1, aav2)}";
+			int range = GetBasedAirUnitRange(2);
+			BasedAirUnit3AAV.Value = $"制空値：{aav1}){Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
 		}
 		// 敵艦隊の制空値変更処理
 		private void ReCalcEnemyUnitAAV() {

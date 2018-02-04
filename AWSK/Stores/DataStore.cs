@@ -406,8 +406,8 @@ namespace AWSK.Stores
 								Intercept = reader.GetInt32(2),
 								Mas = 0,
 								Rf = 0,
-								BAURange = reader.GetInt32(3),
-								WeaponFlg = (reader.GetInt32(4) == 1 ? true : false)
+								BAURange = reader.GetInt32(4),
+								WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
 							};
 						}
 					}

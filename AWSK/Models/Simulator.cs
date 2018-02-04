@@ -50,15 +50,15 @@ namespace AWSK.Models
 		public static string JudgeAirWarStatusStr(int friend, int enemy) {
 			switch(JudgeAirWarStatus(friend, enemy)) {
 			case AirWarStatus.Best:
-				return "制空権確保";
+				return "確保";
 			case AirWarStatus.Good:
-				return "航空優勢";
+				return "優勢";
 			case AirWarStatus.Even:
-				return "制空均衡";
+				return "均衡";
 			case AirWarStatus.Bad:
-				return "航空劣勢";
+				return "劣勢";
 			case AirWarStatus.Worst:
-				return "制空権喪失";
+				return "喪失";
 			default:
 				return "";
 			}
@@ -90,6 +90,30 @@ namespace AWSK.Models
 				}
 			}
 			return sum;
+		}
+		// 戦闘行動半径を計算する
+		public static int CalcBAURange(List<WeaponData> weaponList) {
+			// 全ての装備における戦闘行動半径が0なら0を返す
+			if (weaponList.Where(w => w.BAURange != 0).Count() == 0)
+				return 0;
+			// 航空隊の最低戦闘行動半径を算出する
+			int minBAURange = weaponList.Min(w => w.BAURange);
+			// 航空隊に偵察機が含まれるなら延長後の半径を返す
+			// 含まれないならそのままの延長前の半径を返す
+			var list = weaponList.Where(w =>
+				((w.Type[0] == 5 && w.Type[1] == 7)
+				|| w.Type[0] == 17)
+			);
+			if (list.Count() > 0) {
+				int maxBAURange2 = list.Max(w => w.BAURange);
+				if (maxBAURange2 <= minBAURange)
+					return minBAURange;
+				double addRange = Math.Sqrt(maxBAURange2 - minBAURange);
+				int newBAURange = Math.Min((int)Math.Round(minBAURange + addRange), minBAURange + 3);
+				return newBAURange;
+			} else {
+				return minBAURange;
+			}
 		}
 		// 航空戦の基地航空隊におけるシミュレーションを行う
 		public static void BasedAirUnitSimulation(
