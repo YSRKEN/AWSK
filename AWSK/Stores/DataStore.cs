@@ -189,7 +189,7 @@ namespace AWSK.Stores
 		}
 
 		// データベースの初期化処理
-		public static async Task<DataStoreStatus> Initialize() {
+		public static async Task<DataStoreStatus> Initialize(bool forceUpdateFlg = false) {
 			// テーブルが存在しない場合、テーブルを作成する
 			bool createTableFlg = false;
 			using (var con = new SQLiteConnection(connectionString)) {
@@ -260,7 +260,7 @@ namespace AWSK.Stores
 				}
 			}
 			// テーブルを作成したならば、データをダウンロードする
-			if (createTableFlg) {
+			if (createTableFlg || forceUpdateFlg) {
 				if (await DownloadDataAsync()) {
 					return DataStoreStatus.Success;
 				} else {

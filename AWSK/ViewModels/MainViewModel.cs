@@ -94,6 +94,7 @@ namespace AWSK.ViewModels
 		#region コマンド
 		// シミュレーションを実行
 		public ReactiveCommand RunSimulationCommand { get; }
+		public ReactiveCommand UpdateDatabaseCommand { get; } = new ReactiveCommand();
 		#endregion
 
 		// その他初期化用コード
@@ -318,13 +319,22 @@ namespace AWSK.ViewModels
 				view.Show();
 			}
 		}
+		// データベースを更新する
+		public async void UpdateDatabase() {
+			// データベースの初期化
+			var status = await DataStore.Initialize(true);
+			switch (status) {
+			case DataStoreStatus.Success:
+				MessageBox.Show("ダウンロードに成功しました。", "AWSK");
+				break;
+			case DataStoreStatus.Failed:
+				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
+				break;
+			}
+		}
 
 		// コンストラクタ
 		public MainViewModel() {
-			/*TODO:
-				・取得データの不備を修正
-				・戦闘行動半径の計算機能を追加
-			*/
 			// その他初期化
 			Initialize();
 			// プロパティ・コマンドを設定
@@ -416,6 +426,7 @@ namespace AWSK.ViewModels
 			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit2Flg, BasedAirUnit3Flg }
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
+			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
 			// デバッグ用に編成を予めセットしておく
 			// 参考：http://5-4.blog.jp/archives/1063413608.html
 			BasedAirUnit2Mode.Value = 1;
