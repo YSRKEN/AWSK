@@ -246,22 +246,58 @@
 							</Grid.RowDefinitions>
 							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex1.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex2.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex3.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex4.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex5.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}"/>
+								ItemsSource="{Binding EnemyList}">
+								<ComboBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+									</ContextMenu>
+								</ComboBox.ContextMenu>
+							</ComboBox>
 							<TextBlock Grid.Row="6" Height="24" Margin="5,5,5,5" HorizontalAlignment="Center" FontWeight="Bold"
 								Text="{Binding EnemyUnitAAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 						</Grid>

@@ -94,7 +94,10 @@ namespace AWSK.ViewModels
 		#region コマンド
 		// シミュレーションを実行
 		public ReactiveCommand RunSimulationCommand { get; }
+		// データベースを更新
 		public ReactiveCommand UpdateDatabaseCommand { get; } = new ReactiveCommand();
+		// 右クリックから敵編成を表示
+		public ReactiveCommand ShowEnemyUnitCommand { get; } = new ReactiveCommand();
 		#endregion
 
 		// その他初期化用コード
@@ -427,6 +430,9 @@ namespace AWSK.ViewModels
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
 			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
+			ShowEnemyUnitCommand.Subscribe(_ => {
+				MessageBox.Show("敵編成：\n" + GetEnemyData().ToString(), "AWSK");
+			});
 			// デバッグ用に編成を予めセットしておく
 			// 参考：http://5-4.blog.jp/archives/1063413608.html
 			/*BasedAirUnit2Mode.Value = 1;
