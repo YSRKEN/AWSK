@@ -145,15 +145,19 @@ namespace AWSK.Stores
 		private static async Task<bool> DownloadWeaponDataAsync() {
 			Console.WriteLine("装備のデータをダウンロード中……");
 			try {
-				// 戦闘行動半径だけ事前に読み取っておく
+				// 戦闘行動半径データをダウンロードして読み込む
 				var BasedAirUnitRange = new Dictionary<string, int>();
-				using (var sr = new System.IO.StreamReader(@"WeaponData.csv")) {
-					while (!sr.EndOfStream) {
-						string line = sr.ReadLine();
-						var values = line.Split(',');
-						if (values[0] == "名称")
-							continue;
-						BasedAirUnitRange[values[0]] = int.Parse(values[1]);
+				using (var client = new HttpClient()) {
+					using(var stream = await client.GetStreamAsync("https://raw.githubusercontent.com/YSRKEN/AWSK/master/AWSK/WeaponData.csv")) {
+						using (var sr = new System.IO.StreamReader(stream)) {
+							while (!sr.EndOfStream) {
+								string line = sr.ReadLine();
+								var values = line.Split(',');
+								if (values[0] == "名称")
+									continue;
+								BasedAirUnitRange[values[0]] = int.Parse(values[1]);
+							}
+						}
 					}
 				}
 				// 装備データをダウンロード・パースする
