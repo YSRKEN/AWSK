@@ -635,6 +635,42 @@ namespace AWSK.Stores
 			}
 			return slotData;
 		}
+		// 敵艦隊用に情報をJSONで書き出す
+		public string GetJsonData() {
+			if (Kammusu.Count == 0)
+				return "{}";
+			string output = "{";
+			for (int i = 0; i < Kammusu.Count; ++i) {
+				if (i != 0)
+					output += ",";
+				output += $"\"fleet{i + 1}\":[";
+				for (int j = 0; j < Kammusu[i].Count; ++j) {
+					if (j != 0)
+						output += ",";
+					output += $"{Kammusu[i][j].Id}";
+				}
+				output += "]";
+			}
+			output += "}";
+			return output;
+		}
+		// コンストラクタ
+		public FleetData() {}
+		public FleetData(string jsonString, bool setWeaponFlg = false) {
+			// JSONをパース
+			var obj = DynamicJson.Parse(jsonString);
+			// パース結果を翻訳する
+			for (int fi = 1; fi <= 4; ++fi) {
+				// 
+				if (obj.IsDefined($"fleet{fi}")) {
+					var list = new List<KammusuData>();
+					foreach (int kId in obj[$"fleet{fi}"]) {
+						list.Add(DataStore.KammusuDataById(kId, setWeaponFlg));
+					}
+					Kammusu.Add(list);
+				}
+			}
+		}
 	}
 	// 基地航空隊データ
 	class BasedAirUnitData

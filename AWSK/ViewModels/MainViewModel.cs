@@ -98,6 +98,10 @@ namespace AWSK.ViewModels
 		public ReactiveCommand UpdateDatabaseCommand { get; } = new ReactiveCommand();
 		// 右クリックから敵編成を表示
 		public ReactiveCommand ShowEnemyUnitCommand { get; } = new ReactiveCommand();
+		// 右クリックから敵編成を読み込み
+		public ReactiveCommand LoadEnemyUnitCommand { get; } = new ReactiveCommand();
+		// 右クリックから敵編成を保存
+		public ReactiveCommand SaveEnemyUnitCommand { get; } = new ReactiveCommand();
 		#endregion
 
 		// その他初期化用コード
@@ -433,17 +437,81 @@ namespace AWSK.ViewModels
 			ShowEnemyUnitCommand.Subscribe(_ => {
 				MessageBox.Show("敵編成：\n" + GetEnemyData().ToString(), "AWSK");
 			});
-			// デバッグ用に編成を予めセットしておく
-			// 参考：http://5-4.blog.jp/archives/1063413608.html
-			/*BasedAirUnit2Mode.Value = 1;
-			BasedAirUnitIndex21.Value = BAUIndex("烈風改");
-			BasedAirUnitIndex22.Value = BAUIndex("一式陸攻(野中隊)");
-			BasedAirUnitIndex23.Value = BAUIndex("一式陸攻 二二型甲");
-			BasedAirUnitIndex24.Value = BAUIndex("一式陸攻 二二型甲");
-			EnemyUnitIndex1.Value = EUIndex("空母ヲ級改flagship-4");
-			EnemyUnitIndex2.Value = EUIndex("戦艦タ級flagship");
-			EnemyUnitIndex3.Value = EUIndex("重巡ネ級elite");
-			EnemyUnitIndex4.Value = EUIndex("軽巡ツ級elite");*/
+			LoadEnemyUnitCommand.Subscribe(_ => {
+				var ofd = new Microsoft.Win32.OpenFileDialog(){
+					FileName = "enemy_data.enemy",
+					Filter = "敵艦隊情報(*.enemy)|*.enemy|すべてのファイル(*.*)|*.*",
+					Title = "読み込むのファイルを選択"
+				};
+				if ((bool)ofd.ShowDialog()) {
+					try {
+						// ファイルを読み込み
+						using (var sr = new System.IO.StreamReader(ofd.FileName)) {
+							// テキストとして読み込んでパース
+							string output = sr.ReadToEnd();
+							var enemyData = new FleetData(output);
+							// 敵艦隊の情報を初期化
+							EnemyUnitIndex1.Value = 0;
+							EnemyUnitIndex2.Value = 0;
+							EnemyUnitIndex3.Value = 0;
+							EnemyUnitIndex4.Value = 0;
+							EnemyUnitIndex5.Value = 0;
+							EnemyUnitIndex6.Value = 0;
+							// IDとリストの表示位置との対応表を入手
+							var enemyNameList = DataStore.EnemyNameList().ToList().Select(pair => pair.Key).ToList();
+							// 敵艦隊の情報を書き込む
+							if(enemyData.Kammusu.Count > 0) {
+								int i = 0;
+								foreach(var kammusu in enemyData.Kammusu[0]) {
+									int index = enemyNameList.IndexOf(kammusu.Id);
+									switch (i) {
+									case 0:
+										EnemyUnitIndex1.Value = index;
+										break;
+									case 1:
+										EnemyUnitIndex2.Value = index;
+										break;
+									case 2:
+										EnemyUnitIndex3.Value = index;
+										break;
+									case 3:
+										EnemyUnitIndex4.Value = index;
+										break;
+									case 4:
+										EnemyUnitIndex5.Value = index;
+										break;
+									case 5:
+										EnemyUnitIndex6.Value = index;
+										break;
+									}
+									++i;
+								}
+							}
+						}
+					} catch (Exception e) {
+						Console.WriteLine(e.ToString());
+						MessageBox.Show("ファイルを開けませんでした", "AWSK");
+					}
+				}
+			});
+			SaveEnemyUnitCommand.Subscribe(_ => {
+				var sfd = new Microsoft.Win32.SaveFileDialog(){
+					FileName = "enemy_data.enemy",
+					Filter = "敵艦隊情報(*.enemy)|*.enemy|すべてのファイル(*.*)|*.*",
+					Title = "保存先のファイルを選択"
+				};
+				if ((bool)sfd.ShowDialog()) {
+					try {
+						string output = GetEnemyData().GetJsonData();
+						using (var sw = new System.IO.StreamWriter(sfd.FileName)) {
+							sw.Write(output);
+						}
+					}catch(Exception e) {
+						Console.WriteLine(e.ToString());
+						MessageBox.Show("ファイルに保存できませんでした", "AWSK");
+					}
+				}
+			});
 		}
 	}
 }

@@ -250,6 +250,8 @@
 								<ComboBox.ContextMenu>
 									<ContextMenu>
 										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+										<MenuItem Header="編成を読込" Command="{Binding LoadEnemyUnitCommand}" />
+										<MenuItem Header="編成を保存" Command="{Binding SaveEnemyUnitCommand}" />
 									</ContextMenu>
 								</ComboBox.ContextMenu>
 							</ComboBox>
@@ -333,7 +335,7 @@
 					<ColumnDefinition/>
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
-					<RowDefinition/>
+					<RowDefinition Height="35"/>
 					<RowDefinition/>
 				</Grid.RowDefinitions>
 				<TextBlock Grid.Column="0" Grid.Row="0" Text="試行回数" Margin="5,5,5,5" VerticalAlignment="Center" FontSize="14" HorizontalAlignment="Center"/>
