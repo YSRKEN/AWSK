@@ -41,3 +41,14 @@ Air War Simulator for Kantai Collection
  - データベースの読み書きに使用
 - [OxyPlot.Wpf](https://www.nuget.org/packages/OxyPlot.Wpf/)
  - グラフ表示に使用
+
+## 更新履歴
+
+### Ver.1.1.0
+- 局地戦闘機などの制空値が反映されていない不具合を修正
+- 艦載機の改修効果を間違えていたので修正
+- ウィンドウを最小化できるようにした
+- ちょっとした表示ミスを修正
+
+### Ver.1.0.0
+- 初公開
