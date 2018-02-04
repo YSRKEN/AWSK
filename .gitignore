@@ -286,3 +286,8 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+html/
+AWSK/GameData.db
+AWSK/SQLite.Interop.dll
+weapon_list.csv
+kammusu_list.tsv
