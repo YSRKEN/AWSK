@@ -61,18 +61,36 @@
 					<ComboBoxItem Content="0"/>
 					<ComboBoxItem Content="1"/>
 					<ComboBoxItem Content="2"/>
+					<ComboBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
+							<MenuItem Header="編成を保存" Command="{Binding SaveBasedAirUnitCommand}" />
+						</ContextMenu>
+					</ComboBox.ContextMenu>
 				</ComboBox>
 				<ComboBox Grid.Column="5" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnit2Mode.Value, UpdateSourceTrigger=PropertyChanged}">
 					<ComboBoxItem Content="0"/>
 					<ComboBoxItem Content="1"/>
 					<ComboBoxItem Content="2"/>
+					<ComboBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
+							<MenuItem Header="編成を保存" Command="{Binding SaveBasedAirUnitCommand}" />
+						</ContextMenu>
+					</ComboBox.ContextMenu>
 				</ComboBox>
 				<ComboBox Grid.Column="9" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnit3Mode.Value, UpdateSourceTrigger=PropertyChanged}">
 					<ComboBoxItem Content="0"/>
 					<ComboBoxItem Content="1"/>
 					<ComboBoxItem Content="2"/>
+					<ComboBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
+							<MenuItem Header="編成を保存" Command="{Binding SaveBasedAirUnitCommand}" />
+						</ContextMenu>
+					</ComboBox.ContextMenu>
 				</ComboBox>
 				<!-- 基地航空隊の装備設定 -->
 				<ComboBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Width="110" Height="24" Margin="2,5,2,5"
@@ -257,49 +275,19 @@
 							</ComboBox>
 							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex2.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex3.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex4.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex5.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyList}"/>
 							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex6.Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyList}"/>
 							<TextBlock Grid.Row="6" Height="24" Margin="5,5,5,5" HorizontalAlignment="Center" FontWeight="Bold"
 								Text="{Binding EnemyUnitAAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 						</Grid>
