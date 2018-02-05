@@ -53,14 +53,6 @@ namespace AWSK.Stores
 					rawData = rawData.Replace("var gShips = ", "");
 					// JSONとしてゆるーくパース
 					var obj = DynamicJson.Parse(rawData);
-					// 先に艦名だけ一覧を取得しておく
-					var nameList = new Dictionary<string, int>();
-					foreach (var kammusu in obj) {
-						if (!nameList.ContainsKey(kammusu.name)) {
-							nameList[kammusu.name] = 0;
-						}
-						++nameList[kammusu.name];
-					}
 					// パース結果をゆるーく取得
 					foreach (var kammusu in obj) {
 						// IDや艦名などを取得
@@ -77,22 +69,14 @@ namespace AWSK.Stores
 						if (id > 1900)
 							continue;
 						// 不完全なデータは無視する(暫定対応)
-						if(nameList[kammusu.name] >= 2) {
-							bool continueFlg = true;
-							foreach (var size in slot) {
-								if(size != 0) {
-									continueFlg = false;
-									break;
-								}
-							}
+						if(kammusu.next == "" && !kammusuFlg) {
+							int count = 0;
 							foreach (var wId in firstWeapon) {
-								if (wId != 0) {
-									continueFlg = false;
-									break;
-								}
+								++count;
 							}
-							if (continueFlg && !kammusuFlg)
+							if(count == 0) {
 								continue;
+							}
 						}
 						// コマンドを記録する
 						string sql = "INSERT INTO Kammusu VALUES(";
