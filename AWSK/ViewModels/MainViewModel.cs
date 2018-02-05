@@ -372,18 +372,6 @@ namespace AWSK.ViewModels
 									BasedAirUnitRf34.Value = rf;
 									break;
 								}
-								/*// 対象とするプロパティ名を生成
-								string widx = $"BasedAirUnitIndex{ui + 1}{wi + 1}";
-								string wmas = $"BasedAirUnitMas{ui + 1}{wi + 1}";
-								string wrf = $"BasedAirUnitRf{ui + 1}{wi + 1}";
-								// プロパティ情報の取得
-								var widxProperty = typeof(MainViewModel).GetProperty(widx).PropertyType.GetProperty("Value");
-								var wmasProperty = typeof(MainViewModel).GetProperty(wmas).PropertyType.GetProperty("Value");
-								var wrfProperty = typeof(MainViewModel).GetProperty(wrf).PropertyType.GetProperty("Value");
-								// インスタンスに値を設定
-								widxProperty.SetValue(this, index);
-								wmasProperty.SetValue(this, mas);
-								wrfProperty.SetValue(this, rf);*/
 							}
 						}
 					}
