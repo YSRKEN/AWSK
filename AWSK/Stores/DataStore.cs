@@ -638,20 +638,21 @@ namespace AWSK.Stores
 		// 敵艦隊用に情報をJSONで書き出す
 		public string GetJsonData() {
 			if (Kammusu.Count == 0)
-				return "{}";
-			string output = "{";
+				return "[]";
+			string output = "[";
 			for (int i = 0; i < Kammusu.Count; ++i) {
 				if (i != 0)
 					output += ",";
-				output += $"\"fleet{i + 1}\":[";
+				output += "{";
+				output += $"\"kammusu\":[";
 				for (int j = 0; j < Kammusu[i].Count; ++j) {
 					if (j != 0)
 						output += ",";
 					output += $"{Kammusu[i][j].Id}";
 				}
-				output += "]";
+				output += "]}";
 			}
-			output += "}";
+			output += "]";
 			return output;
 		}
 		// コンストラクタ
@@ -660,11 +661,10 @@ namespace AWSK.Stores
 			// JSONをパース
 			var obj = DynamicJson.Parse(jsonString);
 			// パース結果を翻訳する
-			for (int fi = 1; fi <= 4; ++fi) {
-				// 
-				if (obj.IsDefined($"fleet{fi}")) {
+			foreach(var kammusuList in obj) {
+				if (kammusuList.IsDefined("kammusu")) {
 					var list = new List<KammusuData>();
-					foreach (int kId in obj[$"fleet{fi}"]) {
+					foreach (int kId in kammusuList.kammusu) {
 						list.Add(DataStore.KammusuDataById(kId, setWeaponFlg));
 					}
 					Kammusu.Add(list);
