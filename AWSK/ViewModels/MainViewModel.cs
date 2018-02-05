@@ -29,12 +29,7 @@ namespace AWSK.ViewModels
 		// 基地航空隊の装備改修度
 		public List<List<ReactiveProperty<int>>> BasedAirUnitRf { get; } = new List<List<ReactiveProperty<int>>>();
 		// 敵艦隊の艦の選択番号
-		public ReactiveProperty<int> EnemyUnitIndex1 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> EnemyUnitIndex2 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> EnemyUnitIndex3 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> EnemyUnitIndex4 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> EnemyUnitIndex5 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> EnemyUnitIndex6 { get; } = new ReactiveProperty<int>(0);
+		public List<ReactiveProperty<int>> EnemyUnitIndex { get; } = new List<ReactiveProperty<int>>();
 		// 基地航空隊・敵艦隊の制空値
 		public List<ReactiveProperty<string>> BasedAirUnitAAV { get; } = new List<ReactiveProperty<string>>();
 		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
@@ -228,13 +223,9 @@ namespace AWSK.ViewModels
 			var fleetData = new FleetData();
 			// 艦隊データを格納するインスタンスを作成
 			var kammusuList = new List<KammusuData>();
-			// 準備
-			var enemyUnitIndex = new[] {
-				EnemyUnitIndex1.Value, EnemyUnitIndex2.Value, EnemyUnitIndex3.Value,
-				EnemyUnitIndex4.Value, EnemyUnitIndex5.Value, EnemyUnitIndex6.Value,
-				};
 			// 作成
-			foreach (int enemyIndex in enemyUnitIndex) {
+			for(int ki = 0; ki < 6; ++ki) {
+				int enemyIndex = EnemyUnitIndex[ki].Value;
 				// 「なし」が選択されている敵艦は無視する
 				if (enemyIndex == 0)
 					continue;
@@ -285,40 +276,17 @@ namespace AWSK.ViewModels
 						string output = sr.ReadToEnd();
 						var enemyData = new FleetData(output);
 						// 敵艦隊の情報を初期化
-						EnemyUnitIndex1.Value = 0;
-						EnemyUnitIndex2.Value = 0;
-						EnemyUnitIndex3.Value = 0;
-						EnemyUnitIndex4.Value = 0;
-						EnemyUnitIndex5.Value = 0;
-						EnemyUnitIndex6.Value = 0;
+						for (int ki = 0; ki < 6; ++ki){
+							EnemyUnitIndex[ki].Value = 0;
+						}
 						// IDとリストの表示位置との対応表を入手
 						var enemyNameList = DataStore.EnemyNameList().ToList().Select(pair => pair.Key).ToList();
 						// 敵艦隊の情報を書き込む
 						if (enemyData.Kammusu.Count > 0) {
-							int i = 0;
-							foreach (var kammusu in enemyData.Kammusu[0]) {
+							for(int ki = 0; ki < enemyData.Kammusu[0].Count; ++ki) {
+								var kammusu = enemyData.Kammusu[0][ki];
 								int index = enemyNameList.IndexOf(kammusu.Id) + 1;
-								switch (i) {
-								case 0:
-									EnemyUnitIndex1.Value = index;
-									break;
-								case 1:
-									EnemyUnitIndex2.Value = index;
-									break;
-								case 2:
-									EnemyUnitIndex3.Value = index;
-									break;
-								case 3:
-									EnemyUnitIndex4.Value = index;
-									break;
-								case 4:
-									EnemyUnitIndex5.Value = index;
-									break;
-								case 5:
-									EnemyUnitIndex6.Value = index;
-									break;
-								}
-								++i;
+								EnemyUnitIndex[ki].Value = index;
 							}
 						}
 					}
@@ -416,16 +384,14 @@ namespace AWSK.ViewModels
 			// その他初期化
 			Initialize();
 			// ReactivePropertyを設定
+			//BasedAirUnitModeとBasedAirUnitFlgとBasedAirUnitAAV
+			//(BasedAirUnitFlgはBasedAirUnitModeから作られる)
 			for (int ui = 0; ui < 3; ++ui) {
-				// BasedAirUnitModeとBasedAirUnitFlg
-				// (BasedAirUnitFlgはBasedAirUnitModeから作られる)
-				{
-					var rp = new ReactiveProperty<int>(0);
-					var rp2 = rp.Select(x => x != 0).ToReadOnlyReactiveProperty();
-					BasedAirUnitMode.Add(rp);
-					BasedAirUnitFlg.Add(rp2);
-				}
-				// を設定
+				var rp = new ReactiveProperty<int>(0);
+				var rp2 = rp.Select(x => x != 0).ToReadOnlyReactiveProperty();
+				BasedAirUnitMode.Add(rp);
+				BasedAirUnitFlg.Add(rp2);
+				//
 				BasedAirUnitAAV.Add(new ReactiveProperty<string>(""));
 			}
 			for (int ui = 0; ui < 3; ++ui) {
@@ -434,9 +400,19 @@ namespace AWSK.ViewModels
 				var rpList2 = new List<ReactiveProperty<int>>();
 				var rpList3 = new List<ReactiveProperty<int>>();
 				for (int wi = 0; wi < 4; ++wi) {
-					var rp1 = new ReactiveProperty<int>(0);
-					var rp2 = new ReactiveProperty<int>(7);
-					var rp3 = new ReactiveProperty<int>(0);
+					rpList1.Add(new ReactiveProperty<int>(0));
+					rpList2.Add(new ReactiveProperty<int>(7));
+					rpList3.Add(new ReactiveProperty<int>(0));
+				}
+				BasedAirUnitIndex.Add(rpList1);
+				BasedAirUnitMas.Add(rpList2);
+				BasedAirUnitRf.Add(rpList3);
+			}
+			for (int ki = 0; ki < 6; ++ki) {
+				EnemyUnitIndex.Add(new ReactiveProperty<int>(0));
+			}
+			for (int ui = 0; ui < 3; ++ui) {
+				for (int wi = 0; wi < 4; ++wi) {
 					// 変更時に制空値を自動計算する処理
 					/* このコードだと、実行時、コンボボックスを動かした際「uiになぜか3が代入されて」
 					 * エラーが出てしまう。ファッキュー！ファッキュー！
@@ -446,31 +422,28 @@ namespace AWSK.ViewModels
 					 */
 					switch (ui) {
 					case 0:
-						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
-						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
-						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
 						break;
 					case 1:
-						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
-						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
-						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
 						break;
 					case 2:
-						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
-						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
-						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
 						break;
 					}
-					rpList1.Add(rp1);
-					rpList2.Add(rp2);
-					rpList3.Add(rp3);
 				}
-				BasedAirUnitIndex.Add(rpList1);
-				BasedAirUnitMas.Add(rpList2);
-				BasedAirUnitRf.Add(rpList3);
+			}
+			for (int ki = 0; ki < 6; ++ki) {
+				EnemyUnitIndex[ki].Subscribe(_ => ReCalcEnemyUnitAAV());
 			}
 			#region 各種ReactiveCollection
-			{
+				{
 				var oc = new ObservableCollection<string>(new List<string> {
 					"--", "|", "||", "|||", "/", "//", "///", ">>"
 				});
@@ -508,14 +481,6 @@ namespace AWSK.ViewModels
 			}
 			#endregion
 			// コマンドを設定
-			#region 設定変更により制空値を自動計算する処理
-			EnemyUnitIndex1.Subscribe(_ => ReCalcEnemyUnitAAV());
-			EnemyUnitIndex2.Subscribe(_ => ReCalcEnemyUnitAAV());
-			EnemyUnitIndex3.Subscribe(_ => ReCalcEnemyUnitAAV());
-			EnemyUnitIndex4.Subscribe(_ => ReCalcEnemyUnitAAV());
-			EnemyUnitIndex5.Subscribe(_ => ReCalcEnemyUnitAAV());
-			EnemyUnitIndex6.Subscribe(_ => ReCalcEnemyUnitAAV());
-			#endregion
 			RunSimulationCommand = BasedAirUnitFlg
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
