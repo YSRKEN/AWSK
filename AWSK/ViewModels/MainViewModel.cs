@@ -19,13 +19,9 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊をどれほど送り込むか？
 		// 基地航空隊を飛ばしたか？
-		public ReactiveProperty<int> BasedAirUnit1Mode { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnit2Mode { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnit3Mode { get; } = new ReactiveProperty<int>(0);
+		public List<ReactiveProperty<int>> BasedAirUnitMode { get; } = new List<ReactiveProperty<int>>();
 		// 基地航空隊を飛ばしたか？
-		public ReadOnlyReactiveProperty<bool> BasedAirUnit1Flg { get; }
-		public ReadOnlyReactiveProperty<bool> BasedAirUnit2Flg { get; }
-		public ReadOnlyReactiveProperty<bool> BasedAirUnit3Flg { get; }
+		public List<ReadOnlyReactiveProperty<bool>> BasedAirUnitFlg { get; } = new List<ReadOnlyReactiveProperty<bool>>();
 		// 基地航空隊の装備の選択番号
 		public ReactiveProperty<int> BasedAirUnitIndex11 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> BasedAirUnitIndex12 { get; } = new ReactiveProperty<int>(0);
@@ -110,8 +106,6 @@ namespace AWSK.ViewModels
 		// 基地航空隊のデータを取得
 		private BasedAirUnitData GetBasedAirUnitData() {
 			// 準備
-			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
-			var basedAirUnitModeList = new[] { BasedAirUnit1Mode.Value, BasedAirUnit2Mode.Value, BasedAirUnit3Mode.Value };
 			var basedAirUnitIndex = new[] {
 					BasedAirUnitIndex11.Value, BasedAirUnitIndex12.Value, BasedAirUnitIndex13.Value, BasedAirUnitIndex14.Value,
 					BasedAirUnitIndex21.Value, BasedAirUnitIndex22.Value, BasedAirUnitIndex23.Value, BasedAirUnitIndex24.Value,
@@ -129,14 +123,14 @@ namespace AWSK.ViewModels
 				};
 			// 作成
 			var basedAirUnitData = new BasedAirUnitData();
-			for (int i = 0; i < basedAirUnitFlgList.Count(); ++i) {
+			for (int ui = 0; ui < 3; ++ui) {
 				// チェックを入れてない編成は無視する
-				if (!basedAirUnitFlgList[i])
+				if (!BasedAirUnitFlg[ui].Value)
 					continue;
 				//
 				var temp = new List<WeaponData>();
-				for (int j = 0; j < 4; ++j) {
-					int index = i * 4 + j;
+				for (int wi = 0; wi < 4; ++wi) {
+					int index = ui * 4 + wi;
 					// 「なし」が選択されている装備は無視する
 					if (basedAirUnitIndex[index] == 0)
 						continue;
@@ -150,7 +144,7 @@ namespace AWSK.ViewModels
 				}
 				if (temp.Count > 0) {
 					basedAirUnitData.Weapon.Add(temp);
-					basedAirUnitData.SallyCount.Add(basedAirUnitModeList[i]);
+					basedAirUnitData.SallyCount.Add(BasedAirUnitMode[ui].Value);
 				}
 			}
 			return basedAirUnitData;
@@ -170,19 +164,18 @@ namespace AWSK.ViewModels
 		// インデックス1が第3航空隊で、第2航空隊は有効になっていない
 		private List<int> GetBasedAirUnitIndex() {
 			var output = new List<int> { -1, -1, -1 };
-			var basedAirUnitFlgList = new[] { BasedAirUnit1Flg.Value, BasedAirUnit2Flg.Value, BasedAirUnit3Flg.Value };
 			var basedAirUnitIndex = new[] {
 				BasedAirUnitIndex11.Value, BasedAirUnitIndex12.Value, BasedAirUnitIndex13.Value, BasedAirUnitIndex14.Value,
 				BasedAirUnitIndex21.Value, BasedAirUnitIndex22.Value, BasedAirUnitIndex23.Value, BasedAirUnitIndex24.Value,
 				BasedAirUnitIndex31.Value, BasedAirUnitIndex32.Value, BasedAirUnitIndex33.Value, BasedAirUnitIndex34.Value,
 			};
 			int sum = 0;
-			for (int i = 0; i < basedAirUnitFlgList.Count(); ++i) {
-				if (!basedAirUnitFlgList[i])
+			for (int ui = 0; ui < 3; ++ui) {
+				if (!BasedAirUnitFlg[ui].Value)
 					continue;
 				bool enableFlg = false;
-				for (int j = 0; j < 4; ++j) {
-					int index = i * 4 + j;
+				for (int wi = 0; wi < 4; ++wi) {
+					int index = ui * 4 + wi;
 					// 「なし」が選択されている装備は無視する
 					if (basedAirUnitIndex[index] == 0)
 						continue;
@@ -190,7 +183,7 @@ namespace AWSK.ViewModels
 					break;
 				}
 				if (enableFlg) {
-					output[i] = sum;
+					output[ui] = sum;
 					++sum;
 				}
 			}
@@ -248,9 +241,9 @@ namespace AWSK.ViewModels
 						string output = sr.ReadToEnd();
 						var bauData = new BasedAirUnitData(output);
 						#region 基地航空隊の情報を初期化
-						BasedAirUnit1Mode.Value = 0;
-						BasedAirUnit2Mode.Value = 0;
-						BasedAirUnit3Mode.Value = 0;
+						for(int ui = 0; ui < 3; ++ui) {
+							BasedAirUnitMode[ui].Value = 0;
+						}
 						BasedAirUnitIndex11.Value = 0;
 						BasedAirUnitIndex12.Value = 0;
 						BasedAirUnitIndex13.Value = 0;
@@ -292,17 +285,7 @@ namespace AWSK.ViewModels
 						for (int ui = 0; ui < bauData.Weapon.Count; ++ui) {
 							// 出撃回数
 							int count = bauData.SallyCount[ui];
-							switch (ui) {
-							case 0:
-								BasedAirUnit1Mode.Value = count;
-								break;
-							case 1:
-								BasedAirUnit2Mode.Value = count;
-								break;
-							case 2:
-								BasedAirUnit3Mode.Value = count;
-								break;
-							}
+							BasedAirUnitMode[ui].Value = count;
 							// 装備情報
 							var weaponList = bauData.Weapon[ui];
 							for (int wi = 0; wi < weaponList.Count; ++wi) {
@@ -595,9 +578,13 @@ namespace AWSK.ViewModels
 			// その他初期化
 			Initialize();
 			// プロパティを設定
-			BasedAirUnit1Flg = BasedAirUnit1Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
-			BasedAirUnit2Flg = BasedAirUnit2Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
-			BasedAirUnit3Flg = BasedAirUnit3Mode.Select(x => x != 0).ToReadOnlyReactiveProperty();
+			//BasedAirUnitModeとBasedAirUnitFlg
+			for (int ui = 0; ui < 3; ++ui) {
+				var rp = new ReactiveProperty<int>(0);
+				var rp2 = rp.Select(x => x != 0).ToReadOnlyReactiveProperty();
+				BasedAirUnitMode.Add(rp);
+				BasedAirUnitFlg.Add(rp2);
+			}
 			#region 各種ReactiveCollection
 			{
 				var oc = new ObservableCollection<string>(new List<string> {
@@ -681,7 +668,7 @@ namespace AWSK.ViewModels
 			EnemyUnitIndex5.Subscribe(_ => ReCalcEnemyUnitAAV());
 			EnemyUnitIndex6.Subscribe(_ => ReCalcEnemyUnitAAV());
 			#endregion
-			RunSimulationCommand = new[] { BasedAirUnit1Flg, BasedAirUnit2Flg, BasedAirUnit3Flg }
+			RunSimulationCommand = BasedAirUnitFlg
 				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
 			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
