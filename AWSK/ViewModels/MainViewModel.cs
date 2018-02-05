@@ -25,31 +25,9 @@ namespace AWSK.ViewModels
 		// 基地航空隊の装備の選択番号
 		public List<List<ReactiveProperty<int>>> BasedAirUnitIndex { get; } = new List<List<ReactiveProperty<int>>>();
 		// 基地航空隊の艦載機熟練度
-		public ReactiveProperty<int> BasedAirUnitMas11 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas12 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas13 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas14 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas21 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas22 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas23 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas24 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas31 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas32 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas33 { get; } = new ReactiveProperty<int>(7);
-		public ReactiveProperty<int> BasedAirUnitMas34 { get; } = new ReactiveProperty<int>(7);
+		public List<List<ReactiveProperty<int>>> BasedAirUnitMas { get; } = new List<List<ReactiveProperty<int>>>();
 		// 基地航空隊の装備改修度
-		public ReactiveProperty<int> BasedAirUnitRf11 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf12 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf13 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf14 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf21 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf22 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf23 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf24 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf31 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf32 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf33 { get; } = new ReactiveProperty<int>(0);
-		public ReactiveProperty<int> BasedAirUnitRf34 { get; } = new ReactiveProperty<int>(0);
+		public List<List<ReactiveProperty<int>>> BasedAirUnitRf { get; } = new List<List<ReactiveProperty<int>>>();
 		// 敵艦隊の艦の選択番号
 		public ReactiveProperty<int> EnemyUnitIndex1 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex2 { get; } = new ReactiveProperty<int>(0);
@@ -94,17 +72,6 @@ namespace AWSK.ViewModels
 		#region メソッド(基地航空隊用)
 		// 基地航空隊のデータを取得
 		private BasedAirUnitData GetBasedAirUnitData() {
-			// 準備
-			var basedAirUnitMas = new[] {
-					BasedAirUnitMas11.Value, BasedAirUnitMas12.Value, BasedAirUnitMas13.Value, BasedAirUnitMas14.Value,
-					BasedAirUnitMas21.Value, BasedAirUnitMas22.Value, BasedAirUnitMas23.Value, BasedAirUnitMas24.Value,
-					BasedAirUnitMas31.Value, BasedAirUnitMas32.Value, BasedAirUnitMas33.Value, BasedAirUnitMas34.Value,
-				};
-			var basedAirUnitRf = new[] {
-					BasedAirUnitRf11.Value, BasedAirUnitRf12.Value, BasedAirUnitRf13.Value, BasedAirUnitRf14.Value,
-					BasedAirUnitRf21.Value, BasedAirUnitRf22.Value, BasedAirUnitRf23.Value, BasedAirUnitRf24.Value,
-					BasedAirUnitRf31.Value, BasedAirUnitRf32.Value, BasedAirUnitRf33.Value, BasedAirUnitRf34.Value,
-				};
 			// 作成
 			var basedAirUnitData = new BasedAirUnitData();
 			for (int ui = 0; ui < 3; ++ui) {
@@ -114,7 +81,6 @@ namespace AWSK.ViewModels
 				//
 				var temp = new List<WeaponData>();
 				for (int wi = 0; wi < 4; ++wi) {
-					int index = ui * 4 + wi;
 					// 「なし」が選択されている装備は無視する
 					if (BasedAirUnitIndex[ui][wi].Value == 0)
 						continue;
@@ -122,8 +88,8 @@ namespace AWSK.ViewModels
 					string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value];
 					// 装備名から装備情報を得る
 					var weapon = DataStore.WeaponDataByName(name);
-					weapon.Mas = basedAirUnitMas[index];
-					weapon.Rf = basedAirUnitRf[index];
+					weapon.Mas = BasedAirUnitMas[ui][wi].Value;
+					weapon.Rf = BasedAirUnitRf[ui][wi].Value;
 					temp.Add(weapon);
 				}
 				if (temp.Count > 0) {
@@ -224,32 +190,10 @@ namespace AWSK.ViewModels
 							BasedAirUnitMode[ui].Value = 0;
 							for(int wi = 0; wi < 4; ++wi) {
 								BasedAirUnitIndex[ui][wi].Value = 0;
+								BasedAirUnitMas[ui][wi].Value = 0;
+								BasedAirUnitRf[ui][wi].Value = 0;
 							}
 						}
-						BasedAirUnitMas11.Value = 0;
-						BasedAirUnitMas12.Value = 0;
-						BasedAirUnitMas13.Value = 0;
-						BasedAirUnitMas14.Value = 0;
-						BasedAirUnitMas21.Value = 0;
-						BasedAirUnitMas22.Value = 0;
-						BasedAirUnitMas23.Value = 0;
-						BasedAirUnitMas24.Value = 0;
-						BasedAirUnitMas31.Value = 0;
-						BasedAirUnitMas32.Value = 0;
-						BasedAirUnitMas33.Value = 0;
-						BasedAirUnitMas34.Value = 0;
-						BasedAirUnitRf11.Value = 0;
-						BasedAirUnitRf12.Value = 0;
-						BasedAirUnitRf13.Value = 0;
-						BasedAirUnitRf14.Value = 0;
-						BasedAirUnitRf21.Value = 0;
-						BasedAirUnitRf22.Value = 0;
-						BasedAirUnitRf23.Value = 0;
-						BasedAirUnitRf24.Value = 0;
-						BasedAirUnitRf31.Value = 0;
-						BasedAirUnitRf32.Value = 0;
-						BasedAirUnitRf33.Value = 0;
-						BasedAirUnitRf34.Value = 0;
 						#endregion
 						// 基地航空隊の情報を書き込む
 						for (int ui = 0; ui < bauData.Weapon.Count; ++ui) {
@@ -260,60 +204,9 @@ namespace AWSK.ViewModels
 							var weaponList = bauData.Weapon[ui];
 							for (int wi = 0; wi < weaponList.Count; ++wi) {
 								var weapon = weaponList[wi];
-								int index = BasedAirUnitList.IndexOf(weapon.Name);
-								int mas = weapon.Mas;
-								int rf = weapon.Rf;
-								BasedAirUnitIndex[ui][wi].Value = index;
-								switch ((ui + 1) * 10 + (wi + 1)) {
-								case 11:
-									BasedAirUnitMas11.Value = mas;
-									BasedAirUnitRf11.Value = rf;
-									break;
-								case 12:
-									BasedAirUnitMas12.Value = mas;
-									BasedAirUnitRf12.Value = rf;
-									break;
-								case 13:
-									BasedAirUnitMas13.Value = mas;
-									BasedAirUnitRf13.Value = rf;
-									break;
-								case 14:
-									BasedAirUnitMas14.Value = mas;
-									BasedAirUnitRf14.Value = rf;
-									break;
-								case 21:
-									BasedAirUnitMas21.Value = mas;
-									BasedAirUnitRf21.Value = rf;
-									break;
-								case 22:
-									BasedAirUnitMas22.Value = mas;
-									BasedAirUnitRf22.Value = rf;
-									break;
-								case 23:
-									BasedAirUnitMas23.Value = mas;
-									BasedAirUnitRf23.Value = rf;
-									break;
-								case 24:
-									BasedAirUnitMas24.Value = mas;
-									BasedAirUnitRf24.Value = rf;
-									break;
-								case 31:
-									BasedAirUnitMas31.Value = mas;
-									BasedAirUnitRf31.Value = rf;
-									break;
-								case 32:
-									BasedAirUnitMas32.Value = mas;
-									BasedAirUnitRf32.Value = rf;
-									break;
-								case 33:
-									BasedAirUnitMas33.Value = mas;
-									BasedAirUnitRf33.Value = rf;
-									break;
-								case 34:
-									BasedAirUnitMas34.Value = mas;
-									BasedAirUnitRf34.Value = rf;
-									break;
-								}
+								BasedAirUnitIndex[ui][wi].Value = BasedAirUnitList.IndexOf(weapon.Name);
+								BasedAirUnitMas[ui][wi].Value = weapon.Mas;
+								BasedAirUnitRf[ui][wi].Value = weapon.Rf;
 							}
 						}
 					}
@@ -548,26 +441,40 @@ namespace AWSK.ViewModels
 				}
 			}
 			for (int ui = 0; ui < 3; ++ui) {
-				// BasedAirUnitIndex
+				// BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRf
 				{
-					var rpList = new List<ReactiveProperty<int>>();
+					var rpList1 = new List<ReactiveProperty<int>>();
+					var rpList2 = new List<ReactiveProperty<int>>();
+					var rpList3 = new List<ReactiveProperty<int>>();
 					for (int wi = 0; wi < 4; ++wi) {
-						var rp = new ReactiveProperty<int>(0);
+						var rp1 = new ReactiveProperty<int>(0);
+						var rp2 = new ReactiveProperty<int>(7);
+						var rp3 = new ReactiveProperty<int>(0);
 						// 変更時に制空値を自動計算する処理
 						switch (ui) {
 						case 0:
-							rp.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+							rp1.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+							rp2.Subscribe(_ => ReCalcBasedAirUnit1AAV());
+							rp3.Subscribe(_ => ReCalcBasedAirUnit1AAV());
 							break;
 						case 1:
-							rp.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+							rp1.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+							rp2.Subscribe(_ => ReCalcBasedAirUnit2AAV());
+							rp3.Subscribe(_ => ReCalcBasedAirUnit2AAV());
 							break;
 						case 2:
-							rp.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+							rp1.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+							rp2.Subscribe(_ => ReCalcBasedAirUnit3AAV());
+							rp3.Subscribe(_ => ReCalcBasedAirUnit3AAV());
 							break;
 						}
-						rpList.Add(rp);
+						rpList1.Add(rp1);
+						rpList2.Add(rp2);
+						rpList3.Add(rp3);
 					}
-					BasedAirUnitIndex.Add(rpList);
+					BasedAirUnitIndex.Add(rpList1);
+					BasedAirUnitMas.Add(rpList2);
+					BasedAirUnitRf.Add(rpList3);
 				}
 			}
 			#region 各種ReactiveCollection
@@ -610,30 +517,6 @@ namespace AWSK.ViewModels
 			#endregion
 			// コマンドを設定
 			#region 設定変更により制空値を自動計算する処理
-			BasedAirUnitMas11.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitMas12.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitMas13.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitMas14.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitMas21.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitMas22.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitMas23.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitMas24.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitMas31.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitMas32.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitMas33.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitMas34.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitRf11.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitRf12.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitRf13.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitRf14.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-			BasedAirUnitRf21.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitRf22.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitRf23.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitRf24.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-			BasedAirUnitRf31.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitRf32.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitRf33.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-			BasedAirUnitRf34.Subscribe(_ => ReCalcBasedAirUnit3AAV());
 			EnemyUnitIndex1.Subscribe(_ => ReCalcEnemyUnitAAV());
 			EnemyUnitIndex2.Subscribe(_ => ReCalcEnemyUnitAAV());
 			EnemyUnitIndex3.Subscribe(_ => ReCalcEnemyUnitAAV());
