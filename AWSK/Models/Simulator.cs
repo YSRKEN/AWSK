@@ -39,7 +39,7 @@ namespace AWSK.Models
 						// St1撃墜を計算して書き戻す
 						int rand1 = random.Next(12 - awStatusCoeff[(int)aws]);
 						int rand2 = random.Next(12 - awStatusCoeff[(int)aws]);
-						int killedSlot = (int)Math.Floor(slot * (0.35m * rand1 + 0.65m * rand2) / 10);
+						int killedSlot = slot * (35 * rand1 + 65 * rand2) / 1000;
 						slotData[ui][ki][wi] -= killedSlot;
 					}
 				}
