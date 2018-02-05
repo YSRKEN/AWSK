@@ -9,6 +9,7 @@ Air War Simulator for Kantai Collection
  - それぞれの基地航空隊における制空状況(航空優勢・航空劣勢など)の割合表示
 - 高速で計算を行える他、艦娘・装備データをオンラインからダウンロードして更新も可能です
  - ただし、ダウンロード後はソフトウェアを再起動してください
+- sampleフォルダに、基地航空隊編成や敵艦隊編成のサンプルデータが置いてあります(読み込み方は後述)
 
 ## 画面構成・使い方
 ![image](https://user-images.githubusercontent.com/3734392/35778074-39d3fac6-09fc-11e8-99ea-6dc00d6551aa.png)
@@ -29,7 +30,6 @@ Air War Simulator for Kantai Collection
 
 ## 謝辞
 - Readmeやヘルプファイルなどの表示に、[tatesuke](https://github.com/tatesuke) さんの「 [かんたんMarkdown](https://github.com/tatesuke/KanTanMarkdown) 」を使用しました
-
 
 ## License
 　MIT License
