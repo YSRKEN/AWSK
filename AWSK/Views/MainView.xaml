@@ -241,11 +241,11 @@
 					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<!-- 基地航空隊の制空値 -->
 				<TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
-					Text="{Binding BasedAirUnit1AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+					Text="{Binding BasedAirUnitAAV[0].Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 				<TextBlock Grid.Column="4" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
-					Text="{Binding BasedAirUnit2AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+					Text="{Binding BasedAirUnitAAV[1].Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 				<TextBlock Grid.Column="8" Grid.Row="5" Grid.ColumnSpan="4" Height="24" Margin="2,5,2,5" HorizontalAlignment="Center" FontWeight="Bold"
-					Text="{Binding BasedAirUnit3AAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+					Text="{Binding BasedAirUnitAAV[2].Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 			</Grid>
 		</GroupBox>
 		<GroupBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Header="敵艦隊">

@@ -36,9 +36,7 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<int> EnemyUnitIndex5 { get; } = new ReactiveProperty<int>(0);
 		public ReactiveProperty<int> EnemyUnitIndex6 { get; } = new ReactiveProperty<int>(0);
 		// 基地航空隊・敵艦隊の制空値
-		public ReactiveProperty<string> BasedAirUnit1AAV { get; } = new ReactiveProperty<string>("");
-		public ReactiveProperty<string> BasedAirUnit2AAV { get; } = new ReactiveProperty<string>("");
-		public ReactiveProperty<string> BasedAirUnit3AAV { get; } = new ReactiveProperty<string>("");
+		public List<ReactiveProperty<string>> BasedAirUnitAAV { get; } = new List<ReactiveProperty<string>>();
 		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
 		// シミュレーションの反復回数
 		public ReactiveProperty<int> SimulationCountIndex { get; } = new ReactiveProperty<int>(1);
@@ -153,23 +151,11 @@ namespace AWSK.ViewModels
 			return Simulator.CalcBAURange(bauData.Weapon[bauIndex[index]]);
 		}
 		// 基地航空隊の制空値変更処理
-		private void ReCalcBasedAirUnit1AAV() {
-			int aav1 = GetBasedAirUnitAAV(0);
+		private void ReCalcBasedAirUnitAAV(int ui) {
+			int aav1 = GetBasedAirUnitAAV(ui);
 			int aav2 = GetEnemyUnitAAV();
-			int range = GetBasedAirUnitRange(0);
-			BasedAirUnit1AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
-		}
-		private void ReCalcBasedAirUnit2AAV() {
-			int aav1 = GetBasedAirUnitAAV(1);
-			int aav2 = GetEnemyUnitAAV();
-			int range = GetBasedAirUnitRange(1);
-			BasedAirUnit2AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
-		}
-		private void ReCalcBasedAirUnit3AAV() {
-			int aav1 = GetBasedAirUnitAAV(2);
-			int aav2 = GetEnemyUnitAAV();
-			int range = GetBasedAirUnitRange(2);
-			BasedAirUnit3AAV.Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
+			int range = GetBasedAirUnitRange(ui);
+			BasedAirUnitAAV[ui].Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
 		}
 		// 基地航空隊の読み込み処理
 		private void LoadBasedAirUnit() {
@@ -280,9 +266,9 @@ namespace AWSK.ViewModels
 		// 敵艦隊の制空値変更処理
 		private void ReCalcEnemyUnitAAV() {
 			EnemyUnitAAV.Value = $"制空値：{GetEnemyUnitAAV()}";
-			ReCalcBasedAirUnit1AAV();
-			ReCalcBasedAirUnit2AAV();
-			ReCalcBasedAirUnit3AAV();
+			for(int ui = 0; ui < 3; ++ui) {
+				ReCalcBasedAirUnitAAV(ui);
+			}
 		}
 		// 敵艦隊の読み込み処理
 		private void LoadEnemyUnit() {
@@ -439,43 +425,49 @@ namespace AWSK.ViewModels
 					BasedAirUnitMode.Add(rp);
 					BasedAirUnitFlg.Add(rp2);
 				}
+				// を設定
+				BasedAirUnitAAV.Add(new ReactiveProperty<string>(""));
 			}
 			for (int ui = 0; ui < 3; ++ui) {
 				// BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRf
-				{
-					var rpList1 = new List<ReactiveProperty<int>>();
-					var rpList2 = new List<ReactiveProperty<int>>();
-					var rpList3 = new List<ReactiveProperty<int>>();
-					for (int wi = 0; wi < 4; ++wi) {
-						var rp1 = new ReactiveProperty<int>(0);
-						var rp2 = new ReactiveProperty<int>(7);
-						var rp3 = new ReactiveProperty<int>(0);
-						// 変更時に制空値を自動計算する処理
-						switch (ui) {
-						case 0:
-							rp1.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-							rp2.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-							rp3.Subscribe(_ => ReCalcBasedAirUnit1AAV());
-							break;
-						case 1:
-							rp1.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-							rp2.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-							rp3.Subscribe(_ => ReCalcBasedAirUnit2AAV());
-							break;
-						case 2:
-							rp1.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-							rp2.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-							rp3.Subscribe(_ => ReCalcBasedAirUnit3AAV());
-							break;
-						}
-						rpList1.Add(rp1);
-						rpList2.Add(rp2);
-						rpList3.Add(rp3);
+				var rpList1 = new List<ReactiveProperty<int>>();
+				var rpList2 = new List<ReactiveProperty<int>>();
+				var rpList3 = new List<ReactiveProperty<int>>();
+				for (int wi = 0; wi < 4; ++wi) {
+					var rp1 = new ReactiveProperty<int>(0);
+					var rp2 = new ReactiveProperty<int>(7);
+					var rp3 = new ReactiveProperty<int>(0);
+					// 変更時に制空値を自動計算する処理
+					/* このコードだと、実行時、コンボボックスを動かした際「uiになぜか3が代入されて」
+					 * エラーが出てしまう。ファッキュー！ファッキュー！
+					 * rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
+					 * rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
+					 * rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
+					 */
+					switch (ui) {
+					case 0:
+						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+						break;
+					case 1:
+						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+						break;
+					case 2:
+						rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+						break;
 					}
-					BasedAirUnitIndex.Add(rpList1);
-					BasedAirUnitMas.Add(rpList2);
-					BasedAirUnitRf.Add(rpList3);
+					rpList1.Add(rp1);
+					rpList2.Add(rp2);
+					rpList3.Add(rp3);
 				}
+				BasedAirUnitIndex.Add(rpList1);
+				BasedAirUnitMas.Add(rpList2);
+				BasedAirUnitRf.Add(rpList3);
 			}
 			#region 各種ReactiveCollection
 			{
