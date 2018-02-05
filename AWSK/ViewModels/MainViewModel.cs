@@ -476,7 +476,7 @@ namespace AWSK.ViewModels
 						if (enemyData.Kammusu.Count > 0) {
 							int i = 0;
 							foreach (var kammusu in enemyData.Kammusu[0]) {
-								int index = enemyNameList.IndexOf(kammusu.Id);
+								int index = enemyNameList.IndexOf(kammusu.Id) + 1;
 								switch (i) {
 								case 0:
 									EnemyUnitIndex1.Value = index;
