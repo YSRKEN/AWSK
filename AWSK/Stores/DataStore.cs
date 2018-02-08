@@ -1,7 +1,10 @@
-﻿using Codeplex.Data;
+﻿using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
+using Codeplex.Data;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,12 +43,39 @@ namespace AWSK.Stores
 			{ "潜水艦電探", 24},
 		};
 
+		// 敵艦のカテゴリを取得する
+		public static Dictionary<string, string> ParseEnemyListWikia(string rawData) {
+			var category = new Dictionary<string, string>();
+			// テキストデータをパースする
+			var doc = default(IHtmlDocument);
+			var parser = new HtmlParser();
+			doc = parser.Parse(rawData);
+			// パースしたデータからカテゴリ名とURLのペアを引き出す
+			var categoryTemp = doc.QuerySelectorAll("table.wikitable > tbody > tr > td")
+				.Where(item => item.QuerySelector("b > a") != null && item.QuerySelector("p") != null)
+				.Select(item => {
+					string url = $"http://kancolle.wikia.com{item.QuerySelector("b > a").GetAttribute("href")}";
+					string temp = item.QuerySelector("p > span").TextContent;
+					string name = item.QuerySelector("p").TextContent.Replace(temp, "").Replace("\n", "");
+					return new KeyValuePair<string, string>(name, url);
+				});
+			foreach(var pair in categoryTemp) {
+				category[pair.Key] = pair.Value;
+			}
+			return category;
+		}
+		// 敵艦のデータを取得する
+		public static List<KammusuData> GetKammusuDataWikia(string url) {
+			var list = new List<KammusuData>();
+			return list;
+		}
 		// 艦娘のデータをダウンロードする
 		private static async Task<bool> DownloadKammusuDataAsync() {
 			Console.WriteLine("艦娘のデータをダウンロード中……");
 			try {
 				// 艦娘データをダウンロード・パースする
-				var commandList = new List<string>();
+				var kammusuList = new List<KammusuData>();	//艦娘データ
+				var kammusuDataFlg = new List<bool>();      //艦娘データが不完全ならfalse
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/shipdata.js");
@@ -68,42 +98,79 @@ namespace AWSK.Stores
 							continue;
 						if (id > 1900)
 							continue;
-						// 不完全なデータは無視する(暫定対応)
-						if(kammusu.next == "" && !kammusuFlg) {
+						// 不完全なデータかどうかを判断する
+						bool kammusuDataFlgTemp = true;
+						if (kammusu.next == "" && !kammusuFlg) {
 							int count = 0;
 							foreach (var wId in firstWeapon) {
 								++count;
 							}
-							if(count == 0) {
-								continue;
+							if (count == 0) {
+								kammusuDataFlgTemp = false;
 							}
 						}
-						// コマンドを記録する
-						string sql = "INSERT INTO Kammusu VALUES(";
-						sql += $"{id},'{name}',{antiair},{slotsize},";
-						{
-							int count = 0;
-							foreach (var size in slot) {
-								sql += $"{size},";
-								++count;
-							}
-							for (int wi = count; wi < 5; ++wi) {
-								sql += "0,";
-							}
+						// データを登録する
+						var kammusuDataTemp = new KammusuData {
+							Id = id, AntiAir = antiair, KammusuFlg = kammusuFlg, Name = name,
+							Slot = new List<int>(), SlotSize = slotsize, Weapon = new List<WeaponData>() };
+						foreach (var size in slot) {
+							kammusuDataTemp.Slot.Add((int)size);
 						}
-						{
-							int count = 0;
-							foreach (var wId in firstWeapon) {
-								sql += $"{wId},";
-								++count;
-							}
-							for (int wi = count; wi < 5; ++wi) {
-								sql += "0,";
-							}
+						foreach (var wId in firstWeapon) {
+							kammusuDataTemp.Weapon.Add(new WeaponData { Id = (int)wId });
 						}
-						sql += $"'{(kammusuFlg ? 1 : 0)}')";
-						commandList.Add(sql);
+						kammusuList.Add(kammusuDataTemp);
+						kammusuDataFlg.Add(kammusuDataFlgTemp);
 					}
+				}
+				// 不完全データについては、wikiを読み取って補完する
+				using (var client = new HttpClient()) {
+					// ダウンロード
+					string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessel");
+					// カテゴリ解析
+					var category = ParseEnemyListWikia(rawData);
+					// カテゴリ毎にページをクロールしていく
+					
+				}
+				//
+				for(int ki = 0; ki < kammusuList.Count; ++ki) {
+					if (kammusuDataFlg[ki]) {
+						continue;
+					}
+					Console.WriteLine($"{kammusuList[ki].Id} {kammusuList[ki].Name}");
+				}
+				// SQLコマンドを生成する
+				var commandList = new List<string>();
+				for (int ki = 0; ki < kammusuList.Count; ++ki) {
+					if (!kammusuDataFlg[ki]) {
+						continue;
+					}
+					var kammusu = kammusuList[ki];
+					// コマンドを記録する
+					string sql = "INSERT INTO Kammusu VALUES(";
+					sql += $"{kammusu.Id},'{kammusu.Name}',{kammusu.AntiAir},{kammusu.SlotSize},";
+					{
+						int count = 0;
+						foreach (int size in kammusu.Slot) {
+							sql += $"{size},";
+							++count;
+						}
+						for (int wi = count; wi < 5; ++wi) {
+							sql += "0,";
+						}
+					}
+					{
+						int count = 0;
+						foreach (int wId in kammusu.Weapon.Select(p => p.Id)) {
+							sql += $"{wId},";
+							++count;
+						}
+						for (int wi = count; wi < 5; ++wi) {
+							sql += "0,";
+						}
+					}
+					sql += $"'{(kammusu.KammusuFlg ? 1 : 0)}')";
+					commandList.Add(sql);
 				}
 				// データベースに書き込む
 				using (var con = new SQLiteConnection(connectionString)) {
@@ -119,8 +186,10 @@ namespace AWSK.Stores
 						}
 					}
 				}
+				Console.WriteLine("ダウンロード完了");
 				return true;
 			} catch (Exception e) {
+				Console.WriteLine("ダウンロード失敗");
 				Console.WriteLine(e.ToString());
 				return false;
 			}
@@ -194,8 +263,10 @@ namespace AWSK.Stores
 						}
 					}
 				}
+				Console.WriteLine("ダウンロード完了");
 				return true;
 			} catch (Exception e) {
+				Console.WriteLine("ダウンロード失敗");
 				Console.WriteLine(e.ToString());
 				return false;
 			}

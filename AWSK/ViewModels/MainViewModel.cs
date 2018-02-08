@@ -330,6 +330,18 @@ namespace AWSK.ViewModels
 				CloseWindow.Value = true;
 				return;
 			}
+			//
+			using (var sw = new System.IO.StreamReader("test.html")) {
+				string rawData = sw.ReadToEnd();
+				var category = DataStore.ParseEnemyListWikia(rawData);
+				foreach(var pair in category) {
+					Console.WriteLine($"{pair.Key}　{pair.Value}");
+					var list = DataStore.GetKammusuDataWikia(pair.Value);
+					foreach(var kammusu in list) {
+						Console.WriteLine("　" + kammusu.ToString());
+					}
+				}
+			}
 		}
 
 		// クリップボードからインポート
