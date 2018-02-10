@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -65,8 +66,65 @@ namespace AWSK.Stores
 			return category;
 		}
 		// 敵艦のデータを取得する
-		public static List<KammusuData> GetKammusuDataWikia(string url) {
+		public static List<KammusuData> GetKammusuDataWikia(string rawData) {
 			var list = new List<KammusuData>();
+			// テキストデータをパースする
+			var doc = default(IHtmlDocument);
+			var parser = new HtmlParser();
+			doc = parser.Parse(rawData);
+			// パースしたデータから敵艦のデータを引き出す
+			var kammusuData = doc.QuerySelectorAll("table.infobox-ship > tbody")
+				.Select(item => {
+				// 艦名のテキストから、艦名とIDを取得
+				string nameText = item.QuerySelector("tr > td > div > b").TextContent;
+				int dotIndex = nameText.IndexOf(".");
+				int spaceIndex = nameText.IndexOf(" ");
+				int no = int.Parse(nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1));
+				string name = nameText.Substring(spaceIndex + 1);
+				// 対空値を読み取る
+				var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
+				int antiAir = int.Parse(temp[temp.IndexOf("AA") + 1]);
+				int slots = int.Parse(temp[temp.IndexOf("Slots") + 2]);
+				// 結果を書き込む
+				var kammusu = new KammusuData {
+					Id = no + 1000,
+					Name = name,
+					Level = 1,
+					KammusuFlg = (no <= 500),
+					AntiAir = antiAir,
+					SlotSize = slots,
+					Slot = new List<int>(),
+					Weapon = new List<WeaponData>()
+				};
+				// スロットの枠数を読み取る
+				int weaponIndex = temp.IndexOf("Equipment") + 3;
+				for(int i = 0; i < 4; ++i) {
+					// スロット数の文字列を読み取る
+					string slotStr = temp[weaponIndex + 1 + i * 3];
+					// 文字列が「-」ならループを抜ける
+					if (slotStr.Contains("-"))
+						break;
+					// 文字列を数字だけにしてからint型にパースして読み取る
+					var regex = new Regex("[^0-9]");
+					slotStr = regex.Replace(slotStr, "");
+					kammusu.Slot.Add(int.Parse(slotStr));
+				}
+				// スロット毎の装備を読み取る
+				var trList = item.QuerySelectorAll("tr");
+				int equipIndex = trList
+					.Select((value, index) => new {Index = index, Value = value})
+					.Where(x => x.Value.TextContent.Contains("Equipment"))
+					.Select(x => x.Index).First();
+				for (int i = 0; i < 4; ++i) {
+					// 装備のリンクを読み取る
+					var node = trList[equipIndex + i + 1].QuerySelectorAll("td").Skip(1).First().QuerySelector("a");
+					if(node == null)
+						break;
+					string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
+					Console.WriteLine(url);
+				}
+				return kammusu;
+			}).ToList();
 			return list;
 		}
 		// 艦娘のデータをダウンロードする

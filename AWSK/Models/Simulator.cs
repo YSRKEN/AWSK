@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MersenneTwister;
 
 namespace AWSK.Models
 {
 	static class Simulator
 	{
 		// 乱数の起点
-		private static Random random = new Random();
+		private static Random random = DsfmtRandom.Create();
 
 		// 制空状況を判断する
 		enum AirWarStatus { Best, Good, Even, Bad, Worst }
@@ -34,7 +35,6 @@ namespace AWSK.Models
 				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
 					var kammusu = fleet.Kammusu[ui][ki];
 					for (int wi = 0; wi < kammusu.Weapon.Count; ++wi) {
-						var weapon = kammusu.Weapon[wi];
 						int slot = slotData[ui][ki][wi];
 						// St1撃墜を計算して書き戻す
 						int rand1 = random.Next(12 - awStatusCoeff[(int)aws]);
