@@ -139,8 +139,8 @@ namespace AWSK.Models
 			out Dictionary<int, int> finalAAV,
 			out List<List<List<int>>> awsCount) {
 			// シミュレーションを行う
-			finalAAV = new Dictionary<int, int>();
-			awsCount = new List<List<List<int>>>();
+			finalAAV = new Dictionary<int, int>();	//最終的な制空値のデータ
+			awsCount = new List<List<List<int>>>();	//制空状況をカウントする配列
 			for (int si = 0; si < friend.SallyCount.Count; ++si) {
 				var temp1 = new List<List<int>>();
 				for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
@@ -149,18 +149,20 @@ namespace AWSK.Models
 				}
 				awsCount.Add(temp1);
 			}
-			for(int li = 0; li < simulationCount; ++li) {
+			var friendAntiAirValue = new List<int>();	//基地航空隊の制空値を記録した配列
+			for (int si = 0; si < friend.SallyCount.Count; ++si) {
+				friendAntiAirValue.Add(CalcAntiAirValue(friend.Weapon[si], friend.GetSlotData()[si]));
+			}
+			for (int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
-				var friendSlotData = friend.GetSlotData();
 				var enemySlotData = enemy.GetSlotData();
 				// 指定した回数だけ基地航空隊をぶつける
 				for (int si = 0; si < friend.SallyCount.Count; ++si) {
 					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
-						// 基地航空隊・敵艦隊の制空値を計算する
-						int friendAntiAirValue = CalcAntiAirValue(friend.Weapon[si], friendSlotData[si]);
+						// 敵艦隊の制空値を計算する
 						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData, true);
 						// 制空状況を判断する
-						var airWarStatus = JudgeAirWarStatus(friendAntiAirValue, enemyAntiAirValue);
+						var airWarStatus = JudgeAirWarStatus(friendAntiAirValue[si], enemyAntiAirValue);
 						++awsCount[si][ci][(int)airWarStatus];
 						// St1撃墜を行う
 						LostEnemySlotBySt1(enemy, ref enemySlotData, airWarStatus);
