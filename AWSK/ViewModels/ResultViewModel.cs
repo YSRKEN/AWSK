@@ -28,19 +28,32 @@ namespace AWSK.ViewModels
 		// グラフモデルを作成する
 		private PlotModel CreateLastAAVGraphModel(Dictionary<int, int> finalAAV) {
 			var graphModel = new PlotModel();
-			// X軸・Y軸を追加する
+			// X軸・Y軸(第一・第二)を追加する
 			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "制空値" });
-			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "割合(％)" });
-			// グラフ要素を追加する
+			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left,   Title = "割合(％)", Key = "Primary"   });
+			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Right,  Title = "割合(％)", Key = "Secondary" });
+			// グラフ要素を追加する(第一Y軸)
 			int allSum = finalAAV.Values.Sum();
 			int sum = 0;
-			var lineSeries = new LineSeries();
+			var lineSeries1 = new LineSeries {
+				Title = "下側確率",
+				YAxisKey = "Primary"
+			};
 			foreach (var data in finalAAV) {
 				sum += data.Value;
-				lineSeries.Points.Add(new DataPoint(data.Key, 100.0 * sum / allSum));
+				lineSeries1.Points.Add(new DataPoint(data.Key, 100.0 * sum / allSum));
 			}
-			lineSeries.Title = "下側確率";
-			graphModel.Series.Add(lineSeries);
+			graphModel.Series.Add(lineSeries1);
+			// グラフ要素を追加する(第二Y軸)
+			var lineSeries2 = new LineSeries {
+				Title = "確率分布",
+				YAxisKey = "Secondary"
+			};
+			foreach (var data in finalAAV) {
+				lineSeries2.Points.Add(new DataPoint(data.Key, 100.0 * data.Value / allSum));
+			}
+			graphModel.Series.Add(lineSeries2);
+			//
 			graphModel.InvalidatePlot(true);
 			return graphModel;
 		}
