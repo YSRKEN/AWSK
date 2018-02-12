@@ -12,7 +12,7 @@ namespace AWSK.ViewModels
 	class ResultViewModel
 	{
 		// 制空値情報および制空状況情報
-		private Dictionary<int, int> finalAAV;
+		private Dictionary<int, double> finalAAV;
 		private List<List<List<int>>> awsCount;
 		// タイトルバー
 		public ReactiveProperty<string> TitleStr { get; } = new ReactiveProperty<string>("計算結果");
@@ -26,22 +26,21 @@ namespace AWSK.ViewModels
 		public ReactiveCommand CopyAwsTextCommand { get; } = new ReactiveCommand();
 
 		// グラフモデルを作成する
-		private PlotModel CreateLastAAVGraphModel(Dictionary<int, int> finalAAV) {
+		private PlotModel CreateLastAAVGraphModel(Dictionary<int, double> finalAAV) {
 			var graphModel = new PlotModel();
 			// X軸・Y軸(第一・第二)を追加する
 			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "制空値" });
 			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left,   Title = "割合(％)", Key = "Primary"   });
 			graphModel.Axes.Add(new LinearAxis { Position = AxisPosition.Right,  Title = "割合(％)", Key = "Secondary" });
 			// グラフ要素を追加する(第一Y軸)
-			int allSum = finalAAV.Values.Sum();
-			int sum = 0;
+			double sum = 0.0;
 			var lineSeries1 = new LineSeries {
 				Title = "下側確率",
 				YAxisKey = "Primary"
 			};
 			foreach (var data in finalAAV) {
 				sum += data.Value;
-				lineSeries1.Points.Add(new DataPoint(data.Key, 100.0 * sum / allSum));
+				lineSeries1.Points.Add(new DataPoint(data.Key, 100.0 * sum));
 			}
 			graphModel.Series.Add(lineSeries1);
 			// グラフ要素を追加する(第二Y軸)
@@ -50,7 +49,7 @@ namespace AWSK.ViewModels
 				YAxisKey = "Secondary"
 			};
 			foreach (var data in finalAAV) {
-				lineSeries2.Points.Add(new DataPoint(data.Key, 100.0 * data.Value / allSum));
+				lineSeries2.Points.Add(new DataPoint(data.Key, 100.0 * data.Value));
 			}
 			graphModel.Series.Add(lineSeries2);
 			//
@@ -94,14 +93,13 @@ namespace AWSK.ViewModels
 			return graphModel;
 		}
 		// タイトルバーを設定
-		private string SetTitleBar(Dictionary<int, int> finalAAV) {
+		private string SetTitleBar(Dictionary<int, double> finalAAV) {
 			// 下側確率のデータを取得する
-			int allSum = finalAAV.Values.Sum();
-			int sum = 0;
+			double sum = 0.0;
 			var prob = new List<KeyValuePair<int, double>>();
 			foreach (var data in finalAAV) {
 				sum += data.Value;
-				prob.Add(new KeyValuePair<int, double>(data.Key, 100.0 * sum / allSum));
+				prob.Add(new KeyValuePair<int, double>(data.Key, 100.0 * sum));
 			}
 			// 各パーセンテージを初めて超える際の制空値を取得し、文字列として返す
 			var prob2 = new double[] { 50.0, 70.0, 90.0, 95.0, 99.0 };
@@ -119,7 +117,7 @@ namespace AWSK.ViewModels
 
 		// コンストラクタ
 		public ResultViewModel() { }
-		public ResultViewModel(Dictionary<int, int> finalAAV, List<List<List<int>>> awsCount) {
+		public ResultViewModel(Dictionary<int, double> finalAAV, List<List<List<int>>> awsCount) {
 			// グラフを描画
 			LastAAVGraphModel.Value = CreateLastAAVGraphModel(finalAAV);
 			AwsCountGraphModel.Value = CreateAwsCountGraphModel(awsCount);
@@ -137,17 +135,16 @@ namespace AWSK.ViewModels
 			});
 			CopyAAVTextCommand.Subscribe(_ => {
 				// 制空値の下側確率の情報をテキストとしてクリップボードにコピー
-				int loopCount = finalAAV.Values.Sum();
-				int sum1 = loopCount, sum2 = 0;
-				var temp = new List<List<int>>();
+				double sum1 = 1.0, sum2 = 0.0;
+				var temp = new Dictionary<int, List<double>>();
 				foreach (var pair in finalAAV.OrderBy((x) => x.Key)) {
 					sum2 += pair.Value;
-					temp.Add(new List<int> { pair.Key, pair.Value, sum1, sum2 });
+					temp[pair.Key] = new List<double> {pair.Value, sum1, sum2 };
 					sum1 -= pair.Value;
 				}
 				string output = "制空値,確率分布(%),上側確率(%),下側確率(%)\n";
 				foreach (var record in temp) {
-					output += $"{record[0]},{100.0 * record[1] / loopCount},{100.0 * record[2] / loopCount},{100.0 * record[3] / loopCount}\n";
+					output += $"{record.Key},{100.0 * record.Value[0]},{100.0 * record.Value[1]},{100.0 * record.Value[2]}\n";
 				}
 				Clipboard.SetText(output);
 			});
@@ -159,8 +156,8 @@ namespace AWSK.ViewModels
 			});
 			CopyAwsTextCommand.Subscribe(_ => {
 				// 制空状況の詳細をテキストとしてクリップボードにコピー
-				int loopCount = finalAAV.Values.Sum();
 				string output = "航空隊,回数,確保(%),優勢(%),均衡(%),劣勢(%),喪失(%)\n";
+				int loopCount = awsCount[0][0].Sum();
 				for (int si = 0; si < awsCount.Count; ++si) {
 					for (int ci = 0; ci < awsCount[si].Count; ++ci) {
 						output += $"{si + 1},{ci + 1},";

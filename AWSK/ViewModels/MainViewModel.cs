@@ -371,7 +371,7 @@ namespace AWSK.ViewModels
 			// シミュレーションを行う
 			var simulationCount = new[] { 1000, 10000, 100000, 1000000 };
 			{
-				Dictionary<int, int> finalAAV;
+				Dictionary<int, double> finalAAV;
 				List<List<List<int>>> awsCount;
 				Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out finalAAV, out awsCount);
 				var vm = new ResultViewModel(finalAAV, awsCount);

@@ -63,35 +63,39 @@ namespace AWSK.Models
 				return "";
 			}
 		}
+		// 制空値を計算する(1装備)
+		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
+		public static int CalcAntiAirValue(WeaponData weapon, int slot, bool calcFlg = false) {
+			// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
+			// calcFlgがtrueなら、水上偵察機も制空計算に反映する
+			if (calcFlg) {
+				if (!weapon.HasAAV2)
+					return 0;
+			} else {
+				if (!weapon.HasAAV)
+					return 0;
+			}
+			// 補正後対空値
+			double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
+			//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
+			if ((weapon.Type[0] == 3 && weapon.Type[2] == 6)
+				|| (weapon.Type[0] == 5 && weapon.Type[1] == 36)
+				|| (weapon.Type[0] == 22 && weapon.Type[2] == 48)) {
+				correctedAA += 0.2 * weapon.Rf;
+			} else if (weapon.Type[0] == 3 && weapon.Type[2] == 7 && weapon.Type[4] == 12) {
+				correctedAA += 0.25 * weapon.Rf;
+			}
+			// 補正後制空能力
+			int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slot) + weapon.AntiAirBonus));
+			return correctedAAV;
+		}
 		// 制空値を計算する(1艦)
 		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
 		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData, bool calcFlg = false) {
 			int sum = 0;
 			for (int wi = 0; wi < weaponList.Count; ++wi) {
-				var weapon = weaponList[wi];
-				// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
-				// calcFlgがtrueなら、水上偵察機も制空計算に反映する
-				if (calcFlg) {
-					if (!weapon.HasAAV2)
-						continue;
-				} else {
-					if (!weapon.HasAAV)
-						continue;
-				}
-				// 補正後対空値
-				double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
-				//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
-				if((weapon.Type[0] == 3 && weapon.Type[2] == 6)
-					|| (weapon.Type[0] == 5 && weapon.Type[1] == 36)
-					|| (weapon.Type[0] == 22 && weapon.Type[2] == 48)) {
-					correctedAA += 0.2 * weapon.Rf;
-				}else if(weapon.Type[0] == 3 && weapon.Type[2] == 7 && weapon.Type[4] == 12) {
-					correctedAA += 0.25 * weapon.Rf;
-				}
-				// 補正後制空能力
-				int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slotData[wi]) + weapon.AntiAirBonus));
 				// 加算
-				sum += correctedAAV;
+				sum += CalcAntiAirValue(weaponList[wi], slotData[wi]);
 			}
 			return sum;
 		}
@@ -136,10 +140,10 @@ namespace AWSK.Models
 			BasedAirUnitData friend,
 			FleetData enemy,
 			int simulationCount,
-			out Dictionary<int, int> finalAAV,
+			out Dictionary<int, double> finalAAV,
 			out List<List<List<int>>> awsCount) {
-			// シミュレーションを行う
-			finalAAV = new Dictionary<int, int>();	//最終的な制空値のデータ
+			// 出力先を準備する
+			finalAAV = new Dictionary<int, double>();	//最終的な制空値のデータ
 			awsCount = new List<List<List<int>>>();	//制空状況をカウントする配列
 			for (int si = 0; si < friend.SallyCount.Count; ++si) {
 				var temp1 = new List<List<int>>();
@@ -149,10 +153,21 @@ namespace AWSK.Models
 				}
 				awsCount.Add(temp1);
 			}
+			// テンポラリな変数を用意する
 			var friendAntiAirValue = new List<int>();	//基地航空隊の制空値を記録した配列
 			for (int si = 0; si < friend.SallyCount.Count; ++si) {
 				friendAntiAirValue.Add(CalcAntiAirValue(friend.Weapon[si], friend.GetSlotData()[si]));
 			}
+			var slotProb = new List<List<Dictionary<int, double>>>();
+			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
+				var list = new List<Dictionary<int, double>>();
+				for(int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
+					var dic = new Dictionary<int, double>();
+					list.Add(dic);
+				}
+				slotProb.Add(list);
+			}
+			// シミュレーションを行う
 			for (int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
 				var enemySlotData = enemy.GetSlotData();
@@ -168,12 +183,64 @@ namespace AWSK.Models
 						LostEnemySlotBySt1(enemy, ref enemySlotData, airWarStatus);
 					}
 				}
+				// スロット情報を登録する
+				for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
+					for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
+						int key = enemySlotData[0][ki][wi];
+						if (slotProb[ki][wi].ContainsKey(key)) {
+							slotProb[ki][wi][key] += 1.0;
+						} else {
+							slotProb[ki][wi][key] = 1.0;
+						}
+					}
+				}
 				// 最終制空値を読み取る
-				int aav = CalcAntiAirValue(enemy, enemySlotData, true);
+				/*int aav = CalcAntiAirValue(enemy, enemySlotData, true);
 				if (finalAAV.ContainsKey(aav)) {
 					++finalAAV[aav];
 				} else {
 					finalAAV[aav] = 1;
+				}*/
+			}
+			// スロットの各数をシミュレーション回数で割る(誤差対策)
+			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
+				for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
+					var list = slotProb[ki][wi].ToList();
+					foreach (var pair in list) {
+						slotProb[ki][wi][pair.Key] /= simulationCount;
+					}
+				}
+			}
+			// スロット毎に制空値の分布を算出し、畳み込む
+			finalAAV[0] = 1.0;
+			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
+				for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
+					// 搭載数分布から制空値分布を作成
+					var aavDic = new Dictionary<int, double>();
+					var slotProbtemp = slotProb[ki][wi];
+					foreach(var pair in slotProbtemp) {
+						int aav = CalcAntiAirValue(enemy.Kammusu.First()[ki].Weapon[wi], pair.Key, true);
+						if (aavDic.ContainsKey(aav)) {
+							aavDic[aav] += pair.Value;
+						} else {
+							aavDic[aav] = pair.Value;
+						}
+					}
+					// 制空値分布を畳み込む
+					var aavDic2 = new Dictionary<int, double>();
+					foreach (var pair1 in finalAAV) {
+						foreach (var pair2 in aavDic) {
+							int key = pair1.Key + pair2.Key;
+							double value = pair1.Value * pair2.Value;
+							if (aavDic2.ContainsKey(key)) {
+								aavDic2[key] += value;
+							} else {
+								aavDic2[key] = value;
+							}
+						}
+					}
+					// 上書きする
+					finalAAV = aavDic2;
 				}
 			}
 			finalAAV = finalAAV.OrderBy((x) => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
