@@ -12,8 +12,6 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
-		private List<int> enemyIdList = new List<int>();
-
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
@@ -229,7 +227,8 @@ namespace AWSK.ViewModels
 				if (enemyIndex == 0)
 					continue;
 				// idを算出する
-				int enemyId = enemyIdList[enemyIndex];
+				string comboBoxName = EnemyList[enemyIndex];
+				int enemyId = int.Parse(comboBoxName.Substring(comboBoxName.LastIndexOf("[") + 1, comboBoxName.LastIndexOf("]") - comboBoxName.LastIndexOf("[") - 1));
 				// idから敵艦情報を得る
 				var enemy = DataStore.KammusuDataById(enemyId, true);
 				// 追加
@@ -459,18 +458,9 @@ namespace AWSK.ViewModels
 				var list = DataStore.EnemyNameList();
 				// 敵艦名のリストから、新たに表示用リストを作成
 				var list2 = new List<string>();
-				enemyIdList = new List<int>();
 				list2.Add("なし");
-				enemyIdList.Add(0);
-				foreach (var pair in list) {
-					int count = list.Values.Where(p => p == pair.Value).Count();
-					int count2 = list2.Where(p => p.Contains(pair.Value)).Count();
-					if (count > 1) {
-						list2.Add($"{pair.Value}-{count2 + 1}");
-					} else {
-						list2.Add(pair.Value);
-					}
-					enemyIdList.Add(pair.Key);
+				foreach (var pair in list.OrderBy(pair => pair.Key)) {
+					list2.Add($"{pair.Value} [{pair.Key}]");
 				}
 				var oc = new ObservableCollection<string>(list2);
 				EnemyList = oc.ToReadOnlyReactiveCollection();
