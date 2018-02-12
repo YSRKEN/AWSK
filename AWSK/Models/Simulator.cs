@@ -66,6 +66,9 @@ namespace AWSK.Models
 		// 制空値を計算する(1装備)
 		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
 		public static int CalcAntiAirValue(WeaponData weapon, int slot, bool calcFlg = false) {
+			// 搭載数が0なら当然制空値も0
+			if (slot <= 0)
+				return 0;
 			// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
 			// calcFlgがtrueなら、水上偵察機も制空計算に反映する
 			if (calcFlg) {
