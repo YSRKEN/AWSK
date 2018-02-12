@@ -331,7 +331,7 @@ namespace AWSK.ViewModels
 				return;
 			}
 			//
-			/*using (var sw = new System.IO.StreamReader("test.html")) {
+			using (var sw = new System.IO.StreamReader("test.html")) {
 				string rawData = sw.ReadToEnd();
 				var category = DataStore.ParseEnemyListWikia(rawData);
 				foreach(var pair in category) {
@@ -344,7 +344,7 @@ namespace AWSK.ViewModels
 						}
 					}
 				}
-			}*/
+			}
 		}
 
 		// クリップボードからインポート
