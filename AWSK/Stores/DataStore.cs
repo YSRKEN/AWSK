@@ -43,6 +43,8 @@ namespace AWSK.Stores
 			{ "分解済彩雲", 23},
 			{ "潜水艦電探", 24},
 		};
+		// 装備URLとIDとの対応表(深海棲艦向け)
+		private static Dictionary<string, int> weaponUrlDicWikia = new Dictionary<string, int>();
 
 		// 敵艦のカテゴリを取得する
 		public static Dictionary<string, string> ParseEnemyListWikia(string rawData) {
@@ -65,15 +67,35 @@ namespace AWSK.Stores
 			}
 			return category;
 		}
+		// 装備URLとIDとの対応表(深海棲艦向け)
+		public static async Task GetWeaponDicWikia() {
+			using (var client = new System.Net.Http.HttpClient()) {
+				string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/List_of_equipment_used_by_the_enemy");
+				var doc = default(IHtmlDocument);
+				var parser = new HtmlParser();
+				doc = parser.Parse(rawData);
+				weaponUrlDicWikia = doc.QuerySelectorAll("table.wikitable.typography-xl-optout > tbody > tr")
+					.Where(item => item.QuerySelector("td") != null )
+					.Select(item => {
+					int id = int.Parse(item.QuerySelector("td").TextContent);
+					string url = "http://kancolle.wikia.com" + item.QuerySelectorAll("td").Skip(2).First().QuerySelector("a").Attributes["href"].Value;
+					return new KeyValuePair<string, int>(url, id);
+				}).ToDictionary(item => item.Key, item => item.Value);
+			}
+		}
 		// 敵艦のデータを取得する
 		public static List<KammusuData> GetKammusuDataWikia(string rawData) {
-			var list = new List<KammusuData>();
 			// テキストデータをパースする
 			var doc = default(IHtmlDocument);
 			var parser = new HtmlParser();
 			doc = parser.Parse(rawData);
 			// パースしたデータから敵艦のデータを引き出す
 			var kammusuData = doc.QuerySelectorAll("table.infobox-ship > tbody")
+				.Where(item => {
+					var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
+					string str = temp[temp.IndexOf("AA") + 1];
+					return int.TryParse(str, out int _);
+				})
 				.Select(item => {
 				// 艦名のテキストから、艦名とIDを取得
 				string nameText = item.QuerySelector("tr > td > div > b").TextContent;
@@ -121,11 +143,12 @@ namespace AWSK.Stores
 					if(node == null)
 						break;
 					string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
-					Console.WriteLine(url);
+						kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
 				}
+					Console.WriteLine($"{kammusu.Name}");
 				return kammusu;
 			}).ToList();
-			return list;
+			return kammusuData;
 		}
 		// 艦娘のデータをダウンロードする
 		private static async Task<bool> DownloadKammusuDataAsync() {
@@ -181,14 +204,31 @@ namespace AWSK.Stores
 						kammusuDataFlg.Add(kammusuDataFlgTemp);
 					}
 				}
-				/*// 不完全データについては、wikiを読み取って補完する
+				// 不完全データについては、wikiを読み取って補完する
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessel");
 					// カテゴリ解析
 					var category = ParseEnemyListWikia(rawData);
 					// カテゴリ毎にページをクロールしていく
-					
+					var kammusuDicWikia = new Dictionary<int, KammusuData>();
+					foreach (var pair in category) {
+						string rawData2 = await client.GetStringAsync(pair.Value);
+						var list = GetKammusuDataWikia(rawData2);
+						foreach (var kammusu in list) {
+							kammusuDicWikia[kammusu.Id] = kammusu;
+						}
+					}
+					// クロール結果と比較し、不完全データを補う
+					for (int ki = 0; ki < kammusuList.Count; ++ki) {
+						if (kammusuDataFlg[ki]) {
+							continue;
+						}
+						if (kammusuDicWikia.ContainsKey(kammusuList[ki].Id)) {
+							kammusuList[ki] = kammusuDicWikia[kammusuList[ki].Id];
+							kammusuDataFlg[ki] = true;
+						}
+					}
 				}
 				//
 				for(int ki = 0; ki < kammusuList.Count; ++ki) {
@@ -196,7 +236,7 @@ namespace AWSK.Stores
 						continue;
 					}
 					Console.WriteLine($"{kammusuList[ki].Id} {kammusuList[ki].Name}");
-				}*/
+				}
 				// SQLコマンドを生成する
 				var commandList = new List<string>();
 				for (int ki = 0; ki < kammusuList.Count; ++ki) {
