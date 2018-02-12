@@ -181,7 +181,7 @@ namespace AWSK.Stores
 						kammusuDataFlg.Add(kammusuDataFlgTemp);
 					}
 				}
-				// 不完全データについては、wikiを読み取って補完する
+				/*// 不完全データについては、wikiを読み取って補完する
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessel");
@@ -196,7 +196,7 @@ namespace AWSK.Stores
 						continue;
 					}
 					Console.WriteLine($"{kammusuList[ki].Id} {kammusuList[ki].Name}");
-				}
+				}*/
 				// SQLコマンドを生成する
 				var commandList = new List<string>();
 				for (int ki = 0; ki < kammusuList.Count; ++ki) {
