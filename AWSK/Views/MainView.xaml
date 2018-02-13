@@ -7,7 +7,7 @@
 	xmlns:b="clr-namespace:AWSK.Behaviors"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="航空戦シミュレーター改" Height="370" Width="810" ResizeMode="CanMinimize"
+	Title="航空戦シミュレーター改" Height="370" Width="900" ResizeMode="CanMinimize"
 	b:CloseWindowAttachedBehavior.Close="{Binding CloseWindow.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
 	<Window.DataContext>
 		<local:MainViewModel/>
@@ -253,6 +253,10 @@
 				<TabControl>
 					<TabItem Header="第一艦隊">
 						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition/>
+								<ColumnDefinition/>
+							</Grid.ColumnDefinitions>
 							<Grid.RowDefinitions>
 								<RowDefinition Height="auto"/>
 								<RowDefinition Height="auto"/>
@@ -262,7 +266,13 @@
 								<RowDefinition Height="auto"/>
 								<RowDefinition Height="auto"/>
 							</Grid.RowDefinitions>
-							<ComboBox Grid.Row="0" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="0" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="1" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="2" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="3" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="4" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="5" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="0" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[0].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}">
 								<ComboBox.ContextMenu>
@@ -273,22 +283,22 @@
 									</ContextMenu>
 								</ComboBox.ContextMenu>
 							</ComboBox>
-							<ComboBox Grid.Row="1" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="1" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[1].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<ComboBox Grid.Row="2" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="2" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[2].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<ComboBox Grid.Row="3" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="3" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[3].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<ComboBox Grid.Row="4" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="4" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[4].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<ComboBox Grid.Row="5" Width="100" Height="24" Margin="5,5,5,5"
+							<ComboBox Grid.Row="5" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[5].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}"/>
-							<TextBlock Grid.Row="6" Height="24" Margin="5,5,5,5" HorizontalAlignment="Center" FontWeight="Bold"
+							<TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Height="24" Margin="5,5,5,5" HorizontalAlignment="Center" FontWeight="Bold"
 								Text="{Binding EnemyUnitAAV.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 						</Grid>
 					</TabItem>
