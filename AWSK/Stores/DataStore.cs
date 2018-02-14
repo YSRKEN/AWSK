@@ -169,6 +169,7 @@ namespace AWSK.Stores
 						// IDや艦名などを取得
 						int id = int.Parse(kammusu.id);
 						string name = kammusu.name;
+						string type = kammusu.type;
 						int antiair = (int)(kammusu.max_aac);
 						int slotsize = (int)(kammusu.slot);
 						var slot = kammusu.carry;
@@ -192,7 +193,7 @@ namespace AWSK.Stores
 						}
 						// データを登録する
 						var kammusuDataTemp = new KammusuData {
-							Id = id, AntiAir = antiair, KammusuFlg = kammusuFlg, Name = name,
+							Id = id, AntiAir = antiair, KammusuFlg = kammusuFlg, Name = name, Type = type,
 							Slot = new List<int>(), SlotSize = slotsize, Weapon = new List<WeaponData>() };
 						foreach (var size in slot) {
 							kammusuDataTemp.Slot.Add((int)size);
@@ -225,7 +226,9 @@ namespace AWSK.Stores
 							continue;
 						}
 						if (kammusuDicWikia.ContainsKey(kammusuList[ki].Id)) {
-							kammusuList[ki] = kammusuDicWikia[kammusuList[ki].Id];
+							var kammusuTemp = kammusuDicWikia[kammusuList[ki].Id];
+							kammusuTemp.Type = kammusuList[ki].Type;
+							kammusuList[ki] = kammusuTemp;
 							kammusuDataFlg[ki] = true;
 						}
 					}
@@ -246,7 +249,7 @@ namespace AWSK.Stores
 					var kammusu = kammusuList[ki];
 					// コマンドを記録する
 					string sql = "INSERT INTO Kammusu VALUES(";
-					sql += $"{kammusu.Id},'{kammusu.Name}',{kammusu.AntiAir},{kammusu.SlotSize},";
+					sql += $"{kammusu.Id},'{kammusu.Name}','{kammusu.Type}',{kammusu.AntiAir},{kammusu.SlotSize},";
 					{
 						int count = 0;
 						foreach (int size in kammusu.Slot) {
@@ -386,11 +389,17 @@ namespace AWSK.Stores
 								hasTableFlg = true;
 							}
 						}
-						if (!hasTableFlg) {
+						if (forceUpdateFlg) {
+							string sql = "DROP TABLE [Kammusu]";
+							cmd.CommandText = sql;
+							cmd.ExecuteNonQuery();
+						}
+						if (!hasTableFlg || forceUpdateFlg) {
 							string sql = @"
 								CREATE TABLE [Kammusu](
 								[id] INTEGER NOT NULL PRIMARY KEY,
 								[name] TEXT NOT NULL DEFAULT '',
+								[type] TEXT NOT NULL DEFAULT '',
 								[antiair] INTEGER NOT NULL DEFAULT 0,
 								[slotsize] INTEGER NOT NULL DEFAULT 0,
 								[slot1] INTEGER NOT NULL DEFAULT 0,
@@ -476,23 +485,24 @@ namespace AWSK.Stores
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
 					// 艦娘データを正引き
-					cmd.CommandText = $"SELECT name, antiair, slotsize, kammusu_flg, slot1, slot2, slot3, slot4, slot5, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
+					cmd.CommandText = $"SELECT name, type, antiair, slotsize, kammusu_flg, slot1, slot2, slot3, slot4, slot5, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
 					using (var reader = cmd.ExecuteReader()) {
 						if (reader.Read()) {
 							kd = new KammusuData {
 								Id = id,
 								Name = reader.GetString(0),
+								Type = reader.GetString(1),
 								Level = 1,
-								AntiAir = reader.GetInt32(1),
-								SlotSize = reader.GetInt32(2),
-								KammusuFlg = (reader.GetInt32(3) == 1 ? true : false),
+								AntiAir = reader.GetInt32(2),
+								SlotSize = reader.GetInt32(3),
+								KammusuFlg = (reader.GetInt32(4) == 1 ? true : false),
 								Weapon = new List<WeaponData>(),
 								Slot = new List<int>(),
 							};
 							for (int i = 0; i < 5; ++i) {
-								int size = reader.GetInt32(4 + i);
+								int size = reader.GetInt32(5 + i);
 								kd.Slot.Add(size);
-								int wId = reader.GetInt32(9 + i);
+								int wId = reader.GetInt32(10 + i);
 								if (wId > 0) {
 									weaponList.Add(wId);
 								}
@@ -917,6 +927,7 @@ namespace AWSK.Stores
 	{
 		public int Id;
 		public string Name;
+		public string Type;
 		public int Level;
 		public int AntiAir;
 		public int SlotSize;
