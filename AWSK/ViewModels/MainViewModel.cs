@@ -12,9 +12,6 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
-		private Dictionary<string, List<string>> enemyListEachType;
-		private List<ObservableCollection<string>> enemyListByType = new List<ObservableCollection<string>>();
-
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
@@ -44,11 +41,9 @@ namespace AWSK.ViewModels
 		// 装備改修度の一覧
 		public ReadOnlyReactiveCollection<string> RfList { get; }
 		// 深海棲艦の艦名一覧
-		public List<ReadOnlyReactiveCollection<string>> EnemyListByType { get; private set; }
-			= new List<ReadOnlyReactiveCollection<string>>();
+		public ReadOnlyReactiveCollection<string> EnemyList { get; }
 		// 深海棲艦の艦種一覧
-		public List<ReadOnlyReactiveCollection<string>> EnemyTypeList { get; }
-			= new List<ReadOnlyReactiveCollection<string>>();
+		public ReadOnlyReactiveCollection<string> EnemyTypeList { get; }
 		// 基地航空隊に使用できる装備の一覧
 		public ReadOnlyReactiveCollection<string> BasedAirUnitList { get; }
 		#endregion
@@ -235,8 +230,12 @@ namespace AWSK.ViewModels
 				// 「なし」が選択されている敵艦は無視する
 				if (enemyIndex <= 0)
 					continue;
+				// コンボボックスの選択内容を引き出す
+				string comboBoxName = EnemyList[enemyIndex];
+				// 選択内容が、「艦名＋ID」ではない場合は飛ばす
+				if (comboBoxName.IndexOf("[") < 0 || comboBoxName.IndexOf("]") < 0)
+					continue;
 				// idを算出する
-				string comboBoxName = EnemyListByType[ki][enemyIndex];
 				int enemyId = int.Parse(comboBoxName.Substring(comboBoxName.LastIndexOf("[") + 1, comboBoxName.LastIndexOf("]") - comboBoxName.LastIndexOf("[") - 1));
 				// idから敵艦情報を得る
 				var enemy = DataStore.KammusuDataById(enemyId, true);
@@ -282,18 +281,9 @@ namespace AWSK.ViewModels
 						if (enemyData.Kammusu.Count > 0) {
 							for(int ki = 0; ki < enemyData.Kammusu[0].Count; ++ki) {
 								var kammusu = enemyData.Kammusu[0][ki];
-								int typeIndex = EnemyTypeList[ki].ToList().IndexOf(kammusu.Type);
-								int kammusuIndex = enemyListEachType[kammusu.Type].IndexOf($"{kammusu.Name} [{kammusu.Id}]");
+								int typeIndex = EnemyTypeList.IndexOf(kammusu.Type);
+								int kammusuIndex = EnemyList.IndexOf($"{kammusu.Name} [{kammusu.Id}]");
 								EnemyTypeIndex[ki].Value = typeIndex;
-								// 当メソッドおよび呼び出し先のSubscribeが終了するまでは
-								// 「EnemyUnitIndex[ki].Value = kammusuIndex;」
-								// と書きたいのに書けない極悪糞仕様があるため、
-								// 対策として「EnemyListByTypeの中身をこの時点で書き換えて
-								// しまう」という荒業を選択せざるを得なかった。対案求む！
-								var list = enemyListEachType[kammusu.Type];
-								var oc = new ObservableCollection<string>(list);
-								enemyListByType[ki] = oc;
-								EnemyListByType[ki] = oc.ToReadOnlyReactiveCollection();
 								EnemyUnitIndex[ki].Value = kammusuIndex;
 							}
 						}
@@ -327,13 +317,14 @@ namespace AWSK.ViewModels
 		// comboIndex→コンボボックスの位置を表す番号(0～5)
 		// typeIndex→右の艦種選択コンボボックスの選択番号(0～)
 		private void ResetEnemyListByType(int comboIndex, int typeIndex) {
-			string type = EnemyTypeList[comboIndex][typeIndex];
-			Console.WriteLine($"{type} {comboIndex}");
-			enemyListByType[comboIndex].Clear();
-			enemyListByType[comboIndex].Add("なし");
-			foreach (string name in enemyListEachType[type]) {
-				enemyListByType[comboIndex].Add(name);
+			string type = EnemyTypeList[typeIndex];
+			// 特殊処理
+			if(type == "--") {
+				EnemyUnitIndex[comboIndex].Value = 0;
 			}
+			// 自動選択
+			int enemyIndex = EnemyList.IndexOf($"【{type}】");
+			EnemyUnitIndex[comboIndex].Value = enemyIndex;
 		}
 		#endregion
 		// その他初期化用コード
@@ -479,11 +470,11 @@ namespace AWSK.ViewModels
 				RfList = oc.ToReadOnlyReactiveCollection();
 			}
 			{
-				var list = DataStore.EnemyNameList();
 				// 敵艦名のリストから、新たに表示用リストを作成
-				enemyListEachType = new Dictionary<string, List<string>>();
-				enemyListEachType["--"] = new List<string>();
-				foreach (var pair in list) {
+				var enemyNameList = DataStore.EnemyNameList();
+				//まず艦種毎に艦名リストを再構成する
+				var enemyListEachType = new Dictionary<string, List<string>>();
+				foreach (var pair in enemyNameList) {
 					// 艦のID・艦名・艦種
 					int id = pair.Key;
 					string name = pair.Value.Key;
@@ -494,20 +485,31 @@ namespace AWSK.ViewModels
 					}
 					enemyListEachType[type].Add($"{name} [{id}]");
 				}
-				var enemyTypeList = new List<string>();
-				foreach(string type in enemyListEachType.Keys) {
-					enemyTypeList.Add(type);
+				//次に艦種一覧をコンボボックス用に宛がう
+				{
+					var list = new List<string> { "--" };
+					foreach(var pair in enemyListEachType) {
+						list.Add(pair.Key);
+					}
+					var oc = new ObservableCollection<string>(list);
+					EnemyTypeList = oc.ToReadOnlyReactiveCollection();
 				}
-				// 艦種の表示用リストを反映
 				for (int ki = 0; ki < 6; ++ki) {
-					var oc = new ObservableCollection<string>(enemyTypeList);
-					EnemyTypeList.Add(oc.ToReadOnlyReactiveCollection());
 					EnemyTypeIndex.Add(new ReactiveProperty<int>(0));
 				}
-				// 艦名の表示用リストを準備
-				for(int ki = 0; ki< 6; ++ki) {
-					enemyListByType.Add(new ObservableCollection<string>(new List<string>()));
-					EnemyListByType.Add(enemyListByType[ki].ToReadOnlyReactiveCollection());
+				//最後にコンボボックス用の艦名一覧を作成する
+				var enemyNameList2 = new List<string>();
+				enemyNameList2.Add("なし");
+				foreach(var pair in enemyListEachType) {
+					string type = pair.Key;
+					enemyNameList2.Add($"【{type}】");
+					foreach(string name in pair.Value) {
+						enemyNameList2.Add(name);
+					}
+				}
+				{
+					var oc = new ObservableCollection<string>(enemyNameList2);
+					EnemyList = oc.ToReadOnlyReactiveCollection();
 				}
 				// 艦種を切り替えると艦名のリストが切り替わる処理
 				EnemyTypeIndex[0].Subscribe(x => { ResetEnemyListByType(0, x); });
