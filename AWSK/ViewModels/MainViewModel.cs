@@ -13,7 +13,6 @@ namespace AWSK.ViewModels
 	class MainViewModel
 	{
 		private Dictionary<string, List<string>> enemyListEachType;
-		private List<string> enemyTypeList;
 		private List<ObservableCollection<string>> enemyListByType = new List<ObservableCollection<string>>();
 
 		#region プロパティ(ReactiveProperty)
