@@ -12,7 +12,7 @@ Air War Simulator for Kantai Collection
 - sampleフォルダに、基地航空隊編成や敵艦隊編成のサンプルデータが置いてあります(読み込み方は後述)
 
 ## 画面構成・使い方
-![image](https://user-images.githubusercontent.com/3734392/36104554-af2e2238-1055-11e8-97a5-98f116eda1c0.png)
+![image](https://user-images.githubusercontent.com/3734392/36317033-4ddf83d2-137f-11e8-8867-a5ebcfa99feb.png)
 
 - 基地航空隊において、各航空隊の攻撃回数のコンボボックスを右クリックすると、基地航空隊設定の保存・読み込みができます
 - 敵艦隊において、一番上のコンボボックスを右クリックすると、装備の詳細表示、および敵艦隊設定の保存・読み込みができます
