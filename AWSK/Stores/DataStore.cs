@@ -763,11 +763,13 @@ namespace AWSK.Stores
 					}
 					// 艦名と練度を出力
 					output += $"{kammusu.Name} Lv{kammusu.Level}　";
-					// 装備情報を出力
+					// 装備とスロット数情報を出力
 					for (int ii = 0; ii < kammusu.Weapon.Count; ++ii) {
 						var weapon = kammusu.Weapon[ii];
 						if (ii != 0)
 							output += ",";
+						//搭載数
+						output += $"[{kammusu.Slot[ii]}]";
 						// 装備名
 						output += $"{weapon.Name}";
 						// 艦載機熟練度
