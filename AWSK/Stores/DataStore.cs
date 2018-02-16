@@ -143,9 +143,8 @@ namespace AWSK.Stores
 					if(node == null)
 						break;
 					string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
-						kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
+					kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
 				}
-					Console.WriteLine($"{kammusu.Name}");
 				return kammusu;
 			}).ToList();
 			return kammusuData;
@@ -238,7 +237,6 @@ namespace AWSK.Stores
 					if (kammusuDataFlg[ki]) {
 						continue;
 					}
-					Console.WriteLine($"{kammusuList[ki].Id} {kammusuList[ki].Name}");
 				}
 				// SQLコマンドを生成する
 				var commandList = new List<string>();
@@ -463,6 +461,7 @@ namespace AWSK.Stores
 		}
 		// データをダウンロードする
 		public static async Task<bool> DownloadDataAsync() {
+			await GetWeaponDicWikia();
 			bool flg1 = await DownloadKammusuDataAsync();
 			bool flg2 = await DownloadWeaponDataAsync();
 			return flg1 && flg2;

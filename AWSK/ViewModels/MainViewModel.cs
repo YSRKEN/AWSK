@@ -342,7 +342,6 @@ namespace AWSK.ViewModels
 				CloseWindow.Value = true;
 				return;
 			}
-			await DataStore.GetWeaponDicWikia();
 		}
 
 		// クリップボードからインポート
