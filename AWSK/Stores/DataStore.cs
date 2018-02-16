@@ -624,15 +624,15 @@ namespace AWSK.Stores
 			return list;
 		}
 		// 深海棲艦の艦名一覧をid付きで返す
-		public static Dictionary<int, string> EnemyNameList() {
-			var list = new Dictionary<int, string>();
+		public static Dictionary<int, KeyValuePair<string, string>> EnemyNameList() {
+			var list = new Dictionary<int, KeyValuePair<string, string>>();
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
-					cmd.CommandText = $"SELECT id, name FROM Kammusu WHERE kammusu_flg=0";
+					cmd.CommandText = $"SELECT id, name, type FROM Kammusu WHERE kammusu_flg=0 ORDER BY id";
 					using (var reader = cmd.ExecuteReader()) {
 						while (reader.Read()) {
-							list[reader.GetInt32(0)] = reader.GetString(1);
+							list[reader.GetInt32(0)] = new KeyValuePair<string, string>(reader.GetString(1), reader.GetString(2));
 						}
 					}
 				}

@@ -266,12 +266,24 @@
 								<RowDefinition Height="auto"/>
 								<RowDefinition Height="auto"/>
 							</Grid.RowDefinitions>
-							<ComboBox Grid.Row="0" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
-							<ComboBox Grid.Row="1" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
-							<ComboBox Grid.Row="2" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
-							<ComboBox Grid.Row="3" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
-							<ComboBox Grid.Row="4" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
-							<ComboBox Grid.Row="5" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"/>
+							<ComboBox Grid.Row="0" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[0].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
+							<ComboBox Grid.Row="1" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[1].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
+							<ComboBox Grid.Row="2" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[2].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
+							<ComboBox Grid.Row="3" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[3].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
+							<ComboBox Grid.Row="4" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[4].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
+							<ComboBox Grid.Row="5" Grid.Column="0" Width="60" Height="24" Margin="5,5,2,5"
+								SelectedIndex="{Binding EnemyTypeIndex[5].Value, UpdateSourceTrigger=PropertyChanged}"
+								ItemsSource="{Binding EnemyTypeList}"/>
 							<ComboBox Grid.Row="0" Grid.Column="1" Width="100" Height="24" Margin="2,5,5,5"
 								SelectedIndex="{Binding EnemyUnitIndex[0].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyList}">

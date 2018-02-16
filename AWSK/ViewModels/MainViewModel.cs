@@ -12,6 +12,8 @@ namespace AWSK.ViewModels
 {
 	class MainViewModel
 	{
+		private Dictionary<string, List<string>> enemyListEachType;
+
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
 		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
@@ -27,6 +29,8 @@ namespace AWSK.ViewModels
 		public List<List<ReactiveProperty<int>>> BasedAirUnitRf { get; } = new List<List<ReactiveProperty<int>>>();
 		// 敵艦隊の艦の選択番号
 		public List<ReactiveProperty<int>> EnemyUnitIndex { get; } = new List<ReactiveProperty<int>>();
+		// 敵艦隊の艦種の選択番号
+		public List<ReactiveProperty<int>> EnemyTypeIndex { get; } = new List<ReactiveProperty<int>>();
 		// 基地航空隊・敵艦隊の制空値
 		public List<ReactiveProperty<string>> BasedAirUnitAAV { get; } = new List<ReactiveProperty<string>>();
 		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
@@ -40,6 +44,8 @@ namespace AWSK.ViewModels
 		public ReadOnlyReactiveCollection<string> RfList { get; }
 		// 深海棲艦の艦名一覧
 		public ReadOnlyReactiveCollection<string> EnemyList { get; }
+		// 深海棲艦の艦種一覧
+		public ReadOnlyReactiveCollection<string> EnemyTypeList { get; }
 		// 基地航空隊に使用できる装備の一覧
 		public ReadOnlyReactiveCollection<string> BasedAirUnitList { get; }
 		#endregion
@@ -457,13 +463,25 @@ namespace AWSK.ViewModels
 			{
 				var list = DataStore.EnemyNameList();
 				// 敵艦名のリストから、新たに表示用リストを作成
-				var list2 = new List<string>();
-				list2.Add("なし");
-				foreach (var pair in list.OrderBy(pair => pair.Key)) {
-					list2.Add($"{pair.Value} [{pair.Key}]");
+				enemyListEachType = new Dictionary<string, List<string>>();
+				foreach (var pair in list) {
+					// 艦のID・艦名・艦種
+					int id = pair.Key;
+					string name = pair.Value.Key;
+					string type = pair.Value.Value;
+					// 登録
+					if (!enemyListEachType.ContainsKey(type)) {
+						enemyListEachType[type] = new List<string>();
+					}
+					enemyListEachType[type].Add($"{name} [{id}]");
 				}
-				var oc = new ObservableCollection<string>(list2);
-				EnemyList = oc.ToReadOnlyReactiveCollection();
+				var list2 = new List<string>();
+				list2.Add("--");
+				foreach(string type in enemyListEachType.Keys) {
+					list2.Add(type);
+				}
+				var oc1 = new ObservableCollection<string>(list2);
+				EnemyTypeList = oc1.ToReadOnlyReactiveCollection();
 			}
 			{
 				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
