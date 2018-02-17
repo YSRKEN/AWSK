@@ -109,7 +109,7 @@ namespace AWSK.Stores
 				int slots = int.Parse(temp[temp.IndexOf("Slots") + 2]);
 				// 結果を書き込む
 				var kammusu = new KammusuData {
-					Id = no + 1000,
+					Id = (no < 1000 ? no + 1000 : no),
 					Name = name,
 					Level = 1,
 					KammusuFlg = (no <= 500),
@@ -152,7 +152,7 @@ namespace AWSK.Stores
 		// 艦娘のデータをダウンロードする
 		private static async Task<bool> DownloadKammusuDataAsync() {
 			Console.WriteLine("艦娘のデータをダウンロード中……");
-			try {
+			//try {
 				// 艦娘データをダウンロード・パースする
 				var kammusuList = new List<KammusuData>();	//艦娘データ
 				var kammusuDataFlg = new List<bool>();      //艦娘データが不完全ならfalse
@@ -231,6 +231,14 @@ namespace AWSK.Stores
 							kammusuDataFlg[ki] = true;
 						}
 					}
+					foreach(var pair in kammusuDicWikia) {
+						int id = pair.Key;
+						var kammusu = pair.Value;
+						if(kammusuList.Count(p => p.Id == id) == 0) {
+							kammusuList.Add(kammusu);
+							kammusuDataFlg.Add(true);
+						}
+					}
 				}
 				//
 				for(int ki = 0; ki < kammusuList.Count; ++ki) {
@@ -287,11 +295,11 @@ namespace AWSK.Stores
 				}
 				Console.WriteLine("ダウンロード完了");
 				return true;
-			} catch (Exception e) {
+			/*} catch (Exception e) {
 				Console.WriteLine("ダウンロード失敗");
 				Console.WriteLine(e.ToString());
 				return false;
-			}
+			}*/
 		}
 		// 装備のデータをダウンロードする
 		private static async Task<bool> DownloadWeaponDataAsync() {
