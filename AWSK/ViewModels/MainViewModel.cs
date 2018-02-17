@@ -34,6 +34,9 @@ namespace AWSK.ViewModels
 		public ReactiveProperty<string> EnemyUnitAAV { get; } = new ReactiveProperty<string>("");
 		// シミュレーションの反復回数
 		public ReactiveProperty<int> SimulationCountIndex { get; } = new ReactiveProperty<int>(1);
+		// ダウンロードボタンの表示
+		public ReactiveProperty<bool> UpdateDatabaseButtonFlg { get; } = new ReactiveProperty<bool>(true);
+		public ReadOnlyReactiveProperty<string> UpdateDatabaseButtonMessage { get; }
 		#endregion
 		#region プロパティ(ReadOnlyReactiveCollection)
 		// 艦載機熟練度の一覧
@@ -380,6 +383,7 @@ namespace AWSK.ViewModels
 		}
 		// データベースを更新する
 		public async void UpdateDatabase() {
+			UpdateDatabaseButtonFlg.Value = false;
 			// データベースの初期化
 			var status = await DataStore.Initialize(true);
 			switch (status) {
@@ -390,6 +394,7 @@ namespace AWSK.ViewModels
 				MessageBox.Show("ダウンロードに失敗しました。", "AWSK");
 				break;
 			}
+			UpdateDatabaseButtonFlg.Value = true;
 		}
 
 		// コンストラクタ
@@ -455,8 +460,10 @@ namespace AWSK.ViewModels
 			for (int ki = 0; ki < 6; ++ki) {
 				EnemyUnitIndex[ki].Subscribe(_ => ReCalcEnemyUnitAAV());
 			}
+			//UpdateDatabaseButtonMessage
+			UpdateDatabaseButtonMessage = UpdateDatabaseButtonFlg.Select(f => (f ? "データベースを更新" : "更新中...")).ToReadOnlyReactiveProperty();
 			#region 各種ReactiveCollection
-				{
+			{
 				var oc = new ObservableCollection<string>(new List<string> {
 					"--", "|", "||", "|||", "/", "//", "///", ">>"
 				});
@@ -525,7 +532,7 @@ namespace AWSK.ViewModels
 			#endregion
 			// コマンドを設定
 			RunSimulationCommand = BasedAirUnitFlg
-				.CombineLatest(x => x.Any(y => y)).ToReactiveCommand();
+				.CombineLatest(x => x.Any(y => y)).CombineLatest(UpdateDatabaseButtonFlg, (x, y) => x & y).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
 			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
 			ShowEnemyUnitCommand.Subscribe(_ => { MessageBox.Show("敵編成：\n" + GetEnemyData().ToString(), "AWSK"); });
