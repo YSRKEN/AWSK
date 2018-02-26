@@ -251,6 +251,8 @@ namespace AWSK.Stores
 					var category = ParseEnemyListWikia(rawData);
 					category["護衛棲水姫"] = "http://kancolle.wikia.com/wiki/Escort_Water_Princess"; //パッチ
 					category["深海鶴棲姫"] = "http://kancolle.wikia.com/wiki/Abyssal_Crane_Princess"; //パッチ
+					category["戦艦棲姫改"] = "http://kancolle.wikia.com/wiki/Battleship_Princess_Kai"; //パッチ
+					category["戦艦水鬼改"] = "http://kancolle.wikia.com/wiki/Battleship_Water_Demon_Kai"; //パッチ
 					// カテゴリ毎にページをクロールしていく
 					var kammusuDicWikia = new Dictionary<int, KammusuData>();
 					foreach (var pair in category) {
@@ -281,6 +283,42 @@ namespace AWSK.Stores
 							kammusuDataFlg.Add(true);
 						}
 					}
+				}
+				// 不完全データに対する追加パッチ
+				{
+					//
+					kammusuList.Add(new KammusuData {
+						Id = 1786, Name = "護衛棲水姫-壊", Type = "軽空母", AntiAir = 108, SlotSize = 4,
+						Slot = new List<int> { 42, 36, 34, 0 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
+						WeaponDataById(581), WeaponDataById(582), WeaponDataById(583), WeaponDataById(580)
+					}
+					});
+					kammusuDataFlg.Add(true);
+					//
+					int patchIndex = kammusuList.FindIndex(p => p.Id == 1802);
+					kammusuList[patchIndex]= new KammusuData {
+						Id = 1802, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
+						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
+						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
+					}
+					};
+					kammusuDataFlg[patchIndex] = true;
+					//
+					kammusuList.Add(new KammusuData {
+						Id = 1803, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
+						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
+						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
+					}
+					});
+					kammusuDataFlg.Add(true);
+					//
+					kammusuList.Add(new KammusuData {
+						Id = 1804, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
+						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
+						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
+					}
+					});
+					kammusuDataFlg.Add(true);
 				}
 				// SQLコマンドを生成する
 				var commandList = new List<string>();
