@@ -97,65 +97,103 @@ namespace AWSK.Stores
 					return int.TryParse(str, out int _);
 				})
 				.Select(item => {
-				// 艦名のテキストから、艦名とIDを取得
-				string nameText = item.QuerySelector("tr > td > div > b").TextContent;
-				int dotIndex = nameText.IndexOf(".");
-				int spaceIndex = nameText.IndexOf(" ");
-				int no = int.Parse(nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1));
-				string name = nameText.Substring(spaceIndex + 1);
-				// 対空値を読み取る
-				var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
-				int antiAir = int.Parse(temp[temp.IndexOf("AA") + 1]);
-				int slots = int.Parse(temp[temp.IndexOf("Slots") + 2]);
-				// 結果を書き込む
-				var kammusu = new KammusuData {
-					Id = (no < 1000 ? no + 1000 : no),
-					Name = name,
-					Level = 1,
-					KammusuFlg = (no <= 500),
-					AntiAir = antiAir,
-					SlotSize = slots,
-					Slot = new List<int>(),
-					Weapon = new List<WeaponData>()
-				};
-				// スロットの枠数を読み取る
-				int weaponIndex = temp.IndexOf("Equipment") + 3;
-				for(int i = 0; i < 4; ++i) {
-					// スロット数の文字列を読み取る
-					string slotStr = temp[weaponIndex + 1 + i * 3];
-					// 文字列が「-」ならループを抜ける
-					if (slotStr.Contains("-"))
-						break;
-					// 文字列を数字だけにしてからint型にパースして読み取る
-					var regex = new Regex("[^0-9]");
-					slotStr = regex.Replace(slotStr, "");
-					kammusu.Slot.Add(int.Parse(slotStr));
+					// 艦名のテキストから、艦名とIDを取得
+					string nameText = item.QuerySelector("tr > td > div > b").TextContent;
+					int dotIndex = nameText.IndexOf(".");
+					int spaceIndex = nameText.IndexOf(" ");
+					int no = int.Parse(nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1));
+					string name = nameText.Substring(spaceIndex + 1);
+					// 対空値を読み取る
+					var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
+					int antiAir = int.Parse(temp[temp.IndexOf("AA") + 1]);
+					int slots = int.Parse(temp[temp.IndexOf("Slots") + 2]);
+					// 結果を書き込む
+					var kammusu = new KammusuData {
+						Id = (no < 1000 ? no + 1000 : no),
+						Name = name,
+						Level = 1,
+						KammusuFlg = (no <= 500),
+						AntiAir = antiAir,
+						SlotSize = slots,
+						Slot = new List<int>(),
+						Weapon = new List<WeaponData>()
+					};
+					// 艦種を推定する
+					if(kammusu.Name.Contains("駆逐")) {
+						kammusu.Type = "駆逐艦";
+					}else if (kammusu.Name.Contains("軽巡")) {
+						kammusu.Type = "軽巡洋艦";
+					} else if (kammusu.Name.Contains("重巡")) {
+						if(kammusu.Name == "重巡ネ級flagship") {
+							kammusu.Type = "航空巡洋艦";
+						} else {
+							kammusu.Type = "重巡洋艦";
+						}
+					} else if (kammusu.Name.Contains("戦艦")) {
+						if (kammusu.Name.Contains("レ級") || kammusu.Name.Contains("戦艦仏棲姫")) {
+							kammusu.Type = "航空戦艦";
+						} else if (kammusu.Name.Contains("タ級")) {
+							kammusu.Type = "巡洋戦艦";
+						} else {
+							kammusu.Type = "戦艦";
+						}
+					} else if (kammusu.Name.Contains("軽母")) {
+						kammusu.Type = "軽空母";
+					} else if (kammusu.Name.Contains("空母")) {
+						if (kammusu.Name.Contains("装甲空母")) {
+							kammusu.Type = "航空戦艦";
+						} else {
+							kammusu.Type = "正規空母";
+						}
+					} else if (kammusu.Name.Contains("雷巡")) {
+						kammusu.Type = "重雷装巡洋艦";
+					} else if (kammusu.Name.Contains("潜水")) {
+						kammusu.Type = "潜水艦";
+					} else if (kammusu.Name.Contains("水母")) {
+						kammusu.Type = "水上機母艦";
+					} else if (kammusu.Name.Contains("輸送")) {
+						kammusu.Type = "輸送艦";
+					}
+					// スロットの枠数を読み取る
+					int weaponIndex = temp.IndexOf("Equipment") + 3;
+					for(int i = 0; i < 4; ++i) {
+						// スロット数の文字列を読み取る
+						string slotStr = temp[weaponIndex + 1 + i * 3];
+						// 文字列が「-」「???」ならループを抜ける
+						if (slotStr.Contains("-") || slotStr.Contains("???"))
+							break;
+						// 文字列を数字だけにしてからint型にパースして読み取る
+						var regex = new Regex("[^0-9]");
+						slotStr = regex.Replace(slotStr, "");
+						kammusu.Slot.Add(int.Parse(slotStr));
+					}
+					// スロット毎の装備を読み取る
+					var trList = item.QuerySelectorAll("tr");
+					int equipIndex = trList
+						.Select((value, index) => new {Index = index, Value = value})
+						.Where(x => x.Value.TextContent.Contains("Equipment"))
+						.Select(x => x.Index).First();
+					for (int i = 0; i < 4; ++i) {
+						// 装備のリンクを読み取る
+						var node = trList[equipIndex + i + 1].QuerySelectorAll("td").Skip(1).First().QuerySelector("a");
+						if(node == null)
+							break;
+						string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
+						kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
+					}
+					return kammusu;
 				}
-				// スロット毎の装備を読み取る
-				var trList = item.QuerySelectorAll("tr");
-				int equipIndex = trList
-					.Select((value, index) => new {Index = index, Value = value})
-					.Where(x => x.Value.TextContent.Contains("Equipment"))
-					.Select(x => x.Index).First();
-				for (int i = 0; i < 4; ++i) {
-					// 装備のリンクを読み取る
-					var node = trList[equipIndex + i + 1].QuerySelectorAll("td").Skip(1).First().QuerySelector("a");
-					if(node == null)
-						break;
-					string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
-					kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
-				}
-				return kammusu;
-			}).ToList();
+			).ToList();
 			return kammusuData;
 		}
 		// 艦娘のデータをダウンロードする
 		private static async Task<bool> DownloadKammusuDataAsync() {
 			Console.WriteLine("艦娘のデータをダウンロード中……");
-			//try {
+			try {
 				// 艦娘データをダウンロード・パースする
 				var kammusuList = new List<KammusuData>();	//艦娘データ
 				var kammusuDataFlg = new List<bool>();      //艦娘データが不完全ならfalse
+				Console.WriteLine("・デッキビルダー");
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/shipdata.js");
@@ -205,14 +243,18 @@ namespace AWSK.Stores
 					}
 				}
 				// 不完全データについては、wikiを読み取って補完する
+				Console.WriteLine("・英語Wiki");
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessel");
 					// カテゴリ解析
 					var category = ParseEnemyListWikia(rawData);
+					category["護衛棲水姫"] = "http://kancolle.wikia.com/wiki/Escort_Water_Princess"; //パッチ
+					category["深海鶴棲姫"] = "http://kancolle.wikia.com/wiki/Abyssal_Crane_Princess"; //パッチ
 					// カテゴリ毎にページをクロールしていく
 					var kammusuDicWikia = new Dictionary<int, KammusuData>();
 					foreach (var pair in category) {
+						Console.WriteLine($"　・{pair.Key}");
 						string rawData2 = await client.GetStringAsync(pair.Value);
 						var list = GetKammusuDataWikia(rawData2);
 						foreach (var kammusu in list) {
@@ -238,12 +280,6 @@ namespace AWSK.Stores
 							kammusuList.Add(kammusu);
 							kammusuDataFlg.Add(true);
 						}
-					}
-				}
-				//
-				for(int ki = 0; ki < kammusuList.Count; ++ki) {
-					if (kammusuDataFlg[ki]) {
-						continue;
 					}
 				}
 				// SQLコマンドを生成する
@@ -295,11 +331,11 @@ namespace AWSK.Stores
 				}
 				Console.WriteLine("ダウンロード完了");
 				return true;
-			/*} catch (Exception e) {
+			} catch (Exception e) {
 				Console.WriteLine("ダウンロード失敗");
 				Console.WriteLine(e.ToString());
 				return false;
-			}*/
+			}
 		}
 		// 装備のデータをダウンロードする
 		private static async Task<bool> DownloadWeaponDataAsync() {
@@ -322,6 +358,7 @@ namespace AWSK.Stores
 				}
 				// 装備データをダウンロード・パースする
 				var commandList = new List<string>();
+				Console.WriteLine("・デッキビルダー");
 				using (var client = new HttpClient()) {
 					// ダウンロード
 					string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/itemdata.js");
@@ -355,6 +392,11 @@ namespace AWSK.Stores
 						sql += $"{(weaponFlg ? 1 : 0)})";
 						commandList.Add(sql);
 					}
+				}
+				// 不完全データについては、GitHubにうｐされたデータを読み取って補完する
+				Console.WriteLine("・自前DB");
+				using (var client = new HttpClient()) {
+
 				}
 				// データベースに書き込む
 				using (var con = new SQLiteConnection(connectionString)) {
