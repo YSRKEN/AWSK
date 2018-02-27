@@ -10,9 +10,13 @@ namespace AWSK.Models
 	{
 		// 乱数の起点
 		private static Random random = DsfmtRandom.Create();
+		// St1撃墜用のメモ。killedSlot[搭載数][制空状況]＝[可能性の一覧]
+		private static List<List<List<int>>> killedSlot = PreCalcKilledSlot();
+		// St1撃墜の幅
+		private static List<int> st1Range;
 
 		// 制空状況を判断する
-		enum AirWarStatus { Best, Good, Even, Bad, Worst }
+		enum AirWarStatus { Best, Good, Even, Bad, Worst, Size }
 		private static AirWarStatus JudgeAirWarStatus(int friend, int enemy) {
 			if(friend >= enemy * 3) {
 				return AirWarStatus.Best;
@@ -26,21 +30,43 @@ namespace AWSK.Models
 				return AirWarStatus.Worst;
 			}
 		}
-		// St1撃墜を行う(敵艦隊)
-		private static void LostEnemySlotBySt1(FleetData fleet, ref List<List<List<int>>> slotData, AirWarStatus aws) {
+		// St1撃墜を行うための準備
+		private static List<List<List<int>>> PreCalcKilledSlot() {
 			// 制空定数
-			var awStatusCoeff = new int[]{ 1, 3, 5, 7, 10 };
+			var awStatusCoeff = new int[] { 1, 3, 5, 7, 10 };
+			// 事前計算
+			st1Range = new List<int>();
+			for (int aws = 0; aws < (int)AirWarStatus.Size; ++aws) {
+				st1Range.Add((12 - awStatusCoeff[aws]) * (12 - awStatusCoeff[aws]));
+			}
+			var killedSlot = new List<List<List<int>>>();
+			for(int slot = 0; slot <= 180; ++slot) {
+				var list1 = new List<List<int>>();
+				for (int aws = 0; aws < (int)AirWarStatus.Size; ++aws) {
+					var list2 = new List<int>();
+					for (int i = 0; i <= 11 - awStatusCoeff[aws]; ++i) {
+						for (int j = 0; j <= 11 - awStatusCoeff[aws]; ++j) {
+							list2.Add(slot - slot * (35 * i + 65 * j) / 1000);
+						}
+					}
+					list1.Add(list2);
+				}
+				killedSlot.Add(list1);
+			}
+			return killedSlot;
+		}
+		// St1撃墜を行う(敵艦隊)
+		private static int CalcKilledSlot(int slot, AirWarStatus aws) {
+			return killedSlot[slot][(int)aws][random.Next(st1Range[(int)aws])];
+		}
+		private static void LostEnemySlotBySt1(FleetData fleet, ref List<List<List<int>>> slotData, AirWarStatus aws) {
 			// 計算
 			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
 				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
 					var kammusu = fleet.Kammusu[ui][ki];
 					for (int wi = 0; wi < kammusu.Weapon.Count; ++wi) {
-						int slot = slotData[ui][ki][wi];
 						// St1撃墜を計算して書き戻す
-						int rand1 = random.Next(12 - awStatusCoeff[(int)aws]);
-						int rand2 = random.Next(12 - awStatusCoeff[(int)aws]);
-						int killedSlot = slot * (35 * rand1 + 65 * rand2) / 1000;
-						slotData[ui][ki][wi] -= killedSlot;
+						slotData[ui][ki][wi] = CalcKilledSlot(slotData[ui][ki][wi], aws);
 					}
 				}
 			}
@@ -73,18 +99,8 @@ namespace AWSK.Models
 			// calcFlgがtrueなら、水上偵察機も制空計算に反映する
 			if (!weapon.HasAAV(calcFlg))
 				return 0;
-			// 補正後対空値
-			double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
-			//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
-			if ((weapon.Type[0] == 3 && weapon.Type[2] == 6)
-				|| (weapon.Type[0] == 5 && weapon.Type[1] == 36)
-				|| (weapon.Type[0] == 22 && weapon.Type[2] == 48)) {
-				correctedAA += 0.2 * weapon.Rf;
-			} else if (weapon.Type[0] == 3 && weapon.Type[2] == 7 && weapon.Type[4] == 12) {
-				correctedAA += 0.25 * weapon.Rf;
-			}
 			// 補正後制空能力
-			int correctedAAV = (int)(Math.Floor(correctedAA * Math.Sqrt(slot) + weapon.AntiAirBonus));
+			int correctedAAV = (int)(Math.Floor(weapon.CorrectedAA * Math.Sqrt(slot) + weapon.AntiAirBonus));
 			return correctedAAV;
 		}
 		// 制空値を計算する(1艦)

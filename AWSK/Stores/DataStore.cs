@@ -1044,6 +1044,8 @@ namespace AWSK.Stores
 			CalcAntiAirBonus();
 			// 航空戦に参加するか？
 			CalcHasAAV();
+			// 最終制空値
+			CalcCorrectedAA();
 		}
 		// 艦載機熟練度による制空ボーナス
 		private void CalcAntiAirBonus() {
@@ -1097,6 +1099,20 @@ namespace AWSK.Stores
 		public bool HasAAV(bool calcFlg) {
 			return (calcFlg ? hasAAV[0] : hasAAV[1]);
 		}
+		// 各種影響を加味した最終制空値
+		private void CalcCorrectedAA() {
+			Console.WriteLine("hoge");
+			CorrectedAA = 1.0 * AntiAir + 1.5 * Intercept;
+			//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
+			if ((Type[0] == 3 && Type[2] == 6)
+				|| (Type[0] == 5 && Type[1] == 36)
+				|| (Type[0] == 22 && Type[2] == 48)) {
+				CorrectedAA += 0.2 * Rf;
+			} else if (Type[0] == 3 && Type[2] == 7 && Type[4] == 12) {
+				CorrectedAA += 0.25 * Rf;
+			}
+		}
+		public double CorrectedAA { get; private set; }
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
 	enum DataStoreStatus { Exist, Success, Failed }
