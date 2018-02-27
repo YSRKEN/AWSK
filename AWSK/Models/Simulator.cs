@@ -161,15 +161,6 @@ namespace AWSK.Models
 			for (int si = 0; si < friend.SallyCount.Count; ++si) {
 				friendAntiAirValue.Add(CalcAntiAirValue(friend.Weapon[si], friend.GetSlotData()[si]));
 			}
-			var slotProb = new List<List<Dictionary<int, double>>>();
-			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
-				var list = new List<Dictionary<int, double>>();
-				for(int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
-					var dic = new Dictionary<int, double>();
-					list.Add(dic);
-				}
-				slotProb.Add(list);
-			}
 			// シミュレーションを行う
 			for (int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
@@ -186,67 +177,15 @@ namespace AWSK.Models
 						LostEnemySlotBySt1(enemy, ref enemySlotData, airWarStatus);
 					}
 				}
-				// スロット情報を登録する
-				for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
-					for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
-						int key = enemySlotData[0][ki][wi];
-						if (slotProb[ki][wi].ContainsKey(key)) {
-							slotProb[ki][wi][key] += 1.0;
-						} else {
-							slotProb[ki][wi][key] = 1.0;
-						}
-					}
-				}
 				// 最終制空値を読み取る
-				/*int aav = CalcAntiAirValue(enemy, enemySlotData, true);
+				int aav = CalcAntiAirValue(enemy, enemySlotData, true);
 				if (finalAAV.ContainsKey(aav)) {
 					++finalAAV[aav];
 				} else {
 					finalAAV[aav] = 1;
-				}*/
-			}
-			// スロットの各数をシミュレーション回数で割る(誤差対策)
-			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
-				for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
-					var list = slotProb[ki][wi].ToList();
-					foreach (var pair in list) {
-						slotProb[ki][wi][pair.Key] /= simulationCount;
-					}
 				}
 			}
-			// スロット毎に制空値の分布を算出し、畳み込む
-			finalAAV[0] = 1.0;
-			for (int ki = 0; ki < enemy.Kammusu.First().Count; ++ki) {
-				for (int wi = 0; wi < enemy.Kammusu.First()[ki].Weapon.Count; ++wi) {
-					// 搭載数分布から制空値分布を作成
-					var aavDic = new Dictionary<int, double>();
-					var slotProbtemp = slotProb[ki][wi];
-					foreach(var pair in slotProbtemp) {
-						int aav = CalcAntiAirValue(enemy.Kammusu.First()[ki].Weapon[wi], pair.Key, true);
-						if (aavDic.ContainsKey(aav)) {
-							aavDic[aav] += pair.Value;
-						} else {
-							aavDic[aav] = pair.Value;
-						}
-					}
-					// 制空値分布を畳み込む
-					var aavDic2 = new Dictionary<int, double>();
-					foreach (var pair1 in finalAAV) {
-						foreach (var pair2 in aavDic) {
-							int key = pair1.Key + pair2.Key;
-							double value = pair1.Value * pair2.Value;
-							if (aavDic2.ContainsKey(key)) {
-								aavDic2[key] += value;
-							} else {
-								aavDic2[key] = value;
-							}
-						}
-					}
-					// 上書きする
-					finalAAV = aavDic2;
-				}
-			}
-			finalAAV = finalAAV.OrderBy((x) => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
+			finalAAV = finalAAV.OrderBy((x) => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value / simulationCount);
 		}
 	}
 }
