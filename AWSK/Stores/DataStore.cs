@@ -649,6 +649,7 @@ namespace AWSK.Stores
 					}
 				}
 			}
+			wd.Refresh();
 			return wd;
 		}
 		// 装備のデータをnameから逆引きする
@@ -692,6 +693,7 @@ namespace AWSK.Stores
 					}
 				}
 			}
+			wd.Refresh();
 			return wd;
 		}
 		// 艦名一覧を返す
@@ -1036,63 +1038,64 @@ namespace AWSK.Stores
 		public int Rf;          //装備改修度
 		public int BAURange;    //戦闘行動半径
 		public bool WeaponFlg;
-		public int AntiAirBonus {   // 艦載機熟練度
-			get {
-				// 艦戦・水戦制空ボーナス
-				var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22 };
-				// 水爆制空ボーナス
-				var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6 };
-				// 内部熟練ボーナス
-				var masBonus = new int[] { 0, 1, 1, 2, 2, 2, 2, 3 };
-				// 装備種を判断し、そこから制空ボーナスを算出
-				// 艦戦・水戦・陸戦・局戦は+25
-				if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
-					return pfwfBonus[Mas] + masBonus[Mas];
+		// 事前計算
+		public void Refresh() {
+			// 艦載機熟練度による制空ボーナス
+			CalcAntiAirBonus();
+			// 航空戦に参加するか？
+			CalcHasAAV();
+		}
+		// 艦載機熟練度による制空ボーナス
+		private void CalcAntiAirBonus() {
+			// 艦戦・水戦制空ボーナス
+			var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22 };
+			// 水爆制空ボーナス
+			var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6 };
+			// 内部熟練ボーナス
+			var masBonus = new int[] { 0, 1, 1, 2, 2, 2, 2, 3 };
+			// 装備種を判断し、そこから制空ボーナスを算出
+			// 艦戦・水戦・陸戦・局戦は+25
+			if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
+				AntiAirBonus = pfwfBonus[Mas] + masBonus[Mas];
 				// 水爆は+9
-				} else if (Type[1] == 43) {
-					return wbBonus[Mas] + masBonus[Mas];
-				} else {
-					return masBonus[Mas];
-				}
+			} else if (Type[1] == 43) {
+				AntiAirBonus = wbBonus[Mas] + masBonus[Mas];
+			} else {
+				AntiAirBonus = masBonus[Mas];
 			}
 		}
-		public bool HasAAV {   // 航空戦に参加するか？
-			get {
-				// 艦戦・艦攻・艦爆・爆戦・噴式(カ号・三式指揮連絡機を除く)
-				if(Type[0] == 3 && Type[1] != 15 && Type[1] != 16) {
-					return true;
-				}
-				// 水戦・水爆
-				if(Type[0] == 5 && (Type[1] == 36 || Type[1] == 43)) {
-					return true;
-				}
-				// 陸攻・局戦・陸戦
-				if(Type[0] == 21 || Type[0] == 22) {
-					return true;
-				}
-				return false;
+		public int AntiAirBonus { get; private set; }
+		// 航空戦に参加するか？(calcFlgがtrueなら、水上偵察機も参加するものとする)
+		private bool[] hasAAV;
+		private void CalcHasAAV() {
+			hasAAV = new[]{ false, false };
+			// 艦戦・艦攻・艦爆・爆戦・噴式(カ号・三式指揮連絡機を除く)
+			if (Type[0] == 3 && Type[1] != 15 && Type[1] != 16) {
+				hasAAV[0] = true;
+				hasAAV[1] = true;
+				return;
+			}
+			// 水戦・水爆
+			if (Type[0] == 5 && (Type[1] == 36 || Type[1] == 43)) {
+				hasAAV[0] = true;
+				hasAAV[1] = true;
+				return;
+			}
+			// 陸攻・局戦・陸戦
+			if (Type[0] == 21 || Type[0] == 22) {
+				hasAAV[0] = true;
+				hasAAV[1] = true;
+				return;
+			}
+			// 水偵
+			if (Type[0] == 5 && Type[1] == 7 && Type[2] == 10) {
+				hasAAV[0] = true;
+				hasAAV[1] = false;
+				return;
 			}
 		}
-		public bool HasAAV2 {   // 航空戦に参加するか？
-			get {
-				// 艦戦・艦攻・艦爆・爆戦・噴式(カ号・三式指揮連絡機を除く)
-				if (Type[0] == 3 && Type[1] != 15 && Type[1] != 16) {
-					return true;
-				}
-				// 水戦・水爆
-				if (Type[0] == 5 && (Type[1] == 36 || Type[1] == 43)) {
-					return true;
-				}
-				// 水偵
-				if (Type[0] == 5 && Type[1] == 7 && Type[2] == 10) {
-					return true;
-				}
-				// 陸攻・局戦・陸戦
-				if (Type[0] == 21 || Type[0] == 22) {
-					return true;
-				}
-				return false;
-			}
+		public bool HasAAV(bool calcFlg) {
+			return (calcFlg ? hasAAV[0] : hasAAV[1]);
 		}
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)

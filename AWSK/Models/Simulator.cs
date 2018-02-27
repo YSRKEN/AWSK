@@ -71,13 +71,8 @@ namespace AWSK.Models
 				return 0;
 			// 制空計算に参加する装備(艦戦・艦攻・艦爆・爆戦・噴式・水戦・水爆)かを判断する
 			// calcFlgがtrueなら、水上偵察機も制空計算に反映する
-			if (calcFlg) {
-				if (!weapon.HasAAV2)
-					return 0;
-			} else {
-				if (!weapon.HasAAV)
-					return 0;
-			}
+			if (!weapon.HasAAV(calcFlg))
+				return 0;
 			// 補正後対空値
 			double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
 			//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)

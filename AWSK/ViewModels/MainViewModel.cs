@@ -87,6 +87,7 @@ namespace AWSK.ViewModels
 					var weapon = DataStore.WeaponDataByName(name);
 					weapon.Mas = BasedAirUnitMas[ui][wi].Value;
 					weapon.Rf = BasedAirUnitRf[ui][wi].Value;
+					weapon.Refresh();
 					temp.Add(weapon);
 				}
 				if (temp.Count > 0) {
