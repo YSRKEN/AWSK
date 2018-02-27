@@ -1044,8 +1044,10 @@ namespace AWSK.Stores
 			CalcAntiAirBonus();
 			// 航空戦に参加するか？
 			CalcHasAAV();
-			// 最終制空値
+			// 最終対空値
 			CalcCorrectedAA();
+			// スロットサイズごとの制空値
+			CalcAntiAirValue();
 		}
 		// 艦載機熟練度による制空ボーナス
 		private void CalcAntiAirBonus() {
@@ -1099,9 +1101,8 @@ namespace AWSK.Stores
 		public bool HasAAV(bool calcFlg) {
 			return (calcFlg ? hasAAV[0] : hasAAV[1]);
 		}
-		// 各種影響を加味した最終制空値
+		// 各種影響を加味した最終対空値
 		private void CalcCorrectedAA() {
-			Console.WriteLine("hoge");
 			CorrectedAA = 1.0 * AntiAir + 1.5 * Intercept;
 			//改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
 			if ((Type[0] == 3 && Type[2] == 6)
@@ -1113,6 +1114,28 @@ namespace AWSK.Stores
 			}
 		}
 		public double CorrectedAA { get; private set; }
+		// スロットサイズごとの制空値
+		private List<int> antiAirValue1, antiAirValue2;
+		private void CalcAntiAirValue() {
+			antiAirValue1 = new List<int>();
+			antiAirValue2 = new List<int>();
+			for (int slot = 0; slot <= 180; ++slot) {
+				int aav = (int)(Math.Floor(CorrectedAA * Math.Sqrt(slot) + AntiAirBonus));
+				if (HasAAV(true)) {
+					antiAirValue1.Add(aav);
+				} else {
+					antiAirValue1.Add(0);
+				}
+				if (HasAAV(false)) {
+					antiAirValue2.Add(aav);
+				} else {
+					antiAirValue2.Add(0);
+				}
+			}
+		}
+		public int AntiAirValue(int slot, bool calcFlg) {
+			return (calcFlg ? antiAirValue1[slot] : antiAirValue2[slot]);
+		}
 	}
 	// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
 	enum DataStoreStatus { Exist, Success, Failed }
