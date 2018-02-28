@@ -286,39 +286,52 @@ namespace AWSK.Stores
 				}
 				// 不完全データに対する追加パッチ
 				{
-					//
-					kammusuList.Add(new KammusuData {
-						Id = 1786, Name = "護衛棲水姫-壊", Type = "軽空母", AntiAir = 108, SlotSize = 4,
-						Slot = new List<int> { 42, 36, 34, 0 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
-						WeaponDataById(581), WeaponDataById(582), WeaponDataById(583), WeaponDataById(580)
+					// CSVファイルを読み込み、その中身を記録する
+					// 入力チェックはあまりしてないので注意
+					using(var sr = new System.IO.StreamReader(@"KammusuPatch.csv")) {
+						while (!sr.EndOfStream) {
+							try {
+								// 1行読み込み、カンマ毎に区切る
+								string line = sr.ReadLine();
+								var values = line.Split(',');
+								// 行数がおかしい場合は飛ばす
+								if (values.Count() < 16)
+									continue;
+								// ヘッダー行は飛ばす
+								if (values[0] == "id")
+									continue;
+								// データを読み取る
+								var kammusu = new KammusuData();
+								kammusu.Id = int.Parse(values[0]);
+								kammusu.Name = values[1];
+								kammusu.Type = values[2];
+								kammusu.AntiAir = int.Parse(values[3]);
+								kammusu.SlotSize = int.Parse(values[4]);
+								kammusu.Slot = new List<int>();
+								kammusu.Slot.Add(int.Parse(values[5]));
+								kammusu.Slot.Add(int.Parse(values[6]));
+								kammusu.Slot.Add(int.Parse(values[7]));
+								kammusu.Slot.Add(int.Parse(values[8]));
+								kammusu.Slot.Add(int.Parse(values[9]));
+								kammusu.Weapon = new List<WeaponData>();
+								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[10])));
+								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[11])));
+								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[12])));
+								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[13])));
+								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[14])));
+								kammusu.KammusuFlg = (int.Parse(values[15]) != 0);
+								// データを追記する
+								int index = kammusuList.FindIndex(k => k.Id == kammusu.Id);
+								if (index >= 0) {
+									kammusuList[index] = kammusu;
+									kammusuDataFlg[index] = true;
+								} else {
+									kammusuList.Add(kammusu);
+									kammusuDataFlg.Add(true);
+								}
+							} catch (Exception e) {}
+						}
 					}
-					});
-					kammusuDataFlg.Add(true);
-					//
-					int patchIndex = kammusuList.FindIndex(p => p.Id == 1802);
-					kammusuList[patchIndex]= new KammusuData {
-						Id = 1802, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
-						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
-						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
-					}
-					};
-					kammusuDataFlg[patchIndex] = true;
-					//
-					kammusuList.Add(new KammusuData {
-						Id = 1803, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
-						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
-						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
-					}
-					});
-					kammusuDataFlg.Add(true);
-					//
-					kammusuList.Add(new KammusuData {
-						Id = 1804, Name = "深海鶴棲姫-壊", Type = "正規空母", AntiAir = 108, SlotSize = 4,
-						Slot = new List<int> { 42, 39, 39, 18 }, Level = 1, KammusuFlg = false, Weapon = new List<WeaponData> {
-						WeaponDataById(581), WeaponDataById(575), WeaponDataById(582), WeaponDataById(583)
-					}
-					});
-					kammusuDataFlg.Add(true);
 				}
 				// SQLコマンドを生成する
 				var commandList = new List<string>();
