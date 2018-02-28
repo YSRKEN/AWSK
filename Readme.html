@@ -49,6 +49,8 @@ Air War Simulator for Kantai Collection
 
 ## 画面構成・使い方
 
+　**まずAWSK.exeをクリックして起動してみてください。**
+
 ![image](https://user-images.githubusercontent.com/3734392/36708155-0c4bc58c-1bb5-11e8-8218-70bb35612733.png)
 
 - 基地航空隊において、各航空隊の攻撃回数のコンボボックスを右クリックすると、基地航空隊設定の保存・読み込みができます
@@ -57,17 +59,33 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/35803422-1dcae388-0ab7-11e8-9be6-d0485eedef2f.png)
 
+- KammusuPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような艦』を追加するためのファイルです
+ - 例えばイベントが始まったばかりだと、英Wikiなどのサイトにはまだ新艦のデータが上がってなかったりします
+ - そこで、テキストファイルを編集することにより、まさに「パッチ」としてデータを補う機能がこれです
+- KammusuPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+ - 左から順に、ID・艦名・艦種・素の対空値・スロット数・スロットの搭載数・初期装備・艦娘フラグを入力します
+ - 艦名と艦種は文字列で入力しますが、引用符で囲まないでください
+ - 「スロットの搭載数」と「初期装備」はそれぞれ5スロット分ありますが **これは艦これの仕様です**
+ - 艦娘フラグは、艦娘なら「1」、深海棲艦なら「0」を入力してください
+ - IDの番号をどう付けたらいいかですが、 **お察しください**
+ - 艦種の文字列は今のところ「駆逐艦」「軽巡洋艦」「重雷装巡洋艦」「練習巡洋艦」「重巡洋艦」「航空巡洋艦」「戦艦」「巡洋戦艦」「航空戦艦」「正規空母」「装甲空母」「軽空母」「水上機母艦」「潜水艦」「潜水空母」「海防艦」「潜水母艦」「揚陸艦」「工作艦」「補給艦」としています。なお、歴史的な事情により、 **PT小鬼群は「駆逐艦」、各種姫・鬼は概ね「航空戦艦」としています**
+- KammusuPatch.csvに入力された内容は何よりも優先されます。「データベースを更新」ボタンを押すとまずオンラインの情報を拾い集めてデータベースを構築し、それからKammusuPatch.csvの内容が追加・上書きされます
+ - この上書きはIDの番号をキーとしますので、例えばKammusuPatch.csvでIDが410、type(艦種)が"戦艦"であるデータを重ねますと、既にID410に"清霜"がいることから、ソフトの上でだけ **清霜は戦艦になれます**
+
+![image](https://user-images.githubusercontent.com/3734392/36781797-5e4e3a08-1cba-11e8-9277-23b623cb3de5.png)
+
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.6.2** 以上が必要です
 - **WeaponData.csv** には、装備の戦闘行動半径の情報が書かれています
-- **GameData.db** には、艦娘(深海棲艦)・装備の情報が書き込まれています
+- **GameData.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています
+- **KammusuPatch.csv** には、前述のように追加の艦娘(深海棲艦)の情報がCSV形式で書き込まれています
 
 ## 作者
 　YSR([Twitter](https://twitter.com/YSRKEN), [GitHub](https://github.com/YSRKEN/))
 
 ## 謝辞
 - Readmeやヘルプファイルなどの表示に、[tatesuke](https://github.com/tatesuke) さんの「 [かんたんMarkdown](https://github.com/tatesuke/KanTanMarkdown) 」を使用しました
-- ソフトウェア開発に協力してくださった、[pokopii](https://twitter.com/galpokopii)さんや[avaris](https://twitter.com/nc254cntct)さんに深く感謝いたします
+- ソフトウェア開発に協力してくださった、[pokopii](https://twitter.com/galpokopii)さんや[avaris](https://twitter.com/nc254cntct)さんや[mizucchi41](https://twitter.com/mizucchi41)さんに深く感謝いたします
 
 ## License
 　MIT License
@@ -87,6 +105,11 @@ Air War Simulator for Kantai Collection
  - 乱数生成に使用
 
 ## 更新履歴
+
+### Ver.1.4.4
+- 計算速度が2倍速くなった
+- KammusuPatch.csvに追加の艦娘/深海棲艦を記述するようにした
+ - これにより、オンラインのデータベースに存在してない艦でも好きなだけ追加できるようになります
 
 ### Ver.1.4.3
 - イベントのボスマス敵艦隊の編成をE2～E7までサンプルとして用意した
