@@ -407,6 +407,31 @@ namespace AWSK.Stores
 						}
 					}
 				}
+				// 不完全データに対する追加パッチ
+				Console.WriteLine("・自前DB");
+				{
+					// CSVファイルを読み込み、その中身を記録する
+					// 入力チェックはあまりしてないので注意
+					using (var sr = new System.IO.StreamReader(@"WeaponDataPatch.csv")) {
+						while (!sr.EndOfStream) {
+							try {
+								// 1行読み込み、カンマ毎に区切る
+								string line = sr.ReadLine();
+								var values = line.Split(',');
+								// 行数がおかしい場合は飛ばす
+								if (values.Count() < 2)
+									continue;
+								// ヘッダー行は飛ばす
+								if (values[0] == "名称")
+									continue;
+								// データを読み取る
+								string name = values[0];
+								int r = int.Parse(values[1]);
+								BasedAirUnitRange[name] = r;
+							} catch (Exception e) { }
+						}
+					}
+				}
 				// 装備データをダウンロード・パースする
 				var commandList = new List<string>();
 				Console.WriteLine("・デッキビルダー");
@@ -443,11 +468,6 @@ namespace AWSK.Stores
 						sql += $"{(weaponFlg ? 1 : 0)})";
 						commandList.Add(sql);
 					}
-				}
-				// 不完全データについては、GitHubにうｐされたデータを読み取って補完する
-				Console.WriteLine("・自前DB");
-				using (var client = new HttpClient()) {
-
 				}
 				// データベースに書き込む
 				using (var con = new SQLiteConnection(connectionString)) {
