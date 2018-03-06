@@ -804,10 +804,10 @@ namespace AWSK.Stores
 			using (var con = new SQLiteConnection(connectionString)) {
 				con.Open();
 				using (var cmd = con.CreateCommand()) {
-					cmd.CommandText = $"SELECT name FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
+					cmd.CommandText = $"SELECT name,antiair,baurange FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
 					using (var reader = cmd.ExecuteReader()) {
 						while (reader.Read()) {
-							list.Add(reader.GetString(0));
+							list.Add($"{reader.GetString(0)}：{reader.GetInt32(1)}：{reader.GetInt32(2)}");
 						}
 					}
 				}

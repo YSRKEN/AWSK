@@ -82,7 +82,7 @@ namespace AWSK.ViewModels
 					if (BasedAirUnitIndex[ui][wi].Value == 0)
 						continue;
 					// 装備名を取り出す
-					string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value];
+					string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value].Split("：".ToCharArray())[0];
 					// 装備名から装備情報を得る
 					var weapon = DataStore.WeaponDataByName(name);
 					weapon.Mas = BasedAirUnitMas[ui][wi].Value;
@@ -190,7 +190,7 @@ namespace AWSK.ViewModels
 							var weaponList = bauData.Weapon[ui];
 							for (int wi = 0; wi < weaponList.Count; ++wi) {
 								var weapon = weaponList[wi];
-								BasedAirUnitIndex[ui][wi].Value = BasedAirUnitList.IndexOf(weapon.Name);
+								BasedAirUnitIndex[ui][wi].Value = BasedAirUnitList.IndexOf($"{weapon.Name}：{weapon.AntiAir}：{weapon.BAURange}");
 								BasedAirUnitMas[ui][wi].Value = weapon.Mas;
 								BasedAirUnitRf[ui][wi].Value = weapon.Rf;
 							}
