@@ -13,7 +13,8 @@ Air War Simulator for Kantai Collection
 
 ## 画面構成・使い方
 
-　**まずAWSK.exeをクリックして起動してみてください。**
+　**まずAWSK.exeをクリックして起動してみてください。**  
+　**Ver.1.4.5から、基地航空隊の装備コンボボックスは「装備名：対空値：戦闘行動半径」と表示されます。**
 
 ![image](https://user-images.githubusercontent.com/3734392/36708155-0c4bc58c-1bb5-11e8-8218-70bb35612733.png)
 
@@ -37,6 +38,16 @@ Air War Simulator for Kantai Collection
  - この上書きはIDの番号をキーとしますので、例えばKammusuPatch.csvでIDが410、type(艦種)が"戦艦"であるデータを重ねますと、既にID410に"清霜"がいることから、ソフトの上でだけ **清霜は戦艦になれます**
 
 ![image](https://user-images.githubusercontent.com/3734392/36781797-5e4e3a08-1cba-11e8-9277-23b623cb3de5.png)
+
+- WeaponDataPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような装備の戦闘行動半径』を追加するためのファイルです
+ - 現状、艦娘データと違い装備データは、1種類のサイトでしか引っ張っていません。そのサイトには戦闘行動半径の情報がなく、やむを得ず[GitHubの当リポジトリにあるWeaponData.csv](https://github.com/YSRKEN/AWSK/blob/master/AWSK/WeaponData.csv)から戦闘行動半径の情報を引っ張るようにしています
+ - しかし私の更新が遅れる可能性は(wikiなどの更新が遅れる可能性と同様)十分ありますので、それまでにパッチで補えるようにする仕掛けがこれです
+
+- WeaponDataPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+- WeaponDataPatch.csvに入力された内容は何よりも優先されます。「データベースを更新」ボタンを押すとまずオンラインの情報を拾い集めてデータベースを構築し、それからWeaponDataPatch.csvの内容が追加・上書きされます
+- ちなみにVer.1.4.5から、KammusuPatch.csvやWeaponDataPatch.csvでどの艦・装備の情報が上書きされたかを見ることができます。逆に上書きされたくない場合は、KammusuPatch.csvやWeaponDataPatch.csvを一時的にリネームした上で「データベースを更新」し、GameData.dbの中身をSQLite系のツールで読んで下さい
+
+![image](https://user-images.githubusercontent.com/3734392/37043235-7db5cec2-21a3-11e8-82ec-63661f510a8f.png)
 
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.6.2** 以上が必要です
@@ -69,6 +80,12 @@ Air War Simulator for Kantai Collection
  - 乱数生成に使用
 
 ## 更新履歴
+
+### Ver.1.4.5
+- WeaponDataPatch.csvに追加の装備の戦闘行動半径を記述するようにした
+- これにより、オンラインのデータベースに存在してない装備でも戦闘行動半径を入力できるようになります
+- 装備の対空値と戦闘行動半径が直感的でなかったので、コンボボックスに表示するようにした
+- 2種類のパッチで上書きされた艦船・装備について、その情報を表示するようにした
 
 ### Ver.1.4.4
 - 計算速度が2倍速くなった
