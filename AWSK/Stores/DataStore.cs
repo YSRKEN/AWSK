@@ -285,6 +285,7 @@ namespace AWSK.Stores
 					}
 				}
 				// 不完全データに対する追加パッチ
+				string patchMemo = "";
 				{
 					// CSVファイルを読み込み、その中身を記録する
 					// 入力チェックはあまりしてないので注意
@@ -323,6 +324,7 @@ namespace AWSK.Stores
 								// データを追記する
 								int index = kammusuList.FindIndex(k => k.Id == kammusu.Id);
 								if (index >= 0) {
+									patchMemo += $"・ID：{kammusuList[index].Id} 艦名：{kammusuList[index].Name}\n";
 									kammusuList[index] = kammusu;
 									kammusuDataFlg[index] = true;
 								} else {
@@ -381,6 +383,10 @@ namespace AWSK.Stores
 					}
 				}
 				Console.WriteLine("ダウンロード完了");
+				if (patchMemo != "") {
+					MessageBox.Show($"※パッチで上書きされた艦船：\n{patchMemo}");
+					Console.WriteLine($"※パッチで上書きされた艦船：\n{patchMemo}");
+				}
 				return true;
 			} catch (Exception e) {
 				Console.WriteLine("ダウンロード失敗");
@@ -409,6 +415,7 @@ namespace AWSK.Stores
 				}
 				// 不完全データに対する追加パッチ
 				Console.WriteLine("・自前DB");
+				string patchMemo = "";
 				{
 					// CSVファイルを読み込み、その中身を記録する
 					// 入力チェックはあまりしてないので注意
@@ -427,6 +434,9 @@ namespace AWSK.Stores
 								// データを読み取る
 								string name = values[0];
 								int r = int.Parse(values[1]);
+								if (BasedAirUnitRange.ContainsKey(name)) {
+									patchMemo += $"・装備名：{name} 戦闘行動半径：{r}\n";
+								}
 								BasedAirUnitRange[name] = r;
 							} catch (Exception e) { }
 						}
@@ -484,6 +494,10 @@ namespace AWSK.Stores
 					}
 				}
 				Console.WriteLine("ダウンロード完了");
+				if (patchMemo != "") {
+					MessageBox.Show($"※パッチで上書きされた装備：\n{patchMemo}");
+					Console.WriteLine($"※パッチで上書きされた装備：\n{patchMemo}");
+				}
 				return true;
 			} catch (Exception e) {
 				Console.WriteLine("ダウンロード失敗");
