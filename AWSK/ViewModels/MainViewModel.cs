@@ -466,7 +466,7 @@ namespace AWSK.ViewModels
 			#region 各種ReactiveCollection
 			{
 				var oc = new ObservableCollection<string>(new List<string> {
-					"--", "|", "||", "|||", "/", "//", "///", ">>"
+					"--", "|", "||", "|||", "/", "//", "///", ">>", ">>>"
 				});
 				MasList = oc.ToReadOnlyReactiveCollection();
 			}

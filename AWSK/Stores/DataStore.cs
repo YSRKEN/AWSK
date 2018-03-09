@@ -1107,23 +1107,23 @@ namespace AWSK.Stores
 		// 艦載機熟練度による制空ボーナス
 		private void CalcAntiAirBonus() {
 			// 艦戦・水戦制空ボーナス
-			var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22 };
+			var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
 			// 水爆制空ボーナス
-			var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6 };
+			var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
 			// 内部熟練ボーナス
-			var masBonus = new int[] { 0, 1, 1, 2, 2, 2, 2, 3 };
+			var masBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
 			// 装備種を判断し、そこから制空ボーナスを算出
 			// 艦戦・水戦・陸戦・局戦は+25
 			if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
-				AntiAirBonus = pfwfBonus[Mas] + masBonus[Mas];
+				AntiAirBonus = pfwfBonus[Mas] + Math.Sqrt(1.0 * masBonus[Mas] / 10);
 				// 水爆は+9
 			} else if (Type[1] == 43) {
-				AntiAirBonus = wbBonus[Mas] + masBonus[Mas];
+				AntiAirBonus = wbBonus[Mas] + Math.Sqrt(1.0 * masBonus[Mas] / 10);
 			} else {
-				AntiAirBonus = masBonus[Mas];
+				AntiAirBonus = Math.Sqrt(1.0 * masBonus[Mas] / 10);
 			}
 		}
-		public int AntiAirBonus { get; private set; }
+		public double AntiAirBonus { get; private set; }
 		// 航空戦に参加するか？(calcFlgがtrueなら、水上偵察機も参加するものとする)
 		private bool[] hasAAV;
 		private void CalcHasAAV() {
