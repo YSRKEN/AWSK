@@ -92,6 +92,13 @@ namespace AWSK.Stores
 			// パースしたデータから敵艦のデータを引き出す
 			var kammusuData = doc.QuerySelectorAll("table.infobox-ship > tbody")
 				.Where(item => {
+					string nameText = item.QuerySelector("tr > td > div > b").TextContent;
+					int dotIndex = nameText.IndexOf(".");
+					int spaceIndex = nameText.IndexOf(" ");
+					string id = nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1);
+					if (!int.TryParse(id, out int _))
+						return false;
+					//
 					var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
 					string str = temp[temp.IndexOf("AA") + 1];
 					return int.TryParse(str, out int _);
@@ -265,9 +272,6 @@ namespace AWSK.Stores
 					}
 					// クロール結果と比較し、不完全データを補う
 					for (int ki = 0; ki < kammusuList.Count; ++ki) {
-						if (kammusuDataFlg[ki]) {
-							continue;
-						}
 						if (kammusuDicWikia.ContainsKey(kammusuList[ki].Id)) {
 							var kammusuTemp = kammusuDicWikia[kammusuList[ki].Id];
 							kammusuTemp.Type = kammusuList[ki].Type;
