@@ -293,49 +293,51 @@ namespace AWSK.Stores
 				{
 					// CSVファイルを読み込み、その中身を記録する
 					// 入力チェックはあまりしてないので注意
-					using(var sr = new System.IO.StreamReader(@"KammusuPatch.csv")) {
-						while (!sr.EndOfStream) {
-							try {
-								// 1行読み込み、カンマ毎に区切る
-								string line = sr.ReadLine();
-								var values = line.Split(',');
-								// 行数がおかしい場合は飛ばす
-								if (values.Count() < 16)
-									continue;
-								// ヘッダー行は飛ばす
-								if (values[0] == "id")
-									continue;
-								// データを読み取る
-								var kammusu = new KammusuData();
-								kammusu.Id = int.Parse(values[0]);
-								kammusu.Name = values[1];
-								kammusu.Type = values[2];
-								kammusu.AntiAir = int.Parse(values[3]);
-								kammusu.SlotSize = int.Parse(values[4]);
-								kammusu.Slot = new List<int>();
-								kammusu.Slot.Add(int.Parse(values[5]));
-								kammusu.Slot.Add(int.Parse(values[6]));
-								kammusu.Slot.Add(int.Parse(values[7]));
-								kammusu.Slot.Add(int.Parse(values[8]));
-								kammusu.Slot.Add(int.Parse(values[9]));
-								kammusu.Weapon = new List<WeaponData>();
-								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[10])));
-								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[11])));
-								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[12])));
-								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[13])));
-								kammusu.Weapon.Add(WeaponDataById(int.Parse(values[14])));
-								kammusu.KammusuFlg = (int.Parse(values[15]) != 0);
-								// データを追記する
-								int index = kammusuList.FindIndex(k => k.Id == kammusu.Id);
-								if (index >= 0) {
-									patchMemo += $"・ID：{kammusuList[index].Id} 艦名：{kammusuList[index].Name}\n";
-									kammusuList[index] = kammusu;
-									kammusuDataFlg[index] = true;
-								} else {
-									kammusuList.Add(kammusu);
-									kammusuDataFlg.Add(true);
-								}
-							} catch (Exception e) {}
+					if (System.IO.File.Exists(@"KammusuPatch.csv")) {
+						using (var sr = new System.IO.StreamReader(@"KammusuPatch.csv")) {
+							while (!sr.EndOfStream) {
+								try {
+									// 1行読み込み、カンマ毎に区切る
+									string line = sr.ReadLine();
+									var values = line.Split(',');
+									// 行数がおかしい場合は飛ばす
+									if (values.Count() < 16)
+										continue;
+									// ヘッダー行は飛ばす
+									if (values[0] == "id")
+										continue;
+									// データを読み取る
+									var kammusu = new KammusuData();
+									kammusu.Id = int.Parse(values[0]);
+									kammusu.Name = values[1];
+									kammusu.Type = values[2];
+									kammusu.AntiAir = int.Parse(values[3]);
+									kammusu.SlotSize = int.Parse(values[4]);
+									kammusu.Slot = new List<int>();
+									kammusu.Slot.Add(int.Parse(values[5]));
+									kammusu.Slot.Add(int.Parse(values[6]));
+									kammusu.Slot.Add(int.Parse(values[7]));
+									kammusu.Slot.Add(int.Parse(values[8]));
+									kammusu.Slot.Add(int.Parse(values[9]));
+									kammusu.Weapon = new List<WeaponData>();
+									kammusu.Weapon.Add(WeaponDataById(int.Parse(values[10])));
+									kammusu.Weapon.Add(WeaponDataById(int.Parse(values[11])));
+									kammusu.Weapon.Add(WeaponDataById(int.Parse(values[12])));
+									kammusu.Weapon.Add(WeaponDataById(int.Parse(values[13])));
+									kammusu.Weapon.Add(WeaponDataById(int.Parse(values[14])));
+									kammusu.KammusuFlg = (int.Parse(values[15]) != 0);
+									// データを追記する
+									int index = kammusuList.FindIndex(k => k.Id == kammusu.Id);
+									if (index >= 0) {
+										patchMemo += $"・ID：{kammusuList[index].Id} 艦名：{kammusuList[index].Name}\n";
+										kammusuList[index] = kammusu;
+										kammusuDataFlg[index] = true;
+									} else {
+										kammusuList.Add(kammusu);
+										kammusuDataFlg.Add(true);
+									}
+								} catch (Exception e) { }
+							}
 						}
 					}
 				}
@@ -423,26 +425,28 @@ namespace AWSK.Stores
 				{
 					// CSVファイルを読み込み、その中身を記録する
 					// 入力チェックはあまりしてないので注意
-					using (var sr = new System.IO.StreamReader(@"WeaponDataPatch.csv")) {
-						while (!sr.EndOfStream) {
-							try {
-								// 1行読み込み、カンマ毎に区切る
-								string line = sr.ReadLine();
-								var values = line.Split(',');
-								// 行数がおかしい場合は飛ばす
-								if (values.Count() < 2)
-									continue;
-								// ヘッダー行は飛ばす
-								if (values[0] == "名称")
-									continue;
-								// データを読み取る
-								string name = values[0];
-								int r = int.Parse(values[1]);
-								if (BasedAirUnitRange.ContainsKey(name)) {
-									patchMemo += $"・装備名：{name} 戦闘行動半径：{r}\n";
-								}
-								BasedAirUnitRange[name] = r;
-							} catch (Exception e) { }
+					if (System.IO.File.Exists(@"WeaponDataPatch.csv")) {
+						using (var sr = new System.IO.StreamReader(@"WeaponDataPatch.csv")) {
+							while (!sr.EndOfStream) {
+								try {
+									// 1行読み込み、カンマ毎に区切る
+									string line = sr.ReadLine();
+									var values = line.Split(',');
+									// 行数がおかしい場合は飛ばす
+									if (values.Count() < 2)
+										continue;
+									// ヘッダー行は飛ばす
+									if (values[0] == "名称")
+										continue;
+									// データを読み取る
+									string name = values[0];
+									int r = int.Parse(values[1]);
+									if (BasedAirUnitRange.ContainsKey(name)) {
+										patchMemo += $"・装備名：{name} 戦闘行動半径：{r}\n";
+									}
+									BasedAirUnitRange[name] = r;
+								} catch (Exception e) { }
+							}
 						}
 					}
 				}
