@@ -1146,10 +1146,10 @@ namespace AWSK.Stores
 				hasAAV[1] = true;
 				return;
 			}
-			// 水偵
-			if (Type[0] == 5 && Type[1] == 7 && Type[2] == 10) {
+			// 艦偵・水偵・飛行艇
+			if ((Type[0] == 5 && Type[1] == 7) || Type[0] == 17) {
 				hasAAV[0] = true;
-				hasAAV[1] = false;
+				hasAAV[1] = true;
 				return;
 			}
 		}
