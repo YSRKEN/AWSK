@@ -271,7 +271,7 @@ namespace AWSK.ViewModels
 				Title = "読み込むのファイルを選択"
 			};
 			if ((bool)ofd.ShowDialog()) {
-				try {
+				//try {
 					// ファイルを読み込み
 					using (var sr = new System.IO.StreamReader(ofd.FileName)) {
 						// テキストとして読み込んでパース
@@ -292,10 +292,10 @@ namespace AWSK.ViewModels
 							}
 						}
 					}
-				} catch (Exception e) {
+				/*} catch (Exception e) {
 					Console.WriteLine(e.ToString());
 					MessageBox.Show("ファイルを開けませんでした", "AWSK");
-				}
+				}*/
 			}
 		}
 		// 敵艦隊の保存処理

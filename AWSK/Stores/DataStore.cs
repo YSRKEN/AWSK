@@ -174,6 +174,8 @@ namespace AWSK.Stores
 						slotStr = regex.Replace(slotStr, "");
 						kammusu.Slot.Add(int.Parse(slotStr));
 					}
+					if (kammusu.SlotSize < kammusu.Slot.Count)
+						kammusu.SlotSize = kammusu.Slot.Count;
 					// スロット毎の装備を読み取る
 					var trList = item.QuerySelectorAll("tr");
 					int equipIndex = trList
