@@ -96,51 +96,65 @@
 				<ComboBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[0][0].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[0][0].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[0][1].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[0][1].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[0][2].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[0][2].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[0][3].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[0].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[0][3].Value, UpdateSourceTrigger=PropertyChanged}"/>
+
 				<ComboBox Grid.Column="4" Grid.Row="1" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[1][0].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[1][0].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="4" Grid.Row="2" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[1][1].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[1][1].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[1][2].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[1][2].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="4" Grid.Row="4" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[1][3].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[1].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[1][3].Value, UpdateSourceTrigger=PropertyChanged}"/>
+
 				<ComboBox Grid.Column="8" Grid.Row="1" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[2][0].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[2][0].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="8" Grid.Row="2" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[2][1].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[2][1].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="8" Grid.Row="3" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[2][2].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[2][2].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<ComboBox Grid.Column="8" Grid.Row="4" Grid.ColumnSpan="2" Height="24" Margin="5,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitIndex[2][3].Value, UpdateSourceTrigger=PropertyChanged}"
 					ItemsSource="{Binding BasedAirUnitList}"
-					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"/>
+					IsEnabled="{Binding BasedAirUnitFlg[2].Value, UpdateSourceTrigger=PropertyChanged}"
+					ToolTip="{Binding BasedAirUnitInfo[2][3].Value, UpdateSourceTrigger=PropertyChanged}"/>
 				<!-- 基地航空隊の熟練度設定 -->
 				<ComboBox Grid.Column="2" Grid.Row="1" Height="24" Margin="2,5,2,5"
 					SelectedIndex="{Binding BasedAirUnitMas[0][0].Value, UpdateSourceTrigger=PropertyChanged}"

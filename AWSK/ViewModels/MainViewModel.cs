@@ -25,6 +25,8 @@ namespace AWSK.ViewModels
 		public List<List<ReactiveProperty<int>>> BasedAirUnitMas { get; } = new List<List<ReactiveProperty<int>>>();
 		// 基地航空隊の装備改修度
 		public List<List<ReactiveProperty<int>>> BasedAirUnitRf { get; } = new List<List<ReactiveProperty<int>>>();
+		// 基地航空隊のツールチップ情報
+		public List<List<ReactiveProperty<string>>> BasedAirUnitInfo { get; } = new List<List<ReactiveProperty<string>>>();
 		// 敵艦隊の艦の選択番号
 		public List<ReactiveProperty<int>> EnemyUnitIndex { get; } = new List<ReactiveProperty<int>>();
 		// 敵艦隊の艦種の選択番号
@@ -150,8 +152,39 @@ namespace AWSK.ViewModels
 			}
 			return Simulator.CalcBAURange(bauData.Weapon[bauIndex[index]]);
 		}
+		// 基地航空隊のツールチップ情報を書き換え
+		private void ResetBasedAirUnitInfo(int ui, int wi) {
+			string output = "【装備情報】\n";
+			while (true) {
+				// 装備していないものについては語りようがない
+				if(BasedAirUnitIndex[ui][wi].Value == 0) {
+					output += "装備名：なし";
+					break;
+				}
+				// そうでないなら、まず装備の種類を取得する
+				// 装備名を取り出す
+				string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value].Split("：".ToCharArray())[0];
+				// 装備名から装備情報を得る
+				var weapon = DataStore.WeaponDataByName(name);
+				weapon.Mas = BasedAirUnitMas[ui][wi].Value;
+				weapon.Rf = BasedAirUnitRf[ui][wi].Value;
+				weapon.Refresh();
+				int slot = (((weapon.Type[0] == 5 && weapon.Type[1] == 7) || weapon.Type[0] == 17) ? 4 : 18);
+				// 表示用テキストを作成する
+				output += $"装備名：{weapon.Name}　航空戦：{(weapon.HasAAV(true) ? "参加" : "不参加")}\n";
+				output += $"対空：{weapon.AntiAir}({weapon.CorrectedAA})　迎撃：{weapon.Intercept}\n";
+				output += $"熟練度：{weapon.Mas}　改修度：{weapon.Rf}\n";
+				output += $"搭載数：{slot}　制空値：{weapon.AntiAirValue(slot, true)}\n";
+				output += $"戦闘行動半径：{weapon.BAURange}";
+				break;
+			}
+			BasedAirUnitInfo[ui][wi].Value = output;
+		}
 		// 基地航空隊の制空値変更処理
 		private void ReCalcBasedAirUnitAAV(int ui) {
+			for(int wi = 0; wi < 4; ++wi) {
+				ResetBasedAirUnitInfo(ui, wi);
+			}
 			int aav1 = GetBasedAirUnitAAV(ui);
 			int aav2 = GetEnemyUnitAAV();
 			int range = GetBasedAirUnitRange(ui);
@@ -271,7 +304,7 @@ namespace AWSK.ViewModels
 				Title = "読み込むのファイルを選択"
 			};
 			if ((bool)ofd.ShowDialog()) {
-				//try {
+				try {
 					// ファイルを読み込み
 					using (var sr = new System.IO.StreamReader(ofd.FileName)) {
 						// テキストとして読み込んでパース
@@ -292,10 +325,10 @@ namespace AWSK.ViewModels
 							}
 						}
 					}
-				/*} catch (Exception e) {
+				} catch (Exception e) {
 					Console.WriteLine(e.ToString());
 					MessageBox.Show("ファイルを開けませんでした", "AWSK");
-				}*/
+				}
 			}
 		}
 		// 敵艦隊の保存処理
@@ -414,18 +447,21 @@ namespace AWSK.ViewModels
 				BasedAirUnitAAV.Add(new ReactiveProperty<string>(""));
 			}
 			for (int ui = 0; ui < 3; ++ui) {
-				// BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRf
+				// BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRfとBasedAirUnitInfo
 				var rpList1 = new List<ReactiveProperty<int>>();
 				var rpList2 = new List<ReactiveProperty<int>>();
 				var rpList3 = new List<ReactiveProperty<int>>();
+				var rpList4 = new List<ReactiveProperty<string>>();
 				for (int wi = 0; wi < 4; ++wi) {
 					rpList1.Add(new ReactiveProperty<int>(0));
 					rpList2.Add(new ReactiveProperty<int>(7));
 					rpList3.Add(new ReactiveProperty<int>(0));
+					rpList4.Add(new ReactiveProperty<string>(""));
 				}
 				BasedAirUnitIndex.Add(rpList1);
 				BasedAirUnitMas.Add(rpList2);
 				BasedAirUnitRf.Add(rpList3);
+				BasedAirUnitInfo.Add(rpList4);
 			}
 			for (int ki = 0; ki < 6; ++ki) {
 				EnemyUnitIndex.Add(new ReactiveProperty<int>(0));
