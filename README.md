@@ -16,15 +16,26 @@ Air War Simulator for Kantai Collection
 　**まずAWSK.exeをクリックして起動してみてください。**  
 　**Ver.1.4.5から、基地航空隊の装備コンボボックスは「装備名：対空値：戦闘行動半径」と表示されます。**
 
-![image](https://user-images.githubusercontent.com/3734392/37222506-b70daec8-2410-11e8-8bd2-3744a75517df.png)
+![image](https://user-images.githubusercontent.com/3734392/37255407-6004fb56-258f-11e8-9a64-6f0528e254bd.png)
 
 - Ver.1.5.0から、艦載機熟練度に「>>>」(内部熟練度120)を指定できるようになりました
  - それまでの「>>」は、内部熟練度100を表していました
-- 基地航空隊において、各航空隊の攻撃回数のコンボボックスを右クリックすると、基地航空隊設定の保存・読み込みができます
-- 敵艦隊において、一番上のコンボボックスを右クリックすると、装備の詳細表示、および敵艦隊設定の保存・読み込みができます
+- **基地航空隊のグループボックス内のコントロール**を右クリックすると、基地航空隊設定の保存・読み込みができます
+- **敵艦隊のグループボックス内のコントロール**を右クリックすると、装備の詳細表示、および敵艦隊設定の保存・読み込みができます
 - 「計算結果」画面のグラフを右クリックすると、グラフ画像や詳細なテキストデータをクリップボードにコピーできます
 
 ![image](https://user-images.githubusercontent.com/3734392/35803422-1dcae388-0ab7-11e8-9be6-d0485eedef2f.png)
+
+- 基地航空隊の装備コンボボックスにマウスを合わせると、その装備についての情報がツールチップ表示されます
+  - 表示内容は、名称や戦闘行動半径、装備の対空値(素対空値と基地対空値)やそのスロットの制空値などです
+
+![image](https://user-images.githubusercontent.com/3734392/37255447-e3691a7c-258f-11e8-8f38-b350cd2498c3.png)
+
+- 敵艦を選択する際は、正式名称だけでなく「俗称」も選択できます
+  - コンボボックスの選択項目の中で、頭に「＊」が付いているものがそれです
+  - こういった俗称項目は増やせます**(後述)**
+
+![image](https://user-images.githubusercontent.com/3734392/37255470-21e8da08-2590-11e8-9543-f3c9761874cb.png)
 
 - KammusuPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような艦』を追加するためのファイルです
  - 例えばイベントが始まったばかりだと、英Wikiなどのサイトにはまだ新艦のデータが上がってなかったりします
@@ -51,18 +62,25 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/37043235-7db5cec2-21a3-11e8-82ec-63661f510a8f.png)
 
+- EnemyFamiliarName.csvは、深海棲艦の俗称を登録するためのファイルです
+- EnemyFamiliarName.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+- ID欄で指定するのは、深海棲艦に割り振られた艦船IDです。分からない場合は[英wiki](http://kancolle.wikia.com/wiki/Kancolle_Wiki)を読むか、GameData.dbの中身をSQLite系のツールで読んで下さい
+
+![image](https://user-images.githubusercontent.com/3734392/37255496-a2f2f552-2590-11e8-82af-d1910e7f02af.png)
+
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.6.2** 以上が必要です
 - **WeaponData.csv** には、装備の戦闘行動半径の情報が書かれています
 - **GameData.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています
 - **KammusuPatch.csv** には、前述のように追加の艦娘(深海棲艦)の情報がCSV形式で書き込まれています
+- **EnemyFamiliarName.csv**には、前述のように深海棲艦の俗称がCSV形式で書き込まれています
 
 ## 作者
 　YSR([Twitter](https://twitter.com/YSRKEN), [GitHub](https://github.com/YSRKEN/))
 
 ## 謝辞
 - Readmeやヘルプファイルなどの表示に、[tatesuke](https://github.com/tatesuke) さんの「 [かんたんMarkdown](https://github.com/tatesuke/KanTanMarkdown) 」を使用しました
-- ソフトウェア開発に協力してくださった、[pokopii](https://twitter.com/galpokopii)さんや[avaris](https://twitter.com/nc254cntct)さんや[mizucchi41](https://twitter.com/mizucchi41)さんに深く感謝いたします
+- ソフトウェア開発に協力してくださった、[pokopii](https://twitter.com/galpokopii)さんや[avaris](https://twitter.com/nc254cntct)さんや[mizucchi41](https://twitter.com/mizucchi41)さんや[tkscot](https://twitter.com/99_999999999)さんに深く感謝いたします
 - Ver.1.5.0における更新内容には、[ADMIRAL DATOR](https://twitter.com/aindator)さんの寄与がとても大きいです
 
 ## License
@@ -83,6 +101,12 @@ Air War Simulator for Kantai Collection
  - 乱数生成に使用
 
 ## 更新履歴
+
+### Ver.1.5.1
+- 基地航空隊の攻撃回数の表示を、「0・1・2」から「なし・分散・集中」に変更
+- 右クリックメニューが表示される範囲を格段に広げた
+- 装備選択欄のツールチップに、その装備についての情報を表示するようにした
+- 深海棲艦の俗称を登録できるようにした。これにより、敵艦を入力しやすくなるはず
 
 ### Ver.1.5.0
 - 内部熟練度の扱いを変更しました。これにより、基地航空隊の制空値が僅かに上昇します
