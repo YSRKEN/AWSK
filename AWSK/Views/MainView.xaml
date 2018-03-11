@@ -22,6 +22,12 @@
 			<ColumnDefinition Width="auto"/>
 		</Grid.ColumnDefinitions>
 		<GroupBox Grid.Row="0" Grid.Column="0" Header="基地航空隊">
+			<GroupBox.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
+					<MenuItem Header="編成を保存" Command="{Binding SaveBasedAirUnitCommand}" />
+				</ContextMenu>
+			</GroupBox.ContextMenu>
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="75"/>
@@ -61,12 +67,6 @@
 					<ComboBoxItem Content="なし"/>
 					<ComboBoxItem Content="分散"/>
 					<ComboBoxItem Content="集中"/>
-					<ComboBox.ContextMenu>
-						<ContextMenu>
-							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
-							<MenuItem Header="編成を保存" Command="{Binding SaveBasedAirUnitCommand}" />
-						</ContextMenu>
-					</ComboBox.ContextMenu>
 				</ComboBox>
 				<ComboBox Grid.Column="5" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnitMode[1].Value, UpdateSourceTrigger=PropertyChanged}">
@@ -249,6 +249,13 @@
 			</Grid>
 		</GroupBox>
 		<GroupBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Header="敵艦隊">
+			<GroupBox.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
+					<MenuItem Header="編成を読込" Command="{Binding LoadEnemyUnitCommand}" />
+					<MenuItem Header="編成を保存" Command="{Binding SaveEnemyUnitCommand}" />
+				</ContextMenu>
+			</GroupBox.ContextMenu>
 			<Grid>
 				<TabControl>
 					<TabItem Header="第一艦隊">
@@ -268,15 +275,7 @@
 							</Grid.RowDefinitions>
 							<ComboBox Grid.Row="0" Grid.Column="0" Margin="5,5,2,5"
 								SelectedIndex="{Binding EnemyTypeIndex[0].Value, UpdateSourceTrigger=PropertyChanged}"
-								ItemsSource="{Binding EnemyTypeList}">
-								<ComboBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
-										<MenuItem Header="編成を読込" Command="{Binding LoadEnemyUnitCommand}" />
-										<MenuItem Header="編成を保存" Command="{Binding SaveEnemyUnitCommand}" />
-									</ContextMenu>
-								</ComboBox.ContextMenu>
-							</ComboBox>
+								ItemsSource="{Binding EnemyTypeList}"/>
 							<ComboBox Grid.Row="1" Grid.Column="0" Margin="5,5,2,5"
 								SelectedIndex="{Binding EnemyTypeIndex[1].Value, UpdateSourceTrigger=PropertyChanged}"
 								ItemsSource="{Binding EnemyTypeList}"/>
