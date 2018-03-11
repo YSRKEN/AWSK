@@ -45,6 +45,8 @@ namespace AWSK.Stores
 		};
 		// 装備URLとIDとの対応表(深海棲艦向け)
 		private static Dictionary<string, int> weaponUrlDicWikia = new Dictionary<string, int>();
+		// 装備の俗称とIDとの対応表
+		private static Dictionary<string, int> enemyFamiliarName = ReadEnemyFamiliarName();
 
 		// 敵艦のカテゴリを取得する
 		public static Dictionary<string, string> ParseEnemyListWikia(string rawData) {
@@ -515,6 +517,33 @@ namespace AWSK.Stores
 				return false;
 			}
 		}
+		// 装備の俗称を読み込んでおく
+		private static Dictionary<string, int> ReadEnemyFamiliarName() {
+			var output = new Dictionary<string, int>();
+			if (System.IO.File.Exists(@"EnemyFamiliarName.csv")) {
+				using (var sr = new System.IO.StreamReader(@"EnemyFamiliarName.csv")) {
+					while (!sr.EndOfStream) {
+						try {
+							// 1行読み込み、カンマ毎に区切る
+							string line = sr.ReadLine();
+							var values = line.Split(',');
+							// 行数がおかしい場合は飛ばす
+							if (values.Count() < 2)
+								continue;
+							// ヘッダー行は飛ばす
+							if (values[0] == "俗称")
+								continue;
+							// データを読み取る
+							string name = values[0];
+							int id = int.Parse(values[1]);
+							output[name] = id;
+						}
+						catch (Exception) { }
+					}
+				}
+			}
+			return output;
+		}
 
 		// データベースの初期化処理
 		public static async Task<DataStoreStatus> Initialize(bool forceUpdateFlg = false) {
@@ -782,6 +811,13 @@ namespace AWSK.Stores
 						}
 					}
 				}
+			}
+			//俗称部分は、idの数字を10000だけ大きくして登録する
+			foreach (var pair in enemyFamiliarName) {
+				string name = pair.Key;
+				int id = pair.Value;
+				var kammusu = KammusuDataById(id);
+				list[id + 10000] = new KeyValuePair<string, string>($"*{name}", kammusu.Type);
 			}
 			return list;
 		}

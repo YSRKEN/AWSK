@@ -519,7 +519,7 @@ namespace AWSK.ViewModels
 				var enemyListEachType = new Dictionary<string, List<string>>();
 				foreach (var pair in enemyNameList) {
 					// 艦のID・艦名・艦種
-					int id = pair.Key;
+					int id = (pair.Key < 10000 ? pair.Key : pair.Key - 10000);
 					string name = pair.Value.Key;
 					string type = pair.Value.Value;
 					// 登録
