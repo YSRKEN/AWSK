@@ -7,7 +7,7 @@
 	xmlns:b="clr-namespace:AWSK.Behaviors"
 	mc:Ignorable="d"
 	Topmost="True"
-	Title="航空戦シミュレーター改" Height="370" Width="970" ResizeMode="CanResize"
+	Title="航空戦シミュレーター改" Height="370" Width="1000" ResizeMode="CanResize"
 	b:CloseWindowAttachedBehavior.Close="{Binding CloseWindow.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
 	<Window.DataContext>
 		<local:MainViewModel/>
@@ -25,15 +25,15 @@
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="75"/>
-					<ColumnDefinition Width="50"/>
+					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="50"/>
 					<ColumnDefinition Width="75"/>
-					<ColumnDefinition Width="50"/>
+					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="50"/>
 					<ColumnDefinition Width="75"/>
-					<ColumnDefinition Width="50"/>
+					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="55"/>
 					<ColumnDefinition Width="50"/>
 				</Grid.ColumnDefinitions>
@@ -58,9 +58,9 @@
 				<!-- 基地航空隊の攻撃回数 -->
 				<ComboBox Grid.Column="1" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnitMode[0].Value, UpdateSourceTrigger=PropertyChanged}">
-					<ComboBoxItem Content="0"/>
-					<ComboBoxItem Content="1"/>
-					<ComboBoxItem Content="2"/>
+					<ComboBoxItem Content="なし"/>
+					<ComboBoxItem Content="分散"/>
+					<ComboBoxItem Content="集中"/>
 					<ComboBox.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
@@ -70,9 +70,9 @@
 				</ComboBox>
 				<ComboBox Grid.Column="5" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnitMode[1].Value, UpdateSourceTrigger=PropertyChanged}">
-					<ComboBoxItem Content="0"/>
-					<ComboBoxItem Content="1"/>
-					<ComboBoxItem Content="2"/>
+					<ComboBoxItem Content="なし"/>
+					<ComboBoxItem Content="分散"/>
+					<ComboBoxItem Content="集中"/>
 					<ComboBox.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
@@ -82,9 +82,9 @@
 				</ComboBox>
 				<ComboBox Grid.Column="9" Grid.Row="0" Margin="2,5,2,5" VerticalAlignment="Center"
 						SelectedIndex="{Binding BasedAirUnitMode[2].Value, UpdateSourceTrigger=PropertyChanged}">
-					<ComboBoxItem Content="0"/>
-					<ComboBoxItem Content="1"/>
-					<ComboBoxItem Content="2"/>
+					<ComboBoxItem Content="なし"/>
+					<ComboBoxItem Content="分散"/>
+					<ComboBoxItem Content="集中"/>
 					<ComboBox.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="編成を読込" Command="{Binding LoadBasedAirUnitCommand}" />
