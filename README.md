@@ -70,7 +70,7 @@ Air War Simulator for Kantai Collection
 ![image](https://user-images.githubusercontent.com/3734392/37255496-a2f2f552-2590-11e8-82af-d1910e7f02af.png)
 
 ## 注意
-- ソフトウェアの動作には、 **.NET Framework 4.6.2** 以上が必要です
+- ソフトウェアの動作には、 **.NET Framework 4.7.2** 以上が必要です
 - **WeaponData.csv** には、装備の戦闘行動半径の情報が書かれています
 - **GameData.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています
 - **KammusuPatch.csv** には、前述のように追加の艦娘(深海棲艦)の情報がCSV形式で書き込まれています
