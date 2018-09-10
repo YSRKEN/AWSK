@@ -77,8 +77,9 @@ namespace AWSK.Stores
 				var parser = new HtmlParser();
 				doc = parser.Parse(rawData);
 				weaponUrlDicWikia = doc.QuerySelectorAll("table.wikitable.typography-xl-optout > tbody > tr")
-					.Where(item => item.QuerySelector("td") != null )
+					.Where(item => item.QuerySelector("td") != null && item.QuerySelector("td").TextContent.Substring(0, 2) != "No")
 					.Select(item => {
+                    var hoge = item.QuerySelector("td");
 					int id = int.Parse(item.QuerySelector("td").TextContent);
 					string url = "http://kancolle.wikia.com" + item.QuerySelectorAll("td").Skip(2).First().QuerySelector("a").Attributes["href"].Value;
 					return new KeyValuePair<string, int>(url, id);
