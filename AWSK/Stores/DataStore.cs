@@ -1074,8 +1074,7 @@ namespace AWSK.Stores
     // (表示用に最適化済)
     public static List<string> BasedAirUnitNameList()
     {
-      var list = new List<string>();
-      list.Add("なし");
+      var temp = new List<KeyValuePair<string,string>>();
       // 基地航空隊を飛ばせる条件：
       // ・type1=3 AND type2 not in (15, 16)
       // ・type1 in (17, 21, 22)
@@ -1086,15 +1085,69 @@ namespace AWSK.Stores
         con.Open();
         using (var cmd = con.CreateCommand())
         {
-          cmd.CommandText = $"SELECT name,antiair,baurange FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
+          cmd.CommandText = $"SELECT name,antiair,baurange,type1,type2,type3 FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
           using (var reader = cmd.ExecuteReader())
           {
             while (reader.Read())
             {
-              list.Add($"{reader.GetString(0)}：{reader.GetInt32(1)}：{reader.GetInt32(2)}");
+              string typeString = $"{reader.GetInt32(3)}：{reader.GetInt32(4)}：{reader.GetInt32(5)}";
+              string nameString = $"{reader.GetString(0)}：{reader.GetInt32(1)}：{reader.GetInt32(2)}";
+              temp.Add(new KeyValuePair<string, string>(typeString, nameString));
             }
           }
         }
+      }
+      var list = new List<string>();
+      list.Add("なし");
+      string temp2 = "";
+      foreach(var pair in temp)
+      {
+        string typeString = pair.Key;
+        string nameString = pair.Value;
+        if (temp2 != typeString)
+        {
+          switch (typeString)
+          {
+            case "3：5：6":
+              list.Add("【艦上戦闘機】");
+              break;
+            case "3：5：7":
+              list.Add("【艦上爆撃機】");
+              break;
+            case "3：5：8":
+              list.Add("【艦上攻撃機】");
+              break;
+            case "3：40：57":
+              list.Add("【墳式爆撃機】");
+              break;
+            case "5：7：9":
+              list.Add("【艦上偵察機】");
+              break;
+            case "5：7：10":
+              list.Add("【水上偵察機】");
+              break;
+            case "5：36：45":
+              list.Add("【水上戦闘機】");
+              break;
+            case "5：43：11":
+              list.Add("【水上爆撃機】");
+              break;
+            case "17：33：41":
+              list.Add("【大型飛行艇】");
+              break;
+            case "21：38：47":
+              list.Add("【陸上攻撃機】");
+              break;
+            case "22：39：47":
+              list.Add("【陸上爆撃機】");
+              break;
+            case "22：39：48":
+              list.Add("【陸上戦闘機】");
+              break;
+          }
+          temp2 = typeString;
+        }
+        list.Add(nameString);
       }
       return list;
     }
