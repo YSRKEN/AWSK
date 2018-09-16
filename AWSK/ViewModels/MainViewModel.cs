@@ -461,17 +461,22 @@ namespace AWSK.ViewModels
 
     private async Task<int[]> getNewestVersion()
     {
-      using (var client = new HttpClient())
+      try
       {
-        // ダウンロード
-        string rawData = await client.GetStringAsync("https://raw.githubusercontent.com/YSRKEN/AWSK/master/AWSK/version.txt").ConfigureAwait(false);
-        string[] versionString = rawData.Split(',');
-        int[] version = new int[]{ 0, 0, 0, 0 };
-        for(int i = 0; i < versionString.Length - 1; ++i)
+        using (var client = new HttpClient())
         {
-          version[i] = int.Parse(versionString[i]);
+          // ダウンロード
+          string rawData = await client.GetStringAsync("https://raw.githubusercontent.com/YSRKEN/AWSK/master/version.txt").ConfigureAwait(false);
+          string[] versionString = rawData.Split('.');
+          int[] version = new int[] { 0, 0, 0, 0 };
+          for (int i = 0; i < versionString.Length; ++i)
+          {
+            version[i] = int.Parse(versionString[i]);
+          }
+          return version;
         }
-        return version;
+      }catch(Exception e){
+        return new int[] { 0, 0, 0, 0 };
       }
     }
     private async void VersionCheck()
@@ -500,8 +505,8 @@ namespace AWSK.ViewModels
       {
         string now = $"Ver.{nowVersion[0]}.{nowVersion[1]}.{nowVersion[2]}.{nowVersion[3]}";
         string newest = $"Ver.{newestVersion[0]}.{newestVersion[1]}.{newestVersion[2]}.{newestVersion[3]}";
-        var result = MessageBox.Show("より新しいバージョンが公開されています。ダウンロードしますか？\n現在のバージョン：" + now + "\n最新のバージョン：" + newest, "AWSK", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-        if (result == MessageBoxResult.OK)
+        var result = MessageBox.Show("より新しいバージョンが公開されています。ダウンロードしますか？\n現在のバージョン：" + now + "\n最新のバージョン：" + newest, "AWSK", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        if (result == MessageBoxResult.Yes)
         {
           System.Diagnostics.Process.Start("https://github.com/YSRKEN/AWSK/releases");
         }
