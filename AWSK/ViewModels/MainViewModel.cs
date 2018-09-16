@@ -1,11 +1,16 @@
 ﻿using AWSK.Models;
 using AWSK.Stores;
+using Codeplex.Data;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace AWSK.ViewModels
@@ -454,144 +459,208 @@ namespace AWSK.ViewModels
 			UpdateDatabaseButtonFlg.Value = true;
 		}
 
-		// コンストラクタ
-		public MainViewModel() {
-			// その他初期化
-			Initialize();
-			// ReactivePropertyを設定
-			//BasedAirUnitModeとBasedAirUnitFlgとBasedAirUnitAAV
-			//(BasedAirUnitFlgはBasedAirUnitModeから作られる)
-			for (int ui = 0; ui < 3; ++ui) {
-				var rp = new ReactiveProperty<int>(0);
-				var rp2 = rp.Select(x => x != 0).ToReadOnlyReactiveProperty();
-				BasedAirUnitMode.Add(rp);
-				BasedAirUnitFlg.Add(rp2);
-				//
-				BasedAirUnitAAV.Add(new ReactiveProperty<string>(""));
-			}
-			for (int ui = 0; ui < 3; ++ui) {
-				// BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRfとBasedAirUnitInfo
-				var rpList1 = new List<ReactiveProperty<int>>();
-				var rpList2 = new List<ReactiveProperty<int>>();
-				var rpList3 = new List<ReactiveProperty<int>>();
-				var rpList4 = new List<ReactiveProperty<string>>();
+    private async Task<int[]> getNewestVersion()
+    {
+      using (var client = new HttpClient())
+      {
+        // ダウンロード
+        string rawData = await client.GetStringAsync("https://raw.githubusercontent.com/YSRKEN/AWSK/master/AWSK/version.txt").ConfigureAwait(false);
+        string[] versionString = rawData.Split(',');
+        int[] version = new int[]{ 0, 0, 0, 0 };
+        for(int i = 0; i < versionString.Length - 1; ++i)
+        {
+          version[i] = int.Parse(versionString[i]);
+        }
+        return version;
+      }
+    }
+    private async void VersionCheck()
+    {
+      // 自身のバージョン
+      int[] nowVersion = null;
+      {
+        var assembly = Assembly.GetExecutingAssembly();
+        var asmName = assembly.GetName();
+        var version = asmName.Version;
+        nowVersion = new int[] { version.Major, version.Minor, version.Build, version.Revision };
+      }
+      // ネット上の最新のバージョン
+      int[] newestVersion = await getNewestVersion();
+      // 比較
+      bool flg = false;
+      for (int i = 0; i < 4; ++i)
+      {
+        if (nowVersion[i] < newestVersion[i])
+        {
+          flg = true;
+          break;
+        }
+      }
+      if (flg)
+      {
+        string now = $"Ver.{nowVersion[0]}.{nowVersion[1]}.{nowVersion[2]}.{nowVersion[3]}";
+        string newest = $"Ver.{newestVersion[0]}.{newestVersion[1]}.{newestVersion[2]}.{newestVersion[3]}";
+        var result = MessageBox.Show("より新しいバージョンが公開されています。ダウンロードしますか？\n現在のバージョン：" + now + "\n最新のバージョン：" + newest, "AWSK", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+        if (result == MessageBoxResult.OK)
+        {
+          System.Diagnostics.Process.Start("https://github.com/YSRKEN/AWSK/releases");
+        }
+      }
+    }
+
+    // コンストラクタ
+    public MainViewModel()
+    {
+      // その他初期化
+      Initialize();
+      // ReactivePropertyを設定
+      //BasedAirUnitModeとBasedAirUnitFlgとBasedAirUnitAAV
+      //(BasedAirUnitFlgはBasedAirUnitModeから作られる)
+      for (int ui = 0; ui < 3; ++ui)
+      {
+        var rp = new ReactiveProperty<int>(0);
+        var rp2 = rp.Select(x => x != 0).ToReadOnlyReactiveProperty();
+        BasedAirUnitMode.Add(rp);
+        BasedAirUnitFlg.Add(rp2);
+        //
+        BasedAirUnitAAV.Add(new ReactiveProperty<string>(""));
+      }
+      for (int ui = 0; ui < 3; ++ui)
+      {
+        // BasedAirUnitIndexとBasedAirUnitMasとBasedAirUnitRfとBasedAirUnitInfo
+        var rpList1 = new List<ReactiveProperty<int>>();
+        var rpList2 = new List<ReactiveProperty<int>>();
+        var rpList3 = new List<ReactiveProperty<int>>();
+        var rpList4 = new List<ReactiveProperty<string>>();
         var rpList5 = new List<ReactiveProperty<int>>();
-        for (int wi = 0; wi < 4; ++wi) {
-					rpList1.Add(new ReactiveProperty<int>(0));
-					rpList2.Add(new ReactiveProperty<int>(7));
-					rpList3.Add(new ReactiveProperty<int>(0));
-					rpList4.Add(new ReactiveProperty<string>(""));
+        for (int wi = 0; wi < 4; ++wi)
+        {
+          rpList1.Add(new ReactiveProperty<int>(0));
+          rpList2.Add(new ReactiveProperty<int>(7));
+          rpList3.Add(new ReactiveProperty<int>(0));
+          rpList4.Add(new ReactiveProperty<string>(""));
           rpList5.Add(new ReactiveProperty<int>(0));
         }
-				BasedAirUnitIndex.Add(rpList1);
-				BasedAirUnitMas.Add(rpList2);
-				BasedAirUnitRf.Add(rpList3);
-				BasedAirUnitInfo.Add(rpList4);
+        BasedAirUnitIndex.Add(rpList1);
+        BasedAirUnitMas.Add(rpList2);
+        BasedAirUnitRf.Add(rpList3);
+        BasedAirUnitInfo.Add(rpList4);
         BAUTypeIndex.Add(rpList5);
-			}
-			for (int ki = 0; ki < 6; ++ki) {
-				EnemyUnitIndex.Add(new ReactiveProperty<int>(0));
-			}
-			for (int ui = 0; ui < 3; ++ui) {
-				for (int wi = 0; wi < 4; ++wi) {
-					// 変更時に制空値を自動計算する処理
-					/* このコードだと、実行時、コンボボックスを動かした際「uiになぜか3が代入されて」
+      }
+      for (int ki = 0; ki < 6; ++ki)
+      {
+        EnemyUnitIndex.Add(new ReactiveProperty<int>(0));
+      }
+      for (int ui = 0; ui < 3; ++ui)
+      {
+        for (int wi = 0; wi < 4; ++wi)
+        {
+          // 変更時に制空値を自動計算する処理
+          /* このコードだと、実行時、コンボボックスを動かした際「uiになぜか3が代入されて」
 					 * エラーが出てしまう。ファッキュー！ファッキュー！
 					 * rp1.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
 					 * rp2.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
 					 * rp3.Subscribe(_ => ReCalcBasedAirUnitAAV(ui));
 					 */
-					switch (ui) {
-					case 0:
-						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
-						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
-						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
-						break;
-					case 1:
-						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
-						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
-						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
-						break;
-					case 2:
-						BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
-						BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
-						BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
-						break;
-					}
-				}
-			}
-			for (int ki = 0; ki < 6; ++ki) {
-				EnemyUnitIndex[ki].Subscribe(_ => ReCalcEnemyUnitAAV());
-			}
-			//UpdateDatabaseButtonMessage
-			UpdateDatabaseButtonMessage = UpdateDatabaseButtonFlg.Select(f => (f ? "データベースを更新" : "更新中...")).ToReadOnlyReactiveProperty();
-			#region 各種ReactiveCollection
-			{
-				var oc = new ObservableCollection<string>(new List<string> {
-					"--", "|", "||", "|||", "/", "//", "///", ">>", ">>>"
-				});
-				MasList = oc.ToReadOnlyReactiveCollection();
-			}
-			{
-				var oc = new ObservableCollection<string>(new List<string> {
-					"0", "1", "2", "3", "4", "5",
-					"6", "7", "8", "9", "10"});
-				RfList = oc.ToReadOnlyReactiveCollection();
-			}
+          switch (ui)
+          {
+            case 0:
+              BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+              BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+              BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(0));
+              break;
+            case 1:
+              BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+              BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+              BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(1));
+              break;
+            case 2:
+              BasedAirUnitIndex[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+              BasedAirUnitMas[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+              BasedAirUnitRf[ui][wi].Subscribe(_ => ReCalcBasedAirUnitAAV(2));
+              break;
+          }
+        }
+      }
+      for (int ki = 0; ki < 6; ++ki)
       {
-				// 敵艦名のリストから、新たに表示用リストを作成
-				var enemyNameList = DataStore.EnemyNameList();
-				//まず艦種毎に艦名リストを再構成する
-				var enemyListEachType = new Dictionary<string, List<string>>();
-				foreach (var pair in enemyNameList) {
-					// 艦のID・艦名・艦種
-					int id = (pair.Key < 10000 ? pair.Key : pair.Key - 10000);
-					string name = pair.Value.Key;
-					string type = pair.Value.Value;
-					// 登録
-					if (!enemyListEachType.ContainsKey(type)) {
-						enemyListEachType[type] = new List<string>();
-					}
-					enemyListEachType[type].Add($"{name} [{id}]");
-				}
-				//次に艦種一覧をコンボボックス用に宛がう
-				{
-					var list = new List<string> { "--" };
-					foreach(var pair in enemyListEachType) {
-						list.Add(pair.Key);
-					}
-					var oc = new ObservableCollection<string>(list);
-					EnemyTypeList = oc.ToReadOnlyReactiveCollection();
-				}
-				for (int ki = 0; ki < 6; ++ki) {
-					EnemyTypeIndex.Add(new ReactiveProperty<int>(0));
-				}
-				//最後にコンボボックス用の艦名一覧を作成する
-				var enemyNameList2 = new List<string>();
-				enemyNameList2.Add("なし");
-				foreach(var pair in enemyListEachType) {
-					string type = pair.Key;
-					enemyNameList2.Add($"【{type}】");
-					foreach(string name in pair.Value) {
-						enemyNameList2.Add(name);
-					}
-				}
-				{
-					var oc = new ObservableCollection<string>(enemyNameList2);
-					EnemyList = oc.ToReadOnlyReactiveCollection();
-				}
-				// 艦種を切り替えると艦名のリストが切り替わる処理
-				EnemyTypeIndex[0].Subscribe(x => { ResetEnemyListByType(0, x); });
-				EnemyTypeIndex[1].Subscribe(x => { ResetEnemyListByType(1, x); });
-				EnemyTypeIndex[2].Subscribe(x => { ResetEnemyListByType(2, x); });
-				EnemyTypeIndex[3].Subscribe(x => { ResetEnemyListByType(3, x); });
-				EnemyTypeIndex[4].Subscribe(x => { ResetEnemyListByType(4, x); });
-				EnemyTypeIndex[5].Subscribe(x => { ResetEnemyListByType(5, x); });
-			}
-			{
-				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
-				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
-			}
+        EnemyUnitIndex[ki].Subscribe(_ => ReCalcEnemyUnitAAV());
+      }
+      //UpdateDatabaseButtonMessage
+      UpdateDatabaseButtonMessage = UpdateDatabaseButtonFlg.Select(f => (f ? "データベースを更新" : "更新中...")).ToReadOnlyReactiveProperty();
+      #region 各種ReactiveCollection
+      {
+        var oc = new ObservableCollection<string>(new List<string> {
+          "--", "|", "||", "|||", "/", "//", "///", ">>", ">>>"
+        });
+        MasList = oc.ToReadOnlyReactiveCollection();
+      }
+      {
+        var oc = new ObservableCollection<string>(new List<string> {
+          "0", "1", "2", "3", "4", "5",
+          "6", "7", "8", "9", "10"});
+        RfList = oc.ToReadOnlyReactiveCollection();
+      }
+      {
+        // 敵艦名のリストから、新たに表示用リストを作成
+        var enemyNameList = DataStore.EnemyNameList();
+        //まず艦種毎に艦名リストを再構成する
+        var enemyListEachType = new Dictionary<string, List<string>>();
+        foreach (var pair in enemyNameList)
+        {
+          // 艦のID・艦名・艦種
+          int id = (pair.Key < 10000 ? pair.Key : pair.Key - 10000);
+          string name = pair.Value.Key;
+          string type = pair.Value.Value;
+          // 登録
+          if (!enemyListEachType.ContainsKey(type))
+          {
+            enemyListEachType[type] = new List<string>();
+          }
+          enemyListEachType[type].Add($"{name} [{id}]");
+        }
+        //次に艦種一覧をコンボボックス用に宛がう
+        {
+          var list = new List<string> { "--" };
+          foreach (var pair in enemyListEachType)
+          {
+            list.Add(pair.Key);
+          }
+          var oc = new ObservableCollection<string>(list);
+          EnemyTypeList = oc.ToReadOnlyReactiveCollection();
+        }
+        for (int ki = 0; ki < 6; ++ki)
+        {
+          EnemyTypeIndex.Add(new ReactiveProperty<int>(0));
+        }
+        //最後にコンボボックス用の艦名一覧を作成する
+        var enemyNameList2 = new List<string>();
+        enemyNameList2.Add("なし");
+        foreach (var pair in enemyListEachType)
+        {
+          string type = pair.Key;
+          enemyNameList2.Add($"【{type}】");
+          foreach (string name in pair.Value)
+          {
+            enemyNameList2.Add(name);
+          }
+        }
+        {
+          var oc = new ObservableCollection<string>(enemyNameList2);
+          EnemyList = oc.ToReadOnlyReactiveCollection();
+        }
+        // 艦種を切り替えると艦名のリストが切り替わる処理
+        EnemyTypeIndex[0].Subscribe(x => { ResetEnemyListByType(0, x); });
+        EnemyTypeIndex[1].Subscribe(x => { ResetEnemyListByType(1, x); });
+        EnemyTypeIndex[2].Subscribe(x => { ResetEnemyListByType(2, x); });
+        EnemyTypeIndex[3].Subscribe(x => { ResetEnemyListByType(3, x); });
+        EnemyTypeIndex[4].Subscribe(x => { ResetEnemyListByType(4, x); });
+        EnemyTypeIndex[5].Subscribe(x => { ResetEnemyListByType(5, x); });
+      }
+      {
+        var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
+        BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
+      }
       {
         var oc = new ObservableCollection<string>(new List<string> {
           "--",
@@ -620,14 +689,17 @@ namespace AWSK.ViewModels
       #endregion
       // コマンドを設定
       RunSimulationCommand = BasedAirUnitFlg
-				.CombineLatest(x => x.Any(y => y)).CombineLatest(UpdateDatabaseButtonFlg, (x, y) => x & y).ToReactiveCommand();
-			RunSimulationCommand.Subscribe(RunSimulation);
-			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
-			ShowEnemyUnitCommand.Subscribe(_ => { MessageBox.Show("敵編成：\n" + GetEnemyData().ToString(), "AWSK"); });
-			LoadEnemyUnitCommand.Subscribe(_ => LoadEnemyUnit());
-			SaveEnemyUnitCommand.Subscribe(_ => SaveEnemyUnit());
-			LoadBasedAirUnitCommand.Subscribe(_ => LoadBasedAirUnit());
-			SaveBasedAirUnitCommand.Subscribe(_ => SaveBasedAirUnit());
-		}
+        .CombineLatest(x => x.Any(y => y)).CombineLatest(UpdateDatabaseButtonFlg, (x, y) => x & y).ToReactiveCommand();
+      RunSimulationCommand.Subscribe(RunSimulation);
+      UpdateDatabaseCommand.Subscribe(UpdateDatabase);
+      ShowEnemyUnitCommand.Subscribe(_ => { MessageBox.Show("敵編成：\n" + GetEnemyData().ToString(), "AWSK"); });
+      LoadEnemyUnitCommand.Subscribe(_ => LoadEnemyUnit());
+      SaveEnemyUnitCommand.Subscribe(_ => SaveEnemyUnit());
+      LoadBasedAirUnitCommand.Subscribe(_ => LoadBasedAirUnit());
+      SaveBasedAirUnitCommand.Subscribe(_ => SaveBasedAirUnit());
+
+      // バージョンチェック
+      VersionCheck();
+    }
 	}
 }
