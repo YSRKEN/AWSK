@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace AWSK.ViewModels
 {
-	class MainViewModel
+	public class MainViewModel
 	{
 		#region プロパティ(ReactiveProperty)
 		// trueにすると画面を閉じる
