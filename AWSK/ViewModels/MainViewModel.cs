@@ -19,8 +19,10 @@ namespace AWSK.ViewModels
 		public List<ReactiveProperty<int>> BasedAirUnitMode { get; } = new List<ReactiveProperty<int>>();
 		// 基地航空隊を飛ばしたか？
 		public List<ReadOnlyReactiveProperty<bool>> BasedAirUnitFlg { get; } = new List<ReadOnlyReactiveProperty<bool>>();
-		// 基地航空隊の装備の選択番号
-		public List<List<ReactiveProperty<int>>> BasedAirUnitIndex { get; } = new List<List<ReactiveProperty<int>>>();
+    // 基地航空隊の装備種の選択番号
+    public List<List<ReactiveProperty<int>>> BAUTypeIndex { get; } = new List<List<ReactiveProperty<int>>>();
+    // 基地航空隊の装備の選択番号
+    public List<List<ReactiveProperty<int>>> BasedAirUnitIndex { get; } = new List<List<ReactiveProperty<int>>>();
 		// 基地航空隊の艦載機熟練度
 		public List<List<ReactiveProperty<int>>> BasedAirUnitMas { get; } = new List<List<ReactiveProperty<int>>>();
 		// 基地航空隊の装備改修度
@@ -45,8 +47,10 @@ namespace AWSK.ViewModels
 		public ReadOnlyReactiveCollection<string> MasList { get; }
 		// 装備改修度の一覧
 		public ReadOnlyReactiveCollection<string> RfList { get; }
-		// 深海棲艦の艦名一覧
-		public ReadOnlyReactiveCollection<string> EnemyList { get; }
+    // 装備改修度の一覧
+    public ReadOnlyReactiveCollection<string> BAUTypeList { get; }
+    // 深海棲艦の艦名一覧
+    public ReadOnlyReactiveCollection<string> EnemyList { get; }
 		// 深海棲艦の艦種一覧
 		public ReadOnlyReactiveCollection<string> EnemyTypeList { get; }
 		// 基地航空隊に使用できる装備の一覧
@@ -358,14 +362,33 @@ namespace AWSK.ViewModels
 			// 特殊処理
 			if(type == "--") {
 				EnemyUnitIndex[comboIndex].Value = 0;
-			}
-			// 自動選択
-			int enemyIndex = EnemyList.IndexOf($"【{type}】");
-			EnemyUnitIndex[comboIndex].Value = enemyIndex;
+      }
+      else
+      {
+        // 自動選択
+        int enemyIndex = EnemyList.IndexOf($"【{type}】");
+        EnemyUnitIndex[comboIndex].Value = enemyIndex;
+      }
 		}
-		#endregion
-		// その他初期化用コード
-		private async void Initialize() {
+    // 自装備選択のコンボボックスを書き換え
+    private void ResetWeaponListByType(int index1, int index2, int typeIndex)
+    {
+      string type = BAUTypeList[typeIndex];
+      // 特殊処理
+      if (type == "--")
+      {
+        BasedAirUnitIndex[index1][index2].Value = 0;
+      }
+      else {
+        // 自動選択
+        int bauIndex = BasedAirUnitList.IndexOf($"【{type}】");
+        BasedAirUnitIndex[index1][index2].Value = bauIndex;
+      }
+    }
+    
+    #endregion
+    // その他初期化用コード
+    private async void Initialize() {
 			// データベースの初期化
 			var status = await DataStore.Initialize();
 			switch (status) {
@@ -452,16 +475,19 @@ namespace AWSK.ViewModels
 				var rpList2 = new List<ReactiveProperty<int>>();
 				var rpList3 = new List<ReactiveProperty<int>>();
 				var rpList4 = new List<ReactiveProperty<string>>();
-				for (int wi = 0; wi < 4; ++wi) {
+        var rpList5 = new List<ReactiveProperty<int>>();
+        for (int wi = 0; wi < 4; ++wi) {
 					rpList1.Add(new ReactiveProperty<int>(0));
 					rpList2.Add(new ReactiveProperty<int>(7));
 					rpList3.Add(new ReactiveProperty<int>(0));
 					rpList4.Add(new ReactiveProperty<string>(""));
-				}
+          rpList5.Add(new ReactiveProperty<int>(0));
+        }
 				BasedAirUnitIndex.Add(rpList1);
 				BasedAirUnitMas.Add(rpList2);
 				BasedAirUnitRf.Add(rpList3);
 				BasedAirUnitInfo.Add(rpList4);
+        BAUTypeIndex.Add(rpList5);
 			}
 			for (int ki = 0; ki < 6; ++ki) {
 				EnemyUnitIndex.Add(new ReactiveProperty<int>(0));
@@ -512,7 +538,7 @@ namespace AWSK.ViewModels
 					"6", "7", "8", "9", "10"});
 				RfList = oc.ToReadOnlyReactiveCollection();
 			}
-			{
+      {
 				// 敵艦名のリストから、新たに表示用リストを作成
 				var enemyNameList = DataStore.EnemyNameList();
 				//まず艦種毎に艦名リストを再構成する
@@ -566,9 +592,34 @@ namespace AWSK.ViewModels
 				var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
 				BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
 			}
-			#endregion
-			// コマンドを設定
-			RunSimulationCommand = BasedAirUnitFlg
+      {
+        var oc = new ObservableCollection<string>(new List<string> {
+          "--",
+          "艦上戦闘機", "艦上爆撃機", "艦上攻撃機", "墳式爆撃機",
+          "艦上偵察機", "水上偵察機", "水上戦闘機", "水上爆撃機",
+          "大型飛行艇", "陸上攻撃機", "陸上爆撃機", "陸上戦闘機"});
+        BAUTypeList = oc.ToReadOnlyReactiveCollection();
+
+        // 装備種を切り替えると装備名のリストが切り替わる処理
+        BAUTypeIndex[0][0].Subscribe(x => { ResetWeaponListByType(0, 0, x); });
+        BAUTypeIndex[0][1].Subscribe(x => { ResetWeaponListByType(0, 1, x); });
+        BAUTypeIndex[0][2].Subscribe(x => { ResetWeaponListByType(0, 2, x); });
+        BAUTypeIndex[0][3].Subscribe(x => { ResetWeaponListByType(0, 3, x); });
+
+        BAUTypeIndex[1][0].Subscribe(x => { ResetWeaponListByType(1, 0, x); });
+        BAUTypeIndex[1][1].Subscribe(x => { ResetWeaponListByType(1, 1, x); });
+        BAUTypeIndex[1][2].Subscribe(x => { ResetWeaponListByType(1, 2, x); });
+        BAUTypeIndex[1][3].Subscribe(x => { ResetWeaponListByType(1, 3, x); });
+
+        BAUTypeIndex[2][0].Subscribe(x => { ResetWeaponListByType(2, 0, x); });
+        BAUTypeIndex[2][1].Subscribe(x => { ResetWeaponListByType(2, 1, x); });
+        BAUTypeIndex[2][2].Subscribe(x => { ResetWeaponListByType(2, 2, x); });
+        BAUTypeIndex[2][3].Subscribe(x => { ResetWeaponListByType(2, 3, x); });
+
+      }
+      #endregion
+      // コマンドを設定
+      RunSimulationCommand = BasedAirUnitFlg
 				.CombineLatest(x => x.Any(y => y)).CombineLatest(UpdateDatabaseButtonFlg, (x, y) => x & y).ToReactiveCommand();
 			RunSimulationCommand.Subscribe(RunSimulation);
 			UpdateDatabaseCommand.Subscribe(UpdateDatabase);
