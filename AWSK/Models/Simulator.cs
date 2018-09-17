@@ -40,7 +40,7 @@ namespace AWSK.Models
 				st1Range.Add((12 - awStatusCoeff[aws]) * (12 - awStatusCoeff[aws]));
 			}
 			var killedSlot = new List<List<List<int>>>();
-			for(int slot = 0; slot <= 180; ++slot) {
+			for(int slot = 0; slot <= 300; ++slot) {
 				var list1 = new List<List<int>>();
 				for (int aws = 0; aws < (int)AirWarStatus.Size; ++aws) {
 					var list2 = new List<int>();

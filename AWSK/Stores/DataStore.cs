@@ -1566,7 +1566,7 @@ namespace AWSK.Stores
     {
       antiAirValue1 = new List<int>();
       antiAirValue2 = new List<int>();
-      for (int slot = 0; slot <= 180; ++slot)
+      for (int slot = 0; slot <= 300; ++slot)
       {
         int aav = (int)(Math.Floor(CorrectedAA * Math.Sqrt(slot) + AntiAirBonus));
         if (HasAAV(true))
