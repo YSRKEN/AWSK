@@ -46,10 +46,12 @@ namespace AWSK.ViewModels
 		// ダウンロードボタンの表示
 		public ReactiveProperty<bool> UpdateDatabaseButtonFlg { get; } = new ReactiveProperty<bool>(true);
 		public ReadOnlyReactiveProperty<string> UpdateDatabaseButtonMessage { get; }
-		#endregion
-		#region プロパティ(ReadOnlyReactiveCollection)
-		// 艦載機熟練度の一覧
-		public ReadOnlyReactiveCollection<string> MasList { get; }
+    //
+    public ReactiveProperty<string> TitleText { get; } = new ReactiveProperty<string>("航空戦シミュレーター改");
+    #endregion
+    #region プロパティ(ReadOnlyReactiveCollection)
+    // 艦載機熟練度の一覧
+    public ReadOnlyReactiveCollection<string> MasList { get; }
 		// 装備改修度の一覧
 		public ReadOnlyReactiveCollection<string> RfList { get; }
     // 装備改修度の一覧
@@ -489,6 +491,7 @@ namespace AWSK.ViewModels
         var version = asmName.Version;
         nowVersion = new int[] { version.Major, version.Minor, version.Build, version.Revision };
       }
+      TitleText.Value = $"航空戦シミュレーター改(AWSK) Ver.{nowVersion[0]}.{nowVersion[1]}.{nowVersion[2]}.{nowVersion[3]}";
       // ネット上の最新のバージョン
       int[] newestVersion = await getNewestVersion();
       // 比較
