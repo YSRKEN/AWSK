@@ -69,12 +69,24 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/37255496-a2f2f552-2590-11e8-82af-d1910e7f02af.png)
 
+- WeaponPatch.csvには、自動ダウンロードしきれなかった装備情報のWikiaのURLと装備番号がCSV形式で書き込まれています
+- WeaponPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+
+![image](https://user-images.githubusercontent.com/3734392/45603792-5bd7c580-ba69-11e8-81ba-483cd207c42d.png)
+
+- EnemyCategoryPatch.csvには、自動ダウンロードしきれなかった敵艦情報の名前とWikiaのURLがCSV形式で書き込まれています
+- EnemyCategoryPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+
+![image](https://user-images.githubusercontent.com/3734392/45603844-70b45900-ba69-11e8-975e-8da4675eb28f.png)
+
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.7.2** 以上が必要です
 - **WeaponData.csv** には、装備の戦闘行動半径の情報が書かれています
 - **GameData.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています
 - **KammusuPatch.csv** には、前述のように追加の艦娘(深海棲艦)の情報がCSV形式で書き込まれています
 - **EnemyFamiliarName.csv**には、前述のように深海棲艦の俗称がCSV形式で書き込まれています
+- **WeaponPatch.csv**には、自動ダウンロードしきれなかった装備情報のWikiaのURLと装備番号がCSV形式で書き込まれています
+- **EnemyCategoryPatch.csv**には、自動ダウンロードしきれなかった敵艦情報の名前とWikiaのURLがCSV形式で書き込まれています
 
 ## 作者
 　YSR([Twitter](https://twitter.com/YSRKEN), [GitHub](https://github.com/YSRKEN/))
