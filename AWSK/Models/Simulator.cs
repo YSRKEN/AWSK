@@ -22,9 +22,9 @@ namespace AWSK.Models
 				return AirWarStatus.Best;
 			}else if(friend * 2 >= enemy * 3) {
 				return AirWarStatus.Good;
-			}else if(friend * 3 >= enemy * 2) {
+			}else if(friend * 3 > enemy * 2) {
 				return AirWarStatus.Even;
-			}else if(friend * 3 >= enemy) {
+			}else if(friend * 3 > enemy) {
 				return AirWarStatus.Bad;
 			} else {
 				return AirWarStatus.Worst;
