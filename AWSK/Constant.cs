@@ -2,22 +2,22 @@
 
 namespace AWSK
 {
-  class Constant
-  {
-    /// <summary>
-    /// 艦種を表すenum
-    /// </summary>
-    public enum KammusuType
+    class Constant
     {
-      DD, PT, CL, CLT, CP, CA, CAV, CV, ACV, CVL, AV, BB,
-      CC, BBV, SS, SSV, LST, AO, LHA, AR, AS, AF
-    };
+        /// <summary>
+        /// 艦種を表すenum
+        /// </summary>
+        public enum KammusuType
+        {
+            DD, PT, CL, CLT, CP, CA, CAV, CV, ACV, CVL, AV, BB,
+            CC, BBV, SS, SSV, LST, AO, LHA, AR, AS, AF
+        };
 
-    /// <summary>
-    /// 艦種enumを艦種文字列に変換する
-    /// </summary>
-    public Dictionary<KammusuType, string> KammusuTypeDic =
-      new Dictionary<KammusuType, string>{
+        /// <summary>
+        /// 艦種enumを艦種文字列に変換する
+        /// </summary>
+        public Dictionary<KammusuType, string> KammusuTypeDic =
+          new Dictionary<KammusuType, string>{
         { KammusuType.DD, "駆逐艦" },
         { KammusuType.PT, "魚雷艇" },
         { KammusuType.CL, "軽巡洋艦" },
@@ -40,20 +40,21 @@ namespace AWSK
         { KammusuType.AR, "工作艦" },
         { KammusuType.AS, "潜水母艦" },
         { KammusuType.AF, "陸上型" },
-    };
+        };
 
-    /// <summary>
-    /// 装備種を表すenum
-    /// </summary>
-    public enum WeaponType {
-      PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF, Other
-    };
+        /// <summary>
+        /// 装備種を表すenum
+        /// </summary>
+        public enum WeaponType
+        {
+            PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF, Other
+        };
 
-    /// <summary>
-    /// 装備種enumを装備文字列に変換する
-    /// </summary>
-    public Dictionary<WeaponType, string> WeaponTypeDic = 
-      new Dictionary<WeaponType, string>{
+        /// <summary>
+        /// 装備種enumを装備文字列に変換する
+        /// </summary>
+        public Dictionary<WeaponType, string> WeaponTypeDic =
+          new Dictionary<WeaponType, string>{
         { WeaponType.PF, "艦上戦闘機" },
         { WeaponType.PB, "艦上爆撃機" },
         { WeaponType.PA, "艦上攻撃機" },
@@ -67,6 +68,6 @@ namespace AWSK
         { WeaponType.LA, "陸上攻撃機" },
         { WeaponType.LF, "陸上戦闘機" },
         { WeaponType.Other, "その他" },
-    };
-  }
+        };
+    }
 }
