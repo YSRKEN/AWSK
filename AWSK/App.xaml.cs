@@ -18,6 +18,8 @@ namespace AWSK {
             database.CreateWeaponTable(false);
             database.Save(new Weapon(2, "12.7cm連装砲", WeaponType.Other, 2, 0, 0, true));
             database.Save(new Weapon(3, "61cm三連装魚雷", WeaponType.Other, 0, 0, 0, true));
+            var hoge = database.findByWeaponId(3);
+            var fuga = database.findByWeaponId(1);
 
             // アプリの起動
             var bootstrapper = new Bootstrapper();

@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AWSK.Constant;
 
 namespace AWSK.Service {
     /// <summary>
@@ -55,7 +56,17 @@ namespace AWSK.Service {
                         while (reader.Read()) {
                             var record = new Dictionary<string, dynamic>();
                             for(int i = 0; i < reader.FieldCount; ++i) {
-                                record[reader.GetName(i)] = reader.GetValue(i);
+                                switch (reader.GetFieldType(i).FullName) {
+                                case "System.Int64":
+                                    record[reader.GetName(i)] = reader.GetFieldValue<long>(i);
+                                    break;
+                                case "System.String":
+                                    record[reader.GetName(i)] = reader.GetFieldValue<string>(i);
+                                    break;
+                                default:
+                                    record[reader.GetName(i)] = reader.GetValue(i);
+                                    break;
+                                }
                             }
                             result.Add(record);
                         }
@@ -74,7 +85,7 @@ namespace AWSK.Service {
         void CreateTable(string tableName, string query, bool forceFlg) {
             // 既存のテーブルが存在するかを調べる
             var result = ExecuteReader($"SELECT count(*) AS count FROM sqlite_master WHERE type='table' AND name='{tableName}'");
-            if (result.Count > 0 && (int)result[0]["count"] >= 1) {
+            if (result.Count > 0 && result[0]["count"] >= 1) {
                 if (forceFlg) {
                     ExecuteNonQuery($"DROP TABLE {tableName}");
                 } else {
@@ -146,8 +157,23 @@ namespace AWSK.Service {
         /// <param name="id">装備ID</param>
         /// <returns>装備情報。未ヒットの場合はnull</returns>
         public Weapon findByWeaponId(int id) {
-            // スタブ
-            return null;
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE id={id}");
+            if (queryResult.Count == 0) {
+                return null;
+            }
+
+            // SELECT文から結果を取得して返す
+            var queryResult2 = queryResult[0];
+            var result = new Weapon(
+                (int)queryResult2["id"],
+                (string)queryResult2["name"],
+                (WeaponType)queryResult2["type"],
+                (int)queryResult2["antiair"],
+                (int)queryResult2["intercept"],
+                (int)queryResult2["based_air_unit_range"],
+                queryResult2["for_kammusu_flg"] == 1);
+            return result;
         }
 
         /// <summary>
