@@ -47,7 +47,7 @@ namespace AWSK
         /// </summary>
         public enum WeaponType
         {
-            PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF, Other
+            Other, PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF
         };
 
         /// <summary>
