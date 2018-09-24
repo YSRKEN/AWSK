@@ -150,6 +150,7 @@
     <Compile Include="Models\Simulator.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Service\DataBaseService.cs" />
+    <Compile Include="Service\DownloadService.cs" />
     <Compile Include="Stores\DataStore.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ResultViewModel.cs" />

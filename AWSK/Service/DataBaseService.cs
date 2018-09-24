@@ -150,7 +150,7 @@ namespace AWSK.Service {
 				[weapon5] INTEGER NOT NULL DEFAULT 0,
 				[kammusu_flg] INTEGER NOT NULL DEFAULT 1)
 			";
-            CreateTable("Kammusu", sql, forceFlg);
+            CreateTable("kammusu", sql, forceFlg);
         }
 
         /// <summary>

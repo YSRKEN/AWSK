@@ -11,7 +11,7 @@ namespace AWSK {
 	/// App.xaml の相互作用ロジック
 	/// </summary>
 	public partial class App : Application {
-		protected override void OnStartup(StartupEventArgs e) {
+		protected override async void OnStartup(StartupEventArgs e) {
 			base.OnStartup(e);
 
             // テストコード
@@ -26,6 +26,9 @@ namespace AWSK {
             var foo = database.findByKammusuId(9, true);
             var foo2 = database.findByKammusuId(9, false);
             var bar = database.findByKammusuId(1, true);
+
+            var downloader = DownloadService.instance;
+            var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
 
             // アプリの起動
             var bootstrapper = new Bootstrapper();
