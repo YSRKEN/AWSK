@@ -55,7 +55,7 @@ namespace AWSK.Service {
                     using (var reader = cmd.ExecuteReader()) {
                         while (reader.Read()) {
                             var record = new Dictionary<string, dynamic>();
-                            for(int i = 0; i < reader.FieldCount; ++i) {
+                            for (int i = 0; i < reader.FieldCount; ++i) {
                                 switch (reader.GetFieldType(i).FullName) {
                                 case "System.Int64":
                                     record[reader.GetName(i)] = reader.GetFieldValue<long>(i);
@@ -193,10 +193,10 @@ namespace AWSK.Service {
             // クエリを作成する
             string query = string.Format("REPLACE INTO kammusu VALUES ({0},'{1}',{2},{3},{4}",
                 kammusu.Id, kammusu.Name, (int)kammusu.Type, kammusu.AntiAir, kammusu.SlotList.Count);
-            for(int i = 0; i < kammusu.SlotList.Count; ++i) {
+            for (int i = 0; i < kammusu.SlotList.Count; ++i) {
                 query += $",{kammusu.SlotList[i]}";
             }
-            for(int i = kammusu.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+            for (int i = kammusu.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
                 query += ",0";
             }
             for (int i = 0; i < kammusu.SlotList.Count; ++i) {
@@ -256,7 +256,7 @@ namespace AWSK.Service {
             var slotList = new List<int>();
             var weaponList = new List<int>();
             for (int i = 0; i < slotSize; ++i) {
-                slotList.Add((int)queryResult2[$"slot{i+1}"]);
+                slotList.Add((int)queryResult2[$"slot{i + 1}"]);
                 weaponList.Add((int)queryResult2[$"weapon{i + 1}"]);
             }
 

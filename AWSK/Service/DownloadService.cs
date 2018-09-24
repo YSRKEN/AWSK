@@ -45,7 +45,7 @@ namespace AWSK.Service {
 
                 // 余計な文字を削除
                 rawData = rawData.Replace("var gItems = ", "");
-                
+
                 // JSONとしてパース
                 var obj = DynamicJson.Parse(rawData);
 
@@ -147,7 +147,7 @@ namespace AWSK.Service {
                     // 追記する
                     var kammusuData = new Kammusu(id, name, type, antiAir, new List<int>(), kammusuFlg);
                     var defaultWeaponData = new List<int>();
-                    foreach(var s in slot) {
+                    foreach (var s in slot) {
                         kammusuData.SlotList.Add((int)s);
                     }
                     foreach (var w in defaultWeapon) {
