@@ -177,6 +177,52 @@ namespace AWSK.Service {
         }
 
         /// <summary>
+        /// 装備情報を一括で挿入・上書きする
+        /// </summary>
+        /// <param name="weaponList">装備リスト</param>
+        /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
+        public void SaveAll(List<Weapon> weaponList, bool forceFlg) {
+            // 上書きしないオプションを反映する
+            var weaponList2 = weaponList;
+            if (!forceFlg) {
+                string idList = string.Join(",", weaponList.Select(w => w.Id.ToString()));
+                var temp = ExecuteReader($"SELECT id FROM weapon WHERE id IN ({idList})");
+                var temp2 = temp.Select(r => (int)r["id"]).ToHashSet();
+                weaponList2 = new List<Weapon>();
+                foreach(var weapon in weaponList) {
+                    if (!temp2.Contains(weapon.Id)) {
+                        weaponList2.Add(weapon);
+                    }
+                }
+            }
+
+            // トランザクションを実行する
+            using (var con = new SQLiteConnection(CONNECTION_STRING)) {
+                con.Open();
+                using (var trans = con.BeginTransaction()) {
+                    try {
+                        foreach (var weapon in weaponList2) {
+                            // クエリを作成する
+                            string query = string.Format("REPLACE INTO weapon VALUES ({0},'{1}',{2},{3},{4},{5},{6});",
+                                weapon.Id, weapon.Name, (int)weapon.Type, weapon.AntiAir, weapon.Intercept,
+                                weapon.BasedAirUnitRange, weapon.ForKammusuFlg ? 1 : 0);
+
+                            // クエリを実行する
+                            using (var cmd = con.CreateCommand()) {
+                                cmd.CommandText = query;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        trans.Commit();
+                    } catch (Exception e) {
+                        trans.Rollback();
+                    }
+                }
+            }
+            return;
+        }
+
+        /// <summary>
         /// 艦娘情報を挿入・上書きする
         /// </summary>
         /// <param name="kammusu">艦娘情報</param>
@@ -209,6 +255,64 @@ namespace AWSK.Service {
 
             // クエリを実行する
             ExecuteNonQuery(query);
+            return;
+        }
+
+        /// <summary>
+        /// 艦娘情報を一括で挿入・上書きする
+        /// </summary>
+        /// <param name="kammusuList">艦娘と初期装備のペアのリスト</param>
+        /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
+        public void SaveAll(List<KeyValuePair<Kammusu, List<int>>> kammusuList, bool forceFlg) {
+            // 上書きしないオプションを反映する
+            var kammusuList2 = kammusuList;
+            if (!forceFlg) {
+                string idList = string.Join(",", kammusuList.Select(w => w.Key.Id.ToString()));
+                var temp = ExecuteReader($"SELECT id FROM kammusu WHERE id IN ({idList})");
+                var temp2 = temp.Select(r => (int)r["id"]).ToHashSet();
+                kammusuList2 = new List<KeyValuePair<Kammusu, List<int>>>();
+                foreach (var pair in kammusuList) {
+                    if (!temp2.Contains(pair.Key.Id)) {
+                        kammusuList2.Add(pair);
+                    }
+                }
+            }
+
+            // トランザクションを実行する
+            using (var con = new SQLiteConnection(CONNECTION_STRING)) {
+                con.Open();
+                using (var trans = con.BeginTransaction()) {
+                    try {
+                        foreach (var pair in kammusuList2) {
+                            // クエリを作成する
+                            string query = string.Format("REPLACE INTO kammusu VALUES ({0},'{1}',{2},{3},{4}",
+                                pair.Key.Id, pair.Key.Name, (int)pair.Key.Type, pair.Key.AntiAir, pair.Key.SlotList.Count);
+                            for (int i = 0; i < pair.Key.SlotList.Count; ++i) {
+                                query += $",{pair.Key.SlotList[i]}";
+                            }
+                            for (int i = pair.Key.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+                                query += ",0";
+                            }
+                            for (int i = 0; i < pair.Key.SlotList.Count; ++i) {
+                                query += $",{pair.Value[i]}";
+                            }
+                            for (int i = pair.Key.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+                                query += ",0";
+                            }
+                            query += $",{(pair.Key.KammusuFlg ? 1 : 0)});";
+
+                            // クエリを実行する
+                            using (var cmd = con.CreateCommand()) {
+                                cmd.CommandText = query;
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+                        trans.Commit();
+                    } catch (Exception e) {
+                        trans.Rollback();
+                    }
+                }
+            }
             return;
         }
 
