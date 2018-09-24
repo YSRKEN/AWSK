@@ -16,19 +16,19 @@ namespace AWSK {
 
             // テストコード
             var database = DataBaseService.instance;
-            database.CreateWeaponTable(false);
-            database.Save(new Weapon(2, "12.7cm連装砲", WeaponType.Other, 2, 0, 0, true));
-            database.Save(new Weapon(13, "61cm三連装魚雷", WeaponType.Other, 0, 0, 0, true));
-            var hoge = database.findByWeaponId(3);
-            var fuga = database.findByWeaponId(1);
-            database.CreateKammusuTable(false);
-            database.Save(new Kammusu(9, "吹雪", KammusuType.DD, 39, new List<int>{ 0, 0 }, true), new List<int> { 2, 13 });
-            var foo = database.findByKammusuId(9, true);
-            var foo2 = database.findByKammusuId(9, false);
-            var bar = database.findByKammusuId(1, true);
-
             var downloader = DownloadService.instance;
+
+            database.CreateWeaponTable(false);
             var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
+            foreach(var weapon in weaponData1) {
+                database.Save(weapon);
+            }
+
+            database.CreateKammusuTable(false);
+            var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
+            foreach(var pair in kammusuData1) {
+                database.Save(pair.Key, pair.Value);
+            }
 
             // アプリの起動
             var bootstrapper = new Bootstrapper();

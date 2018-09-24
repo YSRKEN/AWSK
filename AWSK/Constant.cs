@@ -1,22 +1,33 @@
 ﻿using System.Collections.Generic;
 
 namespace AWSK {
-    class Constant {
+    static class Constant {
+        /// <summary>
+        /// staticコンストラクタ
+        /// </summary>
+        static Constant() {
+            KammusuTypeReverseDic = new Dictionary<string, KammusuType>();
+            foreach(var pair in KammusuTypeDic) {
+                KammusuTypeReverseDic[pair.Value] = pair.Key;
+            }
+        }
+
         /// <summary>
         /// 艦種を表すenum
         /// </summary>
         public enum KammusuType {
-            Other, DD, PT, CL, CLT, CP, CA, CAV, CV, ACV, CVL, AV, BB,
+            Other, DD, CD, PT, CL, CLT, CP, CA, CAV, CV, ACV, CVL, AV, BB,
             CC, BBV, SS, SSV, LST, AO, LHA, AR, AS, AF
         };
 
         /// <summary>
         /// 艦種enumを艦種文字列に変換する
         /// </summary>
-        public Dictionary<KammusuType, string> KammusuTypeDic =
+        public static Dictionary<KammusuType, string> KammusuTypeDic =
             new Dictionary<KammusuType, string>{
                 { KammusuType.Other, "その他" },
                 { KammusuType.DD, "駆逐艦" },
+                { KammusuType.CD, "海防艦" },
                 { KammusuType.PT, "魚雷艇" },
                 { KammusuType.CL, "軽巡洋艦" },
                 { KammusuType.CLT, "重雷装巡洋艦" },
@@ -33,12 +44,17 @@ namespace AWSK {
                 { KammusuType.SS, "潜水艦" },
                 { KammusuType.SSV, "潜水空母" },
                 { KammusuType.LST, "輸送艦" },
-                { KammusuType.AO, "給油艦" },
+                { KammusuType.AO, "補給艦" },
                 { KammusuType.LHA, "揚陸艦" },
                 { KammusuType.AR, "工作艦" },
                 { KammusuType.AS, "潜水母艦" },
                 { KammusuType.AF, "陸上型" },
         };
+
+        /// <summary>
+        /// 艦種文字列を艦種enumに変換する
+        /// </summary>
+        public static Dictionary<string, KammusuType> KammusuTypeReverseDic = null;
 
         /// <summary>
         /// 装備種を表すenum
@@ -50,7 +66,7 @@ namespace AWSK {
         /// <summary>
         /// 装備種enumを装備文字列に変換する
         /// </summary>
-        public Dictionary<WeaponType, string> WeaponTypeDic =
+        public static Dictionary<WeaponType, string> WeaponTypeDic =
             new Dictionary<WeaponType, string>{
                 { WeaponType.Other, "その他" },
                 { WeaponType.PF, "艦上戦闘機" },

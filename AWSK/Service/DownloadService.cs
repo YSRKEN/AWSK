@@ -106,5 +106,61 @@ namespace AWSK.Service {
             }
             return result;
         }
+
+        /// <summary>
+        /// 艦娘リストをデッキビルダーからダウンロードする
+        /// </summary>
+        /// <returns>艦娘</returns>
+        public async Task<List<KeyValuePair<Kammusu, List<int>>>> downloadKammusuDataFromDeckBuilderAsync() {
+            var result = new List<KeyValuePair<Kammusu, List<int>>>();
+            using (var client = new HttpClient()) {
+                // テキストデータダウンロード
+                string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/shipdata.js");
+
+                // 余計な文字を削除
+                rawData = rawData.Replace("var gShips = ", "");
+
+                // JSONとしてパース
+                var obj = DynamicJson.Parse(rawData);
+
+                // パース結果を取得
+                foreach (var kammusu in obj) {
+                    // 艦船IDや艦名などを取得
+                    int id = int.Parse(kammusu.id);
+                    if (id > 1900)
+                        continue;
+                    string name = (string)kammusu.name;
+                    if (name == "なし")
+                        continue;
+                    int antiAir = (int)kammusu.max_aac;
+                    int slotCount = (int)kammusu.slot;
+                    var slot = kammusu.carry;
+                    var defaultWeapon = kammusu.equip;
+
+                    // 艦種データを変換する
+                    string rawType = (string)kammusu.type;
+                    var type = KammusuTypeReverseDic.ContainsKey(rawType) ? KammusuTypeReverseDic[rawType] : KammusuType.Other;
+
+                    // 艦娘か？
+                    bool kammusuFlg = id <= 1500;
+
+                    // 追記する
+                    var kammusuData = new Kammusu(id, name, type, antiAir, new List<int>(), kammusuFlg);
+                    var defaultWeaponData = new List<int>();
+                    foreach(var s in slot) {
+                        kammusuData.SlotList.Add((int)s);
+                    }
+                    foreach (var w in defaultWeapon) {
+                        defaultWeaponData.Add((int)w);
+                    }
+                    int temp = defaultWeaponData.Count;
+                    for (int i = temp; i < slotCount; ++i) {
+                        defaultWeaponData.Add(0);
+                    }
+                    result.Add(new KeyValuePair<Kammusu, List<int>>(kammusuData, defaultWeaponData));
+                }
+            }
+            return result;
+        }
     }
 }
