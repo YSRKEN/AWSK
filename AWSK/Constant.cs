@@ -87,5 +87,14 @@ namespace AWSK {
         /// 最大のスロット数
         /// </summary>
         public static int MAX_SLOT_COUNT = 5;
+
+        /// <summary>
+        /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
+        /// </summary>
+        public static HashSet<string> AFSet = new HashSet<string> {
+            "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
+            "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
+            "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
+        };
     }
 }

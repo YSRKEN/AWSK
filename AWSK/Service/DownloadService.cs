@@ -1,5 +1,6 @@
 ﻿using AWSK.Models;
 using Codeplex.Data;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -35,6 +36,7 @@ namespace AWSK.Service {
 
         /// <summary>
         /// 装備リストをデッキビルダーからダウンロードする
+        /// (性質上、基地航空隊の距離を取得できない)
         /// </summary>
         /// <returns>装備リスト</returns>
         public async Task<List<Weapon>> downloadWeaponDataFromDeckBuilderAsync() {
@@ -109,6 +111,7 @@ namespace AWSK.Service {
 
         /// <summary>
         /// 艦娘リストをデッキビルダーからダウンロードする
+        /// (性質上、詳細な情報を取得できない敵艦もある)
         /// </summary>
         /// <returns>艦娘</returns>
         public async Task<List<KeyValuePair<Kammusu, List<int>>>> downloadKammusuDataFromDeckBuilderAsync() {
@@ -137,14 +140,18 @@ namespace AWSK.Service {
                     var slot = kammusu.carry;
                     var defaultWeapon = kammusu.equip;
 
-                    // 艦種データを変換する
-                    string rawType = (string)kammusu.type;
-                    var type = KammusuTypeReverseDic.ContainsKey(rawType) ? KammusuTypeReverseDic[rawType] : KammusuType.Other;
-
                     // 艦娘か？
                     bool kammusuFlg = id <= 1500;
 
-                    // 追記する
+                    // 艦種データを変換する
+                    string rawType = (string)kammusu.type;
+                    var type = KammusuTypeReverseDic.ContainsKey(rawType) ? KammusuTypeReverseDic[rawType] : KammusuType.Other;
+                    //深海棲艦における「航空戦艦」には陸上型も混じっているので個別に対策する
+                    if (!kammusuFlg && AFSet.Contains(name)) {
+                        type = KammusuType.AF;
+                    }
+
+                    // Kammusuクラスとしてまとめる
                     var kammusuData = new Kammusu(id, name, type, antiAir, new List<int>(), kammusuFlg);
                     var defaultWeaponData = new List<int>();
                     foreach (var s in slot) {
@@ -157,6 +164,14 @@ namespace AWSK.Service {
                     for (int i = temp; i < slotCount; ++i) {
                         defaultWeaponData.Add(0);
                     }
+
+                    // データの整合性がおかしいものは追記しない
+                    if (kammusuData.SlotList.Count != slotCount) {
+                        Console.WriteLine($"不完全データを検知→ id:{id} name:{name}");
+                        continue;
+                    }
+
+                    // 追記する
                     result.Add(new KeyValuePair<Kammusu, List<int>>(kammusuData, defaultWeaponData));
                 }
             }

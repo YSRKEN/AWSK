@@ -1,10 +1,5 @@
-﻿using AWSK.Models;
-using AWSK.Service;
-using AWSK.Stores;
-using Prism;
-using System.Collections.Generic;
+﻿using AWSK.Service;
 using System.Windows;
-using static AWSK.Constant;
 
 namespace AWSK {
     /// <summary>
@@ -18,13 +13,13 @@ namespace AWSK {
             var database = DataBaseService.instance;
             var downloader = DownloadService.instance;
 
-            database.CreateWeaponTable(false);
+            database.CreateWeaponTable(true);
             var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
             foreach (var weapon in weaponData1) {
                 database.Save(weapon, false);
             }
 
-            database.CreateKammusuTable(false);
+            database.CreateKammusuTable(true);
             var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
             foreach (var pair in kammusuData1) {
                 database.Save(pair.Key, pair.Value, false);
