@@ -21,13 +21,13 @@ namespace AWSK {
             database.CreateWeaponTable(false);
             var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
             foreach(var weapon in weaponData1) {
-                database.Save(weapon);
+                database.Save(weapon, false);
             }
 
             database.CreateKammusuTable(false);
             var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
             foreach(var pair in kammusuData1) {
-                database.Save(pair.Key, pair.Value);
+                database.Save(pair.Key, pair.Value, false);
             }
 
             // アプリの起動

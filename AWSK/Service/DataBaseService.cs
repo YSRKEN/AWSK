@@ -157,7 +157,15 @@ namespace AWSK.Service {
         /// 装備情報を挿入・上書きする
         /// </summary>
         /// <param name="weapon">装備情報</param>
-        public void Save(Weapon weapon) {
+        /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
+        public void Save(Weapon weapon, bool forceFlg) {
+            if (!forceFlg) {
+                var temp = ExecuteReader($"SELECT count(id) AS count FROM weapon WHERE id={weapon.Id}");
+                if (temp.Count > 0 && temp[0]["count"] >= 1) {
+                    return;
+                }
+            }
+
             // クエリを作成する
             string query = string.Format("REPLACE INTO weapon VALUES ({0},'{1}',{2},{3},{4},{5},{6});",
                 weapon.Id, weapon.Name, (int)weapon.Type, weapon.AntiAir, weapon.Intercept,
@@ -173,7 +181,15 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="kammusu">艦娘情報</param>
         /// <param name="defaultWeaponIdList">初期装備</param>
-        public void Save(Kammusu kammusu, List<int> defaultWeaponIdList) {
+        /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
+        public void Save(Kammusu kammusu, List<int> defaultWeaponIdList, bool forceFlg) {
+            if (!forceFlg) {
+                var temp = ExecuteReader($"SELECT count(id) AS count FROM kammusu WHERE id={kammusu.Id}");
+                if (temp.Count > 0 && temp[0]["count"] >= 1) {
+                    return;
+                }
+            }
+
             // クエリを作成する
             string query = string.Format("REPLACE INTO kammusu VALUES ({0},'{1}',{2},{3},{4}",
                 kammusu.Id, kammusu.Name, (int)kammusu.Type, kammusu.AntiAir, kammusu.SlotList.Count);
