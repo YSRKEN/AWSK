@@ -128,12 +128,38 @@ namespace AWSK.Service {
         }
 
         /// <summary>
+        /// 艦娘テーブルを作成する
+        /// </summary>
+        public void CreateKammusuTable(bool forceFlg) {
+            string sql = @"
+				CREATE TABLE [kammusu](
+				[id] INTEGER NOT NULL PRIMARY KEY,
+				[name] TEXT NOT NULL DEFAULT '',
+				[type] INTEGER NOT NULL DEFAULT 0,
+				[antiair] INTEGER NOT NULL DEFAULT 0,
+				[slotsize] INTEGER NOT NULL DEFAULT 0,
+				[slot1] INTEGER NOT NULL DEFAULT 0,
+				[slot2] INTEGER NOT NULL DEFAULT 0,
+				[slot3] INTEGER NOT NULL DEFAULT 0,
+				[slot4] INTEGER NOT NULL DEFAULT 0,
+				[slot5] INTEGER NOT NULL DEFAULT 0,
+				[weapon1] INTEGER NOT NULL DEFAULT 0,
+				[weapon2] INTEGER NOT NULL DEFAULT 0,
+				[weapon3] INTEGER NOT NULL DEFAULT 0,
+				[weapon4] INTEGER NOT NULL DEFAULT 0,
+				[weapon5] INTEGER NOT NULL DEFAULT 0,
+				[kammusu_flg] INTEGER NOT NULL DEFAULT 1)
+			";
+            CreateTable("Kammusu", sql, forceFlg);
+        }
+
+        /// <summary>
         /// 装備情報を挿入・上書きする
         /// </summary>
         /// <param name="weapon">装備情報</param>
         public void Save(Weapon weapon) {
             // クエリを作成する
-            string query = string.Format("REPLACE INTO Weapon VALUES ({0},'{1}',{2},{3},{4},{5},{6});",
+            string query = string.Format("REPLACE INTO weapon VALUES ({0},'{1}',{2},{3},{4},{5},{6});",
                 weapon.Id, weapon.Name, (int)weapon.Type, weapon.AntiAir, weapon.Intercept,
                 weapon.BasedAirUnitRange, weapon.ForKammusuFlg ? 1 : 0);
 
@@ -146,8 +172,27 @@ namespace AWSK.Service {
         /// 艦娘情報を挿入・上書きする
         /// </summary>
         /// <param name="kammusu">艦娘情報</param>
-        public void Save(Kammusu kammusu) {
-            // スタブ
+        /// <param name="defaultWeaponIdList">初期装備</param>
+        public void Save(Kammusu kammusu, List<int> defaultWeaponIdList) {
+            // クエリを作成する
+            string query = string.Format("REPLACE INTO kammusu VALUES ({0},'{1}',{2},{3},{4}",
+                kammusu.Id, kammusu.Name, (int)kammusu.Type, kammusu.AntiAir, kammusu.SlotList.Count);
+            for(int i = 0; i < kammusu.SlotList.Count; ++i) {
+                query += $",{kammusu.SlotList[i]}";
+            }
+            for(int i = kammusu.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+                query += ",0";
+            }
+            for (int i = 0; i < kammusu.SlotList.Count; ++i) {
+                query += $",{defaultWeaponIdList[i]}";
+            }
+            for (int i = kammusu.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+                query += ",0";
+            }
+            query += $",{(kammusu.KammusuFlg ? 1 : 0)});";
+
+            // クエリを実行する
+            ExecuteNonQuery(query);
             return;
         }
 
@@ -180,10 +225,40 @@ namespace AWSK.Service {
         /// 艦娘情報を艦船IDから検索して返す
         /// </summary>
         /// <param name="id">艦船ID</param>
+        /// <param name="setDefaultWeaponFlg">初期装備を持たせる場合はtrue</param>
         /// <returns>艦娘情報。未ヒットの場合はnull</returns>
-        public Kammusu findByKammusuId(int id) {
-            // スタブ
-            return null;
+        public Kammusu findByKammusuId(int id, bool setDefaultWeaponFlg) {
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM kammusu WHERE id={id}");
+            if (queryResult.Count == 0) {
+                return null;
+            }
+
+            // SELECT文から結果を取得する
+            var queryResult2 = queryResult[0];
+            int slotSize = (int)queryResult2["slotsize"];
+            var slotList = new List<int>();
+            var weaponList = new List<int>();
+            for (int i = 0; i < slotSize; ++i) {
+                slotList.Add((int)queryResult2[$"slot{i+1}"]);
+                weaponList.Add((int)queryResult2[$"weapon{i + 1}"]);
+            }
+
+            var result = new Kammusu(
+                (int)queryResult2["id"],
+                (string)queryResult2["name"],
+                (KammusuType)queryResult2["type"],
+                (int)queryResult2["antiair"],
+                slotList,
+                queryResult2["kammusu_flg"] == 1);
+
+            // 初期装備を持たせる
+            if (setDefaultWeaponFlg) {
+                for (int i = 0; i < slotSize; ++i) {
+                    result.WeaponList[i] = findByWeaponId(weaponList[i]);
+                }
+            }
+            return result;
         }
     }
 }
