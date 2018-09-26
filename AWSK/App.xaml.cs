@@ -13,13 +13,15 @@ namespace AWSK {
             var database = DataBaseService.instance;
             var downloader = DownloadService.instance;
 
-            database.CreateWeaponTable(false);
+            /*database.CreateWeaponTable(false);
             var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
             database.SaveAll(weaponData1, false);
 
             database.CreateKammusuTable(false);
             var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
-            database.SaveAll(kammusuData1, false);
+            database.SaveAll(kammusuData1, false);*/
+
+            var kammusuData2 = await downloader.downloadKammusuDataFromWikiaAsync();
 
             // アプリの起動
             var bootstrapper = new Bootstrapper();

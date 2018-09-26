@@ -7,7 +7,7 @@ namespace AWSK {
         /// </summary>
         static Constant() {
             KammusuTypeReverseDic = new Dictionary<string, KammusuType>();
-            foreach(var pair in KammusuTypeDic) {
+            foreach (var pair in KammusuTypeDic) {
                 KammusuTypeReverseDic[pair.Value] = pair.Key;
             }
         }
@@ -95,6 +95,23 @@ namespace AWSK {
             "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
             "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
             "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
+        };
+
+        public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
+            = new Dictionary<string, KammusuType>{
+                {"AP", KammusuType.AO},
+                {"AV", KammusuType.AV},
+                {"BB", KammusuType.BB},
+                {"BBV", KammusuType.BBV},
+                {"CA", KammusuType.CA},
+                {"CAV", KammusuType.CAV},
+                {"CL", KammusuType.CL},
+                {"CLT", KammusuType.CLT},
+                {"CV", KammusuType.CV},
+                {"CVL", KammusuType.CVL},
+                {"DD", KammusuType.DD},
+                {"FBB", KammusuType.CC},
+                {"SS", KammusuType.SS},
         };
     }
 }

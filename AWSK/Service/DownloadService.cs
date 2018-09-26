@@ -1,7 +1,11 @@
-﻿using AWSK.Models;
+﻿using AngleSharp.Dom;
+using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
+using AWSK.Models;
 using Codeplex.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using static AWSK.Constant;
@@ -113,11 +117,11 @@ namespace AWSK.Service {
         /// 艦娘リストをデッキビルダーからダウンロードする
         /// (性質上、詳細な情報を取得できない敵艦もある)
         /// </summary>
-        /// <returns>艦娘</returns>
+        /// <returns>艦娘リスト</returns>
         public async Task<List<KeyValuePair<Kammusu, List<int>>>> downloadKammusuDataFromDeckBuilderAsync() {
             var result = new List<KeyValuePair<Kammusu, List<int>>>();
             using (var client = new HttpClient()) {
-                // テキストデータダウンロード
+                // テキストデータをダウンロード
                 string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/shipdata.js");
 
                 // 余計な文字を削除
@@ -173,6 +177,53 @@ namespace AWSK.Service {
 
                     // 追記する
                     result.Add(new KeyValuePair<Kammusu, List<int>>(kammusuData, defaultWeaponData));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 艦娘リストをWikiaからダウンロードする
+        /// </summary>
+        /// <returns>艦娘リスト</returns>
+        public async Task<List<KeyValuePair<Kammusu, List<int>>>> downloadKammusuDataFromWikiaAsync() {
+            var result = new List<KeyValuePair<Kammusu, List<int>>>();
+            // 装備URL→装備番号のリストを取得する
+            var weaponUtlToId = new Dictionary<string, int>();
+
+
+            // 深海棲艦のリストを取得し、記録する
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessels/Full");
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+                var tempSelect = doc.QuerySelectorAll("div > table > tbody > tr");
+                foreach(var record in tempSelect) {
+                    var tdList = record.GetElementsByTagName("td").ToList();
+                    if (tdList.Count < 20) {
+                        continue;
+                    }
+                    string rawId = tdList[1].TextContent;
+                    string rawName = tdList[4].TextContent.Replace("\n", "").Replace(" ", "");
+                    string rawType = tdList[0].TextContent.Replace("\n", "").Replace(" ", "");
+                    string rawAntiAir = tdList[9].TextContent;
+                    var rawSlot = tdList[18].TextContent.Replace("\n", "").Split(',').ToList();
+                    if (rawSlot.Count == 1 && rawSlot[0] == "") {
+                        rawSlot = new List<string>();
+                    }
+                    if (rawSlot.Count >= 1 && rawSlot[0].Contains("?")) {
+                        continue;
+                    }
+                    var rawDefaultWeapon = tdList[19].GetElementsByTagName("a").Select(e => e.GetAttribute("href")).ToList();
+                    var kammusu = new Kammusu(int.Parse(rawId), rawName,
+                        KammusuTypeReverseDicWikia[rawType], int.Parse(rawAntiAir),
+                        rawSlot.Select(s => int.Parse(s)).ToList(), false);
+                    Console.WriteLine(rawName);
+                    result.Add(new KeyValuePair<Kammusu, List<int>>(kammusu, null));
                 }
             }
             return result;
