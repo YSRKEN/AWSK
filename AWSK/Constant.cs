@@ -103,8 +103,14 @@ namespace AWSK {
                 {"Carrier-based Fighter Aircraft", WeaponType.PF},
                 {"Carrier-based Dive Bomber", WeaponType.PB},
                 {"Carrier-based Torpedo Bomber", WeaponType.PA},
+                {"Jet-powered Fighter-Bomber", WeaponType.JPB},
+                {"Carrier-based Reconnaissance Aircraft", WeaponType.PS},
+                {"Seaplane Fighter", WeaponType.WF},
                 {"Seaplane Bomber", WeaponType.WB},
                 {"Reconnaissance Seaplane", WeaponType.WS},
+                {"Large Flying Boat", WeaponType.LFB},
+                {"Land-based Attack Aircraft", WeaponType.LA},
+                {"Land-based Fighter", WeaponType.LF},
         };
 
         public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
