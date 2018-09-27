@@ -1,4 +1,5 @@
 ﻿using AWSK.Service;
+using System;
 using System.Windows;
 
 namespace AWSK {
@@ -14,16 +15,12 @@ namespace AWSK {
             var downloader = DownloadService.instance;
 
             /*database.CreateWeaponTable(false);
-            var weaponData1 = await downloader.downloadWeaponDataFromDeckBuilderAsync();
-            database.SaveAll(weaponData1, false);
+            var weaponData = await downloader.downloadWeaponDataFromWikiaAsync();
+            database.SaveAll(weaponData, false);*/
 
-            database.CreateKammusuTable(false);
-            var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
-            database.SaveAll(kammusuData1, false);*/
-
-            var weaponData2 = await downloader.downloadWeaponDataFromWikiaAsync();
-
-            var kammusuData2 = await downloader.downloadKammusuDataFromWikiaAsync();
+            /*database.CreateKammusuTable(false);
+            var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
+            database.SaveAll(kammusuData, false);*/
 
             // アプリの起動
             var bootstrapper = new Bootstrapper();

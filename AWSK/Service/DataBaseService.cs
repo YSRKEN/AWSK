@@ -284,6 +284,7 @@ namespace AWSK.Service {
                 using (var trans = con.BeginTransaction()) {
                     try {
                         foreach (var pair in kammusuList2) {
+                            Console.WriteLine(pair.Key.Name);
                             // クエリを作成する
                             string query = string.Format("REPLACE INTO kammusu VALUES ({0},'{1}',{2},{3},{4}",
                                 pair.Key.Id, pair.Key.Name, (int)pair.Key.Type, pair.Key.AntiAir, pair.Key.SlotList.Count);
@@ -293,10 +294,10 @@ namespace AWSK.Service {
                             for (int i = pair.Key.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
                                 query += ",0";
                             }
-                            for (int i = 0; i < pair.Key.SlotList.Count; ++i) {
+                            for (int i = 0; i < pair.Value.Count; ++i) {
                                 query += $",{pair.Value[i]}";
                             }
-                            for (int i = pair.Key.SlotList.Count; i < MAX_SLOT_COUNT; ++i) {
+                            for (int i = pair.Value.Count; i < MAX_SLOT_COUNT; ++i) {
                                 query += ",0";
                             }
                             query += $",{(pair.Key.KammusuFlg ? 1 : 0)});";
@@ -309,6 +310,7 @@ namespace AWSK.Service {
                         }
                         trans.Commit();
                     } catch (Exception e) {
+                        Console.WriteLine(e);
                         trans.Rollback();
                     }
                 }
