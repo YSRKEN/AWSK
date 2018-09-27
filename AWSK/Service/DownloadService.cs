@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static AWSK.Constant;
 
@@ -190,7 +191,25 @@ namespace AWSK.Service {
             var result = new List<KeyValuePair<Kammusu, List<int>>>();
             // 装備URL→装備番号のリストを取得する
             var weaponUtlToId = new Dictionary<string, int>();
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/List_of_equipment_used_by_the_enemy");
 
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+                var tempSelect = doc.QuerySelectorAll("table.wikitable > tbody > tr");
+                foreach (var record in tempSelect) {
+                    var tdList = record.GetElementsByTagName("td").ToList();
+                    if (tdList.Count < 6) {
+                        continue;
+                    }
+                    string rawId = tdList[0].TextContent;
+                    string rawName = tdList[2].GetElementsByTagName("a").First().GetAttribute("href");
+                    weaponUtlToId[rawName] = int.Parse(rawId);
+                }
+            }
 
             // 深海棲艦のリストを取得し、記録する
             using (var client = new HttpClient()) {
@@ -223,7 +242,25 @@ namespace AWSK.Service {
                         KammusuTypeReverseDicWikia[rawType], int.Parse(rawAntiAir),
                         rawSlot.Select(s => int.Parse(s)).ToList(), false);
                     Console.WriteLine(rawName);
-                    result.Add(new KeyValuePair<Kammusu, List<int>>(kammusu, null));
+                    var defaultWeaponList = new List<int>();
+                    foreach(string url in rawDefaultWeapon) {
+                        if (!Regex.IsMatch(url, "^/wiki")) {
+                            continue;
+                        }
+                        if (!weaponUtlToId.ContainsKey(url)) {
+                            string rawData2 = await client.GetStringAsync($"http://kancolle.wikia.com{url}");
+                            Console.WriteLine(url);
+                            var doc2 = default(IHtmlDocument);
+                            var parser2 = new HtmlParser();
+                            doc2 = parser2.Parse(rawData2);
+                            var tempElement = doc2.QuerySelectorAll("table.infobox > tbody > tr > td > p > b")
+                                .Where(e => e.TextContent.Contains("No.")).First();
+                            int no = int.Parse(Regex.Replace(tempElement.TextContent, ".*No.(\\d+).*", "$1"));
+                            weaponUtlToId[url] = no;
+                        }
+                        defaultWeaponList.Add(weaponUtlToId[url]);
+                    }
+                    result.Add(new KeyValuePair<Kammusu, List<int>>(kammusu, defaultWeaponList));
                 }
             }
             return result;
