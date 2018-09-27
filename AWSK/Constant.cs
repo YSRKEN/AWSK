@@ -97,6 +97,16 @@ namespace AWSK {
             "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
         };
 
+        //Other, PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF
+        public static Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
+            = new Dictionary<string, WeaponType>{
+                {"Carrier-based Fighter Aircraft", WeaponType.PF},
+                {"Carrier-based Dive Bomber", WeaponType.PB},
+                {"Carrier-based Torpedo Bomber", WeaponType.PA},
+                {"Seaplane Bomber", WeaponType.WB},
+                {"Reconnaissance Seaplane", WeaponType.WS},
+        };
+
         public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
             = new Dictionary<string, KammusuType>{
                 {"AP", KammusuType.AO},

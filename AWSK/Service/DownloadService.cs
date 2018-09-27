@@ -108,7 +108,7 @@ namespace AWSK.Service {
                     bool forKammusuFlg = id <= 500;
 
                     // 追記する
-                    result.Add(new Weapon(id, name, WeaponType.Other, antiAir, intercept, basedAirUnitRange, forKammusuFlg));
+                    result.Add(new Weapon(id, name, type, antiAir, intercept, basedAirUnitRange, forKammusuFlg));
                 }
             }
             return result;
@@ -178,6 +178,70 @@ namespace AWSK.Service {
 
                     // 追記する
                     result.Add(new KeyValuePair<Kammusu, List<int>>(kammusuData, defaultWeaponData));
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 装備リストをデッキビルダーからダウンロードする
+        /// </summary>
+        /// <returns>装備リスト</returns>
+        public async Task<List<Weapon>> downloadWeaponDataFromWikiaAsync() {
+            var result = new List<Weapon>();
+
+            // 深海棲艦の装備
+            using (var client = new HttpClient()) {
+                // テキストデータダウンロード
+                string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/List_of_equipment_used_by_the_enemy");
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+                var tempSelect = doc.QuerySelectorAll("table.wikitable > tbody > tr");
+                foreach (var record in tempSelect) {
+                    // 1行を読み出す
+                    var tdList = record.GetElementsByTagName("td").ToList();
+                    if (tdList.Count < 6) {
+                        continue;
+                    }
+
+                    // IDを取得する
+                    string rawId = tdList[0].TextContent;
+                    int id = int.Parse(rawId);
+
+                    // 装備名を取得する
+                    string rawName = tdList[2].TextContent.Replace(tdList[2].GetElementsByTagName("a").First().TextContent, "");
+                    string name = Regex.Replace(rawName, "(^ |\n)", "");
+
+                    // 装備種を取得する
+                    string rawType = Regex.Replace(tdList[3].TextContent, "\n", "");
+                    WeaponType type;
+                    if (WeaponTypeReverseDicWikia.ContainsKey(rawType)) {
+                        type = WeaponTypeReverseDicWikia[rawType];
+                    } else {
+                        type = WeaponType.Other;
+                    }
+
+                    // その他の項目を取得する
+                    int antiAir = 0;
+                    var rawStatIcons = tdList[4].GetElementsByTagName("a")
+                            .Select(e => e.GetAttribute("href"))
+                            .Select(t => Regex.Replace(t, ".*/([A-Za-z_]+)\\.png.*", "$1"))
+                            .ToList();
+                    string rawStatValues = Regex.Replace(tdList[4].InnerHtml, "(<a.*?</a>|<span.*?\">|</span>|\n| )", "");
+                    rawStatValues = Regex.Replace(rawStatValues, "<br>", ",");
+                    string[] rawStatValues2 = rawStatValues.Split(',');
+                    var rawStatDic = rawStatIcons.Zip(rawStatValues2, (f, s) => new KeyValuePair<string, string>(f, s))
+                        .ToDictionary(pair => pair.Key, pair => pair.Value);
+                    if (rawStatDic.ContainsKey("Icon_AA")) {
+                        antiAir = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
+                    }
+
+                    // 追記する
+                    Console.WriteLine(name);
+                    result.Add(new Weapon(id, name, type, antiAir, 0, 0, false));
                 }
             }
             return result;

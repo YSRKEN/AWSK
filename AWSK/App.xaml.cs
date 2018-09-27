@@ -21,6 +21,8 @@ namespace AWSK {
             var kammusuData1 = await downloader.downloadKammusuDataFromDeckBuilderAsync();
             database.SaveAll(kammusuData1, false);*/
 
+            var weaponData2 = await downloader.downloadWeaponDataFromWikiaAsync();
+
             var kammusuData2 = await downloader.downloadKammusuDataFromWikiaAsync();
 
             // アプリの起動
