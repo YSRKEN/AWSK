@@ -214,6 +214,9 @@ namespace AWSK.Service {
                     // 装備名を取得する
                     string rawName = tdList[2].TextContent.Replace(tdList[2].GetElementsByTagName("a").First().TextContent, "");
                     string name = Regex.Replace(rawName, "(^ |\n)", "");
+                    if (name == "") {
+                        name = Regex.Replace(tdList[2].GetElementsByTagName("a").First().TextContent, "(^ |\n)", "");
+                    }
 
                     // 装備種を取得する
                     string rawType = Regex.Replace(tdList[3].TextContent, "\n", "");

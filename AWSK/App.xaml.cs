@@ -13,10 +13,9 @@ namespace AWSK {
             // テストコード
             var database = DataBaseService.instance;
             var downloader = DownloadService.instance;
-
-            /*database.CreateWeaponTable(false);
+            database.CreateWeaponTable(false);
             var weaponData = await downloader.downloadWeaponDataFromWikiaAsync();
-            database.SaveAll(weaponData, false);*/
+            database.SaveAll(weaponData, true);
 
             /*database.CreateKammusuTable(false);
             var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
