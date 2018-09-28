@@ -435,7 +435,7 @@ namespace AWSK.ViewModels
 			if (enemyData.Kammusu.Count <= 0)
 				return;
 			// シミュレーションを行う
-			var simulationCount = new[] { 1000, 10000, 100000, 1000000 };
+			int[] simulationCount = new[] { 1000, 10000, 100000, 1000000 };
 			{
 				Dictionary<int, double> finalAAV;
 				List<List<List<int>>> awsCount;
@@ -478,6 +478,7 @@ namespace AWSK.ViewModels
           return version;
         }
       }catch(Exception e){
+        Console.WriteLine(e);
         return new int[] { 0, 0, 0, 0 };
       }
     }

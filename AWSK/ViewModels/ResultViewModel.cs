@@ -75,7 +75,7 @@ namespace AWSK.ViewModels
 			}
 			// グラフ要素を追加する
 			// 各制空状態(k)毎に入力することに注意
-			var columnLabel = new[] { "制空権確保", "航空優勢", "制空均衡", "航空劣勢", "制空権喪失" };
+			string[] columnLabel = new[] { "制空権確保", "航空優勢", "制空均衡", "航空劣勢", "制空権喪失" };
 			for (int k = 0; k < 5; ++k) {
 				var columnSeries = new ColumnSeries();
 				columnSeries.IsStacked = true;
@@ -101,8 +101,8 @@ namespace AWSK.ViewModels
 				sum += data.Value;
 				prob.Add(new KeyValuePair<int, double>(data.Key, 100.0 * sum));
 			}
-			// 各パーセンテージを初めて超える際の制空値を取得し、文字列として返す
-			var prob2 = new double[] { 50.0, 70.0, 90.0, 95.0, 99.0 };
+            // 各パーセンテージを初めて超える際の制空値を取得し、文字列として返す
+            double[] prob2 = new double[] { 50.0, 70.0, 90.0, 95.0, 99.0 };
 			string output = "計算結果(";
 			int index = 0;
 			foreach(double prob2_ in prob2) {

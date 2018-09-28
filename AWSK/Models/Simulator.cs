@@ -33,7 +33,7 @@ namespace AWSK.Models
 		// St1撃墜を行うための準備
 		private static List<List<List<int>>> PreCalcKilledSlot() {
 			// 制空定数
-			var awStatusCoeff = new int[] { 1, 3, 5, 7, 10 };
+			int[] awStatusCoeff = new int[] { 1, 3, 5, 7, 10 };
 			// 事前計算
 			st1Range = new List<int>();
 			for (int aws = 0; aws < (int)AirWarStatus.Size; ++aws) {

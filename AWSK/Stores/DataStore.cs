@@ -1,5 +1,7 @@
 ﻿using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using AWSK.Models;
+using AWSK.Service;
 using Codeplex.Data;
 using System;
 using System.Collections.Generic;
@@ -9,564 +11,14 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using static AWSK.Constant;
 
 namespace AWSK.Stores {
     static class DataStore {
-        // 接続用文字列
-        private const string connectionString = @"Data Source=GameData.db";
-        // 装備の種類(type1)の名称
-        private static Dictionary<string, int> WeaponType1 = new Dictionary<string, int> {
-            { "主砲", 1},
-            { "魚雷", 2},
-            { "艦上機", 3},
-            { "対空装備", 4},
-            { "索敵装備", 5},
-            { "缶・女神・バルジ", 6},
-            { "対潜装備", 7},
-            { "大発・探照灯", 8},
-            { "ドラム缶", 9},
-            { "艦艇修理施設", 10},
-            { "照明弾", 11},
-            { "艦隊司令部", 12},
-            { "航空要員", 13},
-            { "高射装置", 14},
-            { "WG42", 15},
-            { "熟練見張員", 16},
-            { "大型飛行艇", 17},
-            { "戦闘糧食", 18},
-            { "洋上補給", 19},
-            { "特二式内火艇", 20},
-            { "陸上攻撃機", 21},
-            { "局地戦闘機", 22},
-            { "分解済彩雲", 23},
-            { "潜水艦電探", 24},
-        };
-        // 装備URLとIDとの対応表(深海棲艦向け)
-        private static Dictionary<string, int> weaponUrlDicWikia = new Dictionary<string, int>();
+        #region TODO
         // 装備の俗称とIDとの対応表
         private static Dictionary<string, int> enemyFamiliarName = ReadEnemyFamiliarName();
-        // 敵艦のカテゴリを取得する
-        private static Dictionary<string, string> ParseEnemyListWikia(string rawData) {
-            var category = new Dictionary<string, string>();
-            // テキストデータをパースする
-            var doc = default(IHtmlDocument);
-            var parser = new HtmlParser();
-            doc = parser.Parse(rawData);
-            // パースしたデータからカテゴリ名とURLのペアを引き出す
-            var categoryTemp = doc.QuerySelectorAll("table.wikitable > tbody > tr > td")
-                .Where(item => item.QuerySelector("b > a") != null && item.QuerySelector("p") != null)
-                .Select(item => {
-                    string url = $"http://kancolle.wikia.com{item.QuerySelector("b > a").GetAttribute("href")}";
-                    string temp = item.QuerySelector("p > span").TextContent;
-                    string name = item.QuerySelector("p").TextContent.Replace(temp, "").Replace("\n", "");
-                    return new KeyValuePair<string, string>(name, url);
-                });
-            foreach (var pair in categoryTemp) {
-                category[pair.Key] = pair.Value;
-            }
-            return category;
-        }
-        // 装備URLとIDとの対応表(深海棲艦向け)
-        private static async Task GetWeaponDicWikia() {
-            using (var client = new System.Net.Http.HttpClient()) {
-                string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/List_of_equipment_used_by_the_enemy");
-                var doc = default(IHtmlDocument);
-                var parser = new HtmlParser();
-                doc = parser.Parse(rawData);
-                weaponUrlDicWikia = doc.QuerySelectorAll("table.wikitable.typography-xl-optout > tbody > tr")
-                    .Where(item => item.QuerySelector("td") != null && item.QuerySelector("td").TextContent.Substring(0, 2) != "No")
-                    .Select(item => {
-                        var hoge = item.QuerySelector("td");
-                        int id = int.Parse(item.QuerySelector("td").TextContent);
-                        string url = "http://kancolle.wikia.com" + item.QuerySelectorAll("td").Skip(2).First().QuerySelector("a").Attributes["href"].Value;
-                        return new KeyValuePair<string, int>(url, id);
-                    }).ToDictionary(item => item.Key, item => item.Value);
-            }
-            if (System.IO.File.Exists(@"WeaponPatch.csv")) {
-                using (var sr = new System.IO.StreamReader(@"WeaponPatch.csv")) {
-                    while (!sr.EndOfStream) {
-                        try {
-                            // 1行読み込み、カンマ毎に区切る
-                            string line = sr.ReadLine();
-                            var values = line.Split(',');
-                            // 行数がおかしい場合は飛ばす
-                            if (values.Count() < 2)
-                                continue;
-                            // ヘッダー行は飛ばす
-                            if (values[0] == "url")
-                                continue;
-                            // データを読み取る
-                            weaponUrlDicWikia[values[0]] = int.Parse(values[1]);
-                        } catch (Exception e) { Console.WriteLine(e.StackTrace); }
-                    }
-                }
-            }
-        }
-        // 敵艦のデータを取得する
-        private static List<KammusuData> GetKammusuDataWikia(string rawData) {
-            // テキストデータをパースする
-            var doc = default(IHtmlDocument);
-            var parser = new HtmlParser();
-            doc = parser.Parse(rawData);
-            // パースしたデータから敵艦のデータを引き出す
-            var kammusuData = doc.QuerySelectorAll("table.infobox-ship > tbody")
-                .Where(item => {
-                    string nameText = item.QuerySelector("tr > td > div > b").TextContent;
-                    int dotIndex = nameText.IndexOf(".");
-                    int spaceIndex = nameText.IndexOf(" ");
-                    string id = nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1);
-                    if (!int.TryParse(id, out int _))
-                        return false;
-              //
-              var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
-                    string str = temp[temp.IndexOf("AA") + 1];
-                    return int.TryParse(str, out int _);
-                })
-                .Select(item => {
-              // 艦名のテキストから、艦名とIDを取得
-              string nameText = item.QuerySelector("tr > td > div > b").TextContent;
-                    int dotIndex = nameText.IndexOf(".");
-                    int spaceIndex = nameText.IndexOf(" ");
-                    int no = int.Parse(nameText.Substring(dotIndex + 1, spaceIndex - dotIndex - 1));
-                    string name = nameText.Substring(spaceIndex + 1);
-              // 対空値を読み取る
-              var temp = item.QuerySelectorAll("td").Select(item2 => item2.TextContent.Replace("\n", "").Replace(" ", "")).ToList();
-                    int antiAir = int.Parse(temp[temp.IndexOf("AA") + 1]);
-                    int slots = int.Parse(temp[temp.IndexOf("Slots") + 2]);
-              // 結果を書き込む
-              var kammusu = new KammusuData {
-                        Id = (no < 1000 ? no + 1000 : no),
-                        Name = name,
-                        Level = 1,
-                        KammusuFlg = (no <= 500),
-                        AntiAir = antiAir,
-                        SlotSize = slots,
-                        Slot = new List<int>(),
-                        Weapon = new List<WeaponData>()
-                    };
-              // 艦種を推定する
-              if (kammusu.Name.Contains("駆逐")) {
-                        kammusu.Type = "駆逐艦";
-                    } else if (kammusu.Name.Contains("軽巡")) {
-                        kammusu.Type = "軽巡洋艦";
-                    } else if (kammusu.Name.Contains("重巡")) {
-                        if (kammusu.Name == "重巡ネ級flagship") {
-                            kammusu.Type = "航空巡洋艦";
-                        } else {
-                            kammusu.Type = "重巡洋艦";
-                        }
-                    } else if (kammusu.Name.Contains("戦艦")) {
-                        if (kammusu.Name.Contains("レ級") || kammusu.Name.Contains("戦艦仏棲姫")) {
-                            kammusu.Type = "航空戦艦";
-                        } else if (kammusu.Name.Contains("タ級")) {
-                            kammusu.Type = "巡洋戦艦";
-                        } else {
-                            kammusu.Type = "戦艦";
-                        }
-                    } else if (kammusu.Name.Contains("軽母")) {
-                        kammusu.Type = "軽空母";
-                    } else if (kammusu.Name.Contains("空母")) {
-                        if (kammusu.Name.Contains("装甲空母")) {
-                            kammusu.Type = "航空戦艦";
-                        } else {
-                            kammusu.Type = "正規空母";
-                        }
-                    } else if (kammusu.Name.Contains("雷巡")) {
-                        kammusu.Type = "重雷装巡洋艦";
-                    } else if (kammusu.Name.Contains("潜水")) {
-                        kammusu.Type = "潜水艦";
-                    } else if (kammusu.Name.Contains("水母")) {
-                        kammusu.Type = "水上機母艦";
-                    } else if (kammusu.Name.Contains("輸送")) {
-                        kammusu.Type = "輸送艦";
-                    } else if (kammusu.Name.Contains("集積地") || kammusu.Name.Contains("泊地") || kammusu.Name.Contains("欧州水姫")) {
-                        kammusu.Type = "航空戦艦";
-                    } else if (kammusu.Name.Contains("護衛独還姫")) {
-                        kammusu.Type = "軽空母";
-                    } else if (kammusu.Name.Contains("船渠棲姫")) {
-                        kammusu.Type = "駆逐艦";
-                    }
-              // スロットの枠数を読み取る
-              int weaponIndex = temp.IndexOf("Equipment") + 3;
-                    for (int i = 0; i < 4; ++i) {
-                  // スロット数の文字列を読み取る
-                  string slotStr = temp[weaponIndex + 1 + i * 3];
-                  // 文字列が「-」「???」ならループを抜ける
-                  if (slotStr.Contains("-") || slotStr.Contains("???"))
-                            break;
-                  // 文字列を数字だけにしてからint型にパースして読み取る
-                  var regex = new Regex("[^0-9]");
-                        slotStr = regex.Replace(slotStr, "");
-                        kammusu.Slot.Add(int.Parse(slotStr));
-                    }
-                    if (kammusu.SlotSize < kammusu.Slot.Count)
-                        kammusu.SlotSize = kammusu.Slot.Count;
-              // スロット毎の装備を読み取る
-              var trList = item.QuerySelectorAll("tr");
-                    int equipIndex = trList
-                        .Select((value, index) => new { Index = index, Value = value })
-                        .Where(x => x.Value.TextContent.Contains("Equipment"))
-                        .Select(x => x.Index).First();
-                    for (int i = 0; i < 4; ++i) {
-                  // 装備のリンクを読み取る
-                  var node = trList[equipIndex + i + 1].QuerySelectorAll("td").Skip(1).First().QuerySelector("a");
-                        if (node == null)
-                            break;
-                        string url = "http://kancolle.wikia.com" + node.GetAttribute("href");
-                        kammusu.Weapon.Add(WeaponDataById(weaponUrlDicWikia[url]));
-                    }
-                    return kammusu;
-                }
-            ).ToList();
-            return kammusuData;
-        }
-        // 艦娘のデータをダウンロードする
-        private static async Task<bool> DownloadKammusuDataAsync() {
-            Console.WriteLine("艦娘のデータをダウンロード中……");
-            try {
-                // 艦娘データをダウンロード・パースする
-                var kammusuList = new List<KammusuData>();  //艦娘データ
-                var kammusuDataFlg = new List<bool>();      //艦娘データが不完全ならfalse
-                Console.WriteLine("・デッキビルダー");
-                using (var client = new HttpClient()) {
-                    // ダウンロード
-                    string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/shipdata.js");
-                    // 余計な文字を削除
-                    rawData = rawData.Replace("var gShips = ", "");
-                    // JSONとしてゆるーくパース
-                    var obj = DynamicJson.Parse(rawData);
-                    // パース結果をゆるーく取得
-                    foreach (var kammusu in obj) {
-                        // IDや艦名などを取得
-                        int id = int.Parse(kammusu.id);
-                        string name = kammusu.name;
-                        string type = kammusu.type;
-                        int antiair = (int)(kammusu.max_aac);
-                        int slotsize = (int)(kammusu.slot);
-                        var slot = kammusu.carry;
-                        var firstWeapon = kammusu.equip;
-                        bool kammusuFlg = (id <= 1500);
-                        // 艦娘・深海棲艦のデータと呼べないものは無視する
-                        if (name == "なし")
-                            continue;
-                        if (id > 1900)
-                            continue;
-                        // 不完全なデータかどうかを判断する
-                        bool kammusuDataFlgTemp = true;
-                        if (kammusu.next == "" && !kammusuFlg) {
-                            int count = 0;
-                            foreach (var wId in firstWeapon) {
-                                ++count;
-                            }
-                            if (count == 0) {
-                                kammusuDataFlgTemp = false;
-                            }
-                        }
-                        // データを登録する
-                        var kammusuDataTemp = new KammusuData {
-                            Id = id,
-                            AntiAir = antiair,
-                            KammusuFlg = kammusuFlg,
-                            Name = name,
-                            Type = type,
-                            Slot = new List<int>(),
-                            SlotSize = slotsize,
-                            Weapon = new List<WeaponData>()
-                        };
-                        foreach (var size in slot) {
-                            kammusuDataTemp.Slot.Add((int)size);
-                        }
-                        foreach (var wId in firstWeapon) {
-                            kammusuDataTemp.Weapon.Add(new WeaponData { Id = (int)wId });
-                        }
-                        kammusuList.Add(kammusuDataTemp);
-                        kammusuDataFlg.Add(kammusuDataFlgTemp);
-                    }
-                }
-                // 不完全データについては、wikiを読み取って補完する
-                Console.WriteLine("・英語Wiki");
-                using (var client = new HttpClient()) {
-                    // ダウンロード
-                    string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Enemy_Vessel");
-                    // カテゴリ解析
-                    var category = ParseEnemyListWikia(rawData);
-                    if (System.IO.File.Exists(@"EnemyCategoryPatch.csv")) {
-                        using (var sr = new System.IO.StreamReader(@"EnemyCategoryPatch.csv")) {
-                            while (!sr.EndOfStream) {
-                                try {
-                                    // 1行読み込み、カンマ毎に区切る
-                                    string line = sr.ReadLine();
-                                    var values = line.Split(',');
-                                    // 行数がおかしい場合は飛ばす
-                                    if (values.Count() < 2)
-                                        continue;
-                                    // ヘッダー行は飛ばす
-                                    if (values[0] == "name")
-                                        continue;
-                                    // データを読み取る
-                                    category[values[0]] = values[1];
-                                } catch (Exception e) { Console.WriteLine(e.StackTrace); }
-                            }
-                        }
-                    }
-                    // カテゴリ毎にページをクロールしていく
-                    var kammusuDicWikia = new Dictionary<int, KammusuData>();
-                    foreach (var pair in category) {
-                        Console.WriteLine($"　・{pair.Key}");
-                        string rawData2 = await client.GetStringAsync(pair.Value);
-                        var list = GetKammusuDataWikia(rawData2);
-                        foreach (var kammusu in list) {
-                            kammusuDicWikia[kammusu.Id] = kammusu;
-                        }
-                    }
-                    // クロール結果と比較し、不完全データを補う
-                    for (int ki = 0; ki < kammusuList.Count; ++ki) {
-                        if (kammusuDicWikia.ContainsKey(kammusuList[ki].Id)) {
-                            var kammusuTemp = kammusuDicWikia[kammusuList[ki].Id];
-                            kammusuTemp.Type = kammusuList[ki].Type;
-                            kammusuList[ki] = kammusuTemp;
-                            kammusuDataFlg[ki] = true;
-                        }
-                    }
-                    foreach (var pair in kammusuDicWikia) {
-                        int id = pair.Key;
-                        var kammusu = pair.Value;
-                        if (kammusuList.Count(p => p.Id == id) == 0) {
-                            kammusuList.Add(kammusu);
-                            kammusuDataFlg.Add(true);
-                        }
-                    }
-                }
-                // 不完全データに対する追加パッチ
-                string patchMemo = "";
-                {
-                    // CSVファイルを読み込み、その中身を記録する
-                    // 入力チェックはあまりしてないので注意
-                    if (System.IO.File.Exists(@"KammusuPatch.csv")) {
-                        using (var sr = new System.IO.StreamReader(@"KammusuPatch.csv")) {
-                            while (!sr.EndOfStream) {
-                                try {
-                                    // 1行読み込み、カンマ毎に区切る
-                                    string line = sr.ReadLine();
-                                    var values = line.Split(',');
-                                    // 行数がおかしい場合は飛ばす
-                                    if (values.Count() < 16)
-                                        continue;
-                                    // ヘッダー行は飛ばす
-                                    if (values[0] == "id")
-                                        continue;
-                                    // データを読み取る
-                                    var kammusu = new KammusuData();
-                                    kammusu.Id = int.Parse(values[0]);
-                                    kammusu.Name = values[1];
-                                    kammusu.Type = values[2];
-                                    kammusu.AntiAir = int.Parse(values[3]);
-                                    kammusu.SlotSize = int.Parse(values[4]);
-                                    kammusu.Slot = new List<int>();
-                                    kammusu.Slot.Add(int.Parse(values[5]));
-                                    kammusu.Slot.Add(int.Parse(values[6]));
-                                    kammusu.Slot.Add(int.Parse(values[7]));
-                                    kammusu.Slot.Add(int.Parse(values[8]));
-                                    kammusu.Slot.Add(int.Parse(values[9]));
-                                    kammusu.Weapon = new List<WeaponData>();
-                                    kammusu.Weapon.Add(WeaponDataById(int.Parse(values[10])));
-                                    kammusu.Weapon.Add(WeaponDataById(int.Parse(values[11])));
-                                    kammusu.Weapon.Add(WeaponDataById(int.Parse(values[12])));
-                                    kammusu.Weapon.Add(WeaponDataById(int.Parse(values[13])));
-                                    kammusu.Weapon.Add(WeaponDataById(int.Parse(values[14])));
-                                    kammusu.KammusuFlg = (int.Parse(values[15]) != 0);
-                                    // データを追記する
-                                    int index = kammusuList.FindIndex(k => k.Id == kammusu.Id);
-                                    if (index >= 0) {
-                                        patchMemo += $"・ID：{kammusuList[index].Id} 艦名：{kammusuList[index].Name}\n";
-                                        kammusuList[index] = kammusu;
-                                        kammusuDataFlg[index] = true;
-                                    } else {
-                                        kammusuList.Add(kammusu);
-                                        kammusuDataFlg.Add(true);
-                                    }
-                                } catch (Exception e) { }
-                            }
-                        }
-                    }
-                }
-                // SQLコマンドを生成する
-                var commandList = new List<string>();
-                for (int ki = 0; ki < kammusuList.Count; ++ki) {
-                    if (!kammusuDataFlg[ki]) {
-                        continue;
-                    }
-                    var kammusu = kammusuList[ki];
-                    // コマンドを記録する
-                    string sql = "INSERT INTO Kammusu VALUES(";
-                    sql += $"{kammusu.Id},'{kammusu.Name}','{kammusu.Type}',{kammusu.AntiAir},{kammusu.SlotSize},";
-                    {
-                        int count = 0;
-                        foreach (int size in kammusu.Slot) {
-                            sql += $"{size},";
-                            ++count;
-                        }
-                        for (int wi = count; wi < 5; ++wi) {
-                            sql += "0,";
-                        }
-                    }
-                    {
-                        int count = 0;
-                        foreach (int wId in kammusu.Weapon.Select(p => p.Id)) {
-                            sql += $"{wId},";
-                            ++count;
-                        }
-                        for (int wi = count; wi < 5; ++wi) {
-                            sql += "0,";
-                        }
-                    }
-                    sql += $"'{(kammusu.KammusuFlg ? 1 : 0)}')";
-                    commandList.Add(sql);
-                }
-                // データベースに書き込む
-                using (var con = new SQLiteConnection(connectionString)) {
-                    con.Open();
-                    using (var cmd = con.CreateCommand()) {
-                        // 艦娘データを全削除
-                        cmd.CommandText = "DELETE FROM Kammusu";
-                        cmd.ExecuteNonQuery();
-                        // 書き込み処理
-                        foreach (string command in commandList) {
-                            cmd.CommandText = command;
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-                Console.WriteLine("ダウンロード完了");
-                if (patchMemo != "") {
-                    MessageBox.Show($"※パッチで上書きされた艦船：\n{patchMemo}");
-                    Console.WriteLine($"※パッチで上書きされた艦船：\n{patchMemo}");
-                }
-                return true;
-            } catch (Exception e) {
-                Console.WriteLine("ダウンロード失敗");
-                Console.WriteLine(e.ToString());
-                return false;
-            }
-        }
-        // 装備のデータをダウンロードする
-        private static async Task<bool> DownloadWeaponDataAsync() {
-            Console.WriteLine("装備のデータをダウンロード中……");
-            try {
-                // 戦闘行動半径データをダウンロードして読み込む
-                var BasedAirUnitRange = new Dictionary<string, int>();
-                using (var client = new HttpClient()) {
-                    using (var stream = await client.GetStreamAsync("https://raw.githubusercontent.com/YSRKEN/AWSK/master/AWSK/WeaponData.csv")) {
-                        using (var sr = new System.IO.StreamReader(stream)) {
-                            while (!sr.EndOfStream) {
-                                string line = sr.ReadLine();
-                                var values = line.Split(',');
-                                if (values[0] == "名称")
-                                    continue;
-                                BasedAirUnitRange[values[0]] = int.Parse(values[1]);
-                            }
-                        }
-                    }
-                }
-                // 不完全データに対する追加パッチ
-                Console.WriteLine("・自前DB");
-                string patchMemo = "";
-                {
-                    // CSVファイルを読み込み、その中身を記録する
-                    // 入力チェックはあまりしてないので注意
-                    if (System.IO.File.Exists(@"WeaponDataPatch.csv")) {
-                        using (var sr = new System.IO.StreamReader(@"WeaponDataPatch.csv")) {
-                            while (!sr.EndOfStream) {
-                                try {
-                                    // 1行読み込み、カンマ毎に区切る
-                                    string line = sr.ReadLine();
-                                    var values = line.Split(',');
-                                    // 行数がおかしい場合は飛ばす
-                                    if (values.Count() < 2)
-                                        continue;
-                                    // ヘッダー行は飛ばす
-                                    if (values[0] == "名称")
-                                        continue;
-                                    // データを読み取る
-                                    string name = values[0];
-                                    int r = int.Parse(values[1]);
-                                    if (BasedAirUnitRange.ContainsKey(name)) {
-                                        patchMemo += $"・装備名：{name} 戦闘行動半径：{r}\n";
-                                    }
-                                    BasedAirUnitRange[name] = r;
-                                } catch (Exception e) { }
-                            }
-                        }
-                    }
-                }
-                // 装備データをダウンロード・パースする
-                var commandList = new List<string>();
-                var idHash = new Dictionary<int, bool>();
-                Console.WriteLine("・デッキビルダー");
-                using (var client = new HttpClient()) {
-                    // ダウンロード
-                    string rawData = await client.GetStringAsync("http://kancolle-calc.net/data/itemdata.js");
-                    // 余計な文字を削除
-                    rawData = rawData.Replace("var gItems = ", "");
-                    // JSONとしてゆるーくパース
-                    var obj = DynamicJson.Parse(rawData);
-                    // パース結果をゆるーく取得
-                    foreach (var weapon in obj) {
-                        // IDや装備名などを取得
-                        int id = (int)weapon.id;
-                        string name = weapon.name;
-                        int antiair = (int)weapon.aac;
-                        int intercept = 0;
-                        var type = weapon.type;
-                        // 局戦・陸戦は迎撃値を読み取るようにした
-                        if (type[0] == 22 && type[2] == 48) {
-                            intercept = (int)weapon.evasion;
-                        }
-                        // 戦闘行動半径の処理
-                        int baurange = 0;
-                        if (BasedAirUnitRange.ContainsKey(name)) {
-                            baurange = BasedAirUnitRange[name];
-                        }
-                        // 艦娘用の装備か？
-                        bool weaponFlg = (id <= 500);
-                        // コマンドを記録する
-                        string sql = "INSERT INTO Weapon VALUES(";
-                        sql += $"{id},'{name}',{antiair},{intercept},{baurange},";
-                        sql += $"{type[0]},{type[1]},{type[2]},{type[3]},{type[4]},";
-                        sql += $"{(weaponFlg ? 1 : 0)})";
-                        commandList.Add(sql);
-                        idHash[id] = true;
-                    }
-                }
-                // パッチ当て(仮処理)
-                commandList.Add("INSERT INTO Weapon VALUES(586,'深海攻撃哨戒鷹改二',10,0,0,3,5,8,8,0,0)");
-                commandList.Add("INSERT INTO Weapon VALUES(587,'深海16inch三連装砲改二',5,0,0,1,1,3,3,0,0)");
-                // データベースに書き込む
-                using (var con = new SQLiteConnection(connectionString)) {
-                    con.Open();
-                    using (var cmd = con.CreateCommand()) {
-                        // 装備データを全削除
-                        cmd.CommandText = "DELETE FROM Weapon";
-                        cmd.ExecuteNonQuery();
-                        // 書き込み処理
-                        foreach (string command in commandList) {
-                            cmd.CommandText = command;
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-                Console.WriteLine("ダウンロード完了");
-                if (patchMemo != "") {
-                    MessageBox.Show($"※パッチで上書きされた装備：\n{patchMemo}");
-                    Console.WriteLine($"※パッチで上書きされた装備：\n{patchMemo}");
-                }
-                return true;
-            } catch (Exception e) {
-                Console.WriteLine("ダウンロード失敗");
-                Console.WriteLine(e.ToString());
-                return false;
-            }
-        }
+
         // 装備の俗称を読み込んでおく
         private static Dictionary<string, int> ReadEnemyFamiliarName() {
             var output = new Dictionary<string, int>();
@@ -576,7 +28,7 @@ namespace AWSK.Stores {
                         try {
                             // 1行読み込み、カンマ毎に区切る
                             string line = sr.ReadLine();
-                            var values = line.Split(',');
+                            string[] values = line.Split(',');
                             // 行数がおかしい場合は飛ばす
                             if (values.Count() < 2)
                                 continue;
@@ -593,343 +45,235 @@ namespace AWSK.Stores {
             }
             return output;
         }
-        // データをダウンロードする
-        private static async Task<bool> DownloadDataAsync() {
-            await GetWeaponDicWikia();
-            bool flg1 = await DownloadKammusuDataAsync();
-            bool flg2 = await DownloadWeaponDataAsync();
-            return flg1 && flg2;
-        }
+        #endregion
 
-        
 
-        // 装備のデータをidから正引きする
-        public static WeaponData WeaponDataById(int id) {
-            var wd = new WeaponData {
-                Id = id,
-                Name = "empty",
-                Type = new List<int> { 0, 0, 0, 0, 0 },
-                AntiAir = 0,
-                Intercept = 0,
-                Mas = 0,
-                Rf = 0,
-                BAURange = 0,
-                WeaponFlg = true,
+        /// <summary>
+        /// WeaponTypeを、デッキビルダーのTypeに変換するための辞書
+        /// </summary>
+        private static Dictionary<WeaponType, List<int>> weaponTypeDic
+            = new Dictionary<WeaponType, List<int>> {
+                { WeaponType.PF, new List<int> {3, 5, 6} },
+                { WeaponType.PB, new List<int> {3, 5, 7} },
+                { WeaponType.PA, new List<int> {3, 5, 8} },
+                { WeaponType.JPB, new List<int> {3, 40, 57} },
+                { WeaponType.PS, new List<int> {5, 7, 9} },
+                { WeaponType.WS, new List<int> {5, 7, 10} },
+                { WeaponType.WF, new List<int> {5, 36, 45} },
+                { WeaponType.WB, new List<int> {5, 43, 11} },
+                { WeaponType.LFB, new List<int> {17, 33, 41} },
+                { WeaponType.LA, new List<int> {21, 28, 47} },
+                { WeaponType.LB, new List<int> {22, 39, 47} },
+                { WeaponType.LF, new List<int> {22, 39, 48} },
             };
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    // 艦娘データを正引き
-                    cmd.CommandText = $"SELECT name, antiair, intercept, baurange, weapon_flg, type1, type2, type3, type4, type5 FROM Weapon WHERE id={id}";
-                    using (var reader = cmd.ExecuteReader()) {
-                        if (reader.Read()) {
-                            wd = new WeaponData {
-                                Id = id,
-                                Name = reader.GetString(0),
-                                Type = new List<int> {
-                                    reader.GetInt32(5),
-                                    reader.GetInt32(6),
-                                    reader.GetInt32(7),
-                                    reader.GetInt32(8),
-                                    reader.GetInt32(9)
-                                },
-                                AntiAir = reader.GetInt32(1),
-                                Intercept = reader.GetInt32(2),
-                                Mas = 0,
-                                Rf = 0,
-                                BAURange = reader.GetInt32(3),
-                                WeaponFlg = (reader.GetInt32(4) == 1 ? true : false)
-                            };
-                        }
-                    }
-                }
+
+        /// <summary>
+        /// Weapon型をWeaponData型に変換する
+        /// </summary>
+        /// <param name="weapon">Weapon型</param>
+        /// <returns>WeaponData型</returns>
+        private static WeaponData Convert(Weapon weapon) {
+            // nullならば、デフォルト値を返す
+            if (weapon == null) {
+                return new WeaponData {
+                    Id = 0,
+                    Name = "empty",
+                    Type = new List<int> { 0, 0, 0, 0, 0 },
+                    AntiAir = 0,
+                    Intercept = 0,
+                    Mas = 0,
+                    Rf = 0,
+                    BAURange = 0,
+                    WeaponFlg = true,
+                };
             }
-            wd.Refresh();
-            return wd;
+            
+            // Type部分を変換
+            var type = weaponTypeDic.ContainsKey(weapon.Type) ? weaponTypeDic[weapon.Type] : new List<int> { 0, 0, 0, 0, 0 };
+
+            // 変換後の結果を算出して返す
+            var weaponData = new WeaponData {
+                Id = weapon.Id,
+                Name = weapon.Name,
+                Type = type,
+                AntiAir = weapon.AntiAir,
+                Intercept = weapon.Intercept,
+                Mas = weapon.Mas,
+                Rf = weapon.Rf,
+                BAURange = weapon.BasedAirUnitRange,
+                WeaponFlg = weapon.ForKammusuFlg,
+            };
+            weaponData.Refresh();
+            return weaponData;
         }
-        // データベースの初期化処理
+
+        /// <summary>
+        /// Kammusu型をKammusuData型に変換する
+        /// </summary>
+        /// <param name="kammusu">Kammusu型</param>
+        /// <returns>KammusuData型</returns>
+        private static KammusuData Convert(Kammusu kammusu) {
+            // nullならば、デフォルト値を返す
+            if (kammusu == null) {
+                var kd = new KammusuData {
+                    Id = 0,
+                    Name = "なし",
+                    Type = "その他",
+                    Level = 0,
+                    AntiAir = 0,
+                    SlotSize = 0,
+                    KammusuFlg = true,
+                    Weapon = new List<WeaponData>(),
+                    Slot = new List<int>(),
+                };
+            }
+
+            // Type部分を変換
+            string type = KammusuTypeDic.ContainsKey(kammusu.Type) ? KammusuTypeDic[kammusu.Type] : "";
+
+            // 変換後の結果を算出して返す
+            var kammusuData = new KammusuData {
+                Id = kammusu.Id,
+                Name = kammusu.Name,
+                Type = type,
+                Level = 1,
+                AntiAir = kammusu.AntiAir,
+                SlotSize = kammusu.SlotList.Count,
+                KammusuFlg = kammusu.KammusuFlg,
+                Weapon = new List<WeaponData>(),
+                Slot = kammusu.SlotList,
+            };
+            foreach(var weapon in kammusu.WeaponList){
+                kammusuData.Weapon.Add(Convert(weapon));
+            }
+            return kammusuData;
+        }
+
+        /// <summary>
+        /// 装備のデータをidから正引きする
+        /// </summary>
+        /// <param name="id">装備id</param>
+        /// <returns>装備情報</returns>
+        public static WeaponData WeaponDataById(int id) {
+            var database = DataBaseService.instance;
+            return Convert(database.FindByWeaponId(id));
+        }
+
+        /// <summary>
+        /// データベースの初期化処理
+        /// </summary>
+        /// <param name="forceUpdateFlg">強制的に更新する場合はtrue</param>
+        /// <returns></returns>
         public static async Task<DataStoreStatus> Initialize(bool forceUpdateFlg = false) {
             // テーブルが存在しない場合、テーブルを作成する
-            bool createTableFlg = false;
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    // 艦娘データ
-                    {
-                        bool hasTableFlg = false;
-                        cmd.CommandText = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Kammusu'";
-                        using (var reader = cmd.ExecuteReader()) {
-                            if (reader.Read() && reader.GetInt32(0) == 1) {
-                                hasTableFlg = true;
-                            }
-                        }
-                        if (forceUpdateFlg) {
-                            string sql = "DROP TABLE [Kammusu]";
-                            cmd.CommandText = sql;
-                            cmd.ExecuteNonQuery();
-                        }
-                        if (!hasTableFlg || forceUpdateFlg) {
-                            string sql = @"
-								CREATE TABLE [Kammusu](
-								[id] INTEGER NOT NULL PRIMARY KEY,
-								[name] TEXT NOT NULL DEFAULT '',
-								[type] TEXT NOT NULL DEFAULT '',
-								[antiair] INTEGER NOT NULL DEFAULT 0,
-								[slotsize] INTEGER NOT NULL DEFAULT 0,
-								[slot1] INTEGER NOT NULL DEFAULT 0,
-								[slot2] INTEGER NOT NULL DEFAULT 0,
-								[slot3] INTEGER NOT NULL DEFAULT 0,
-								[slot4] INTEGER NOT NULL DEFAULT 0,
-								[slot5] INTEGER NOT NULL DEFAULT 0,
-								[weapon1] INTEGER NOT NULL DEFAULT 0,
-								[weapon2] INTEGER NOT NULL DEFAULT 0,
-								[weapon3] INTEGER NOT NULL DEFAULT 0,
-								[weapon4] INTEGER NOT NULL DEFAULT 0,
-								[weapon5] INTEGER NOT NULL DEFAULT 0,
-								[kammusu_flg] INTEGER NOT NULL)
-							";
-                            cmd.CommandText = sql;
-                            cmd.ExecuteNonQuery();
-                            createTableFlg = true;
-                        }
-                    }
-                    // 装備データ
-                    {
-                        bool hasTableFlg = false;
-                        cmd.CommandText = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Weapon'";
-                        using (var reader = cmd.ExecuteReader()) {
-                            if (reader.Read() && reader.GetInt32(0) == 1) {
-                                hasTableFlg = true;
-                            }
-                        }
-                        if (!hasTableFlg) {
-                            string sql = @"
-							CREATE TABLE [Weapon](
-							[id] INTEGER NOT NULL PRIMARY KEY,
-							[name] TEXT NOT NULL DEFAULT '',
-							[antiair] INTEGER NOT NULL DEFAULT 0,
-							[intercept] INTEGER NOT NULL DEFAULT 0,
-							[baurange] INTEGER NOT NULL DEFAULT 0,
-							[type1] INTEGER NOT NULL DEFAULT 0,
-							[type2] INTEGER NOT NULL DEFAULT 0,
-							[type3] INTEGER NOT NULL DEFAULT 0,
-							[type4] INTEGER NOT NULL DEFAULT 0,
-							[type5] INTEGER NOT NULL DEFAULT 0,
-							[weapon_flg] INTEGER NOT NULL)
-						";
-                            cmd.CommandText = sql;
-                            cmd.ExecuteNonQuery();
-                            createTableFlg = true;
-                        }
-                    }
-                }
-            }
+            var database = DataBaseService.instance;
+            bool createTableFlg = database.CreateWeaponTable(forceUpdateFlg)
+                || database.CreateKammusuTable(forceUpdateFlg);
+
             // テーブルを作成したならば、データをダウンロードする
-            if (createTableFlg || forceUpdateFlg) {
-                if (await DownloadDataAsync()) {
-                    return DataStoreStatus.Success;
-                } else {
-                    return DataStoreStatus.Failed;
-                }
-            } else {
+            if (!createTableFlg) {
                 return DataStoreStatus.Exist;
             }
+            try {
+                var downloader = DownloadService.instance;
+                var weaponData = await downloader.downloadWeaponDataFromWikiaAsync();
+                database.SaveAll(weaponData, true);
+                var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
+                database.SaveAll(kammusuData, true);
+                return DataStoreStatus.Success;
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return DataStoreStatus.Failed;
+            }
         }
-        // 艦娘のデータをidから正引きする
-        // setWeaponFlgが有効だと、初期装備を握って登場する
+
+        /// <summary>
+        /// 艦娘のデータをidから正引きする
+        /// </summary>
+        /// <param name="id">艦船ID</param>
+        /// <param name="setWeaponFlg">trueの場合、初期装備を握って登場する</param>
+        /// <returns>艦船情報</returns>
         public static KammusuData KammusuDataById(int id, bool setWeaponFlg = false) {
-            var kd = new KammusuData {
-                Id = 0,
-                Name = "なし",
-                Level = 0,
-                AntiAir = 0,
-                SlotSize = 0,
-                KammusuFlg = true,
-                Weapon = new List<WeaponData>(),
-                Slot = new List<int>(),
-            };
-            var weaponList = new List<int>();
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    // 艦娘データを正引き
-                    cmd.CommandText = $"SELECT name, type, antiair, slotsize, kammusu_flg, slot1, slot2, slot3, slot4, slot5, weapon1, weapon2, weapon3, weapon4, weapon5 FROM Kammusu WHERE id={id}";
-                    using (var reader = cmd.ExecuteReader()) {
-                        if (reader.Read()) {
-                            kd = new KammusuData {
-                                Id = id,
-                                Name = reader.GetString(0),
-                                Type = reader.GetString(1),
-                                Level = 1,
-                                AntiAir = reader.GetInt32(2),
-                                SlotSize = reader.GetInt32(3),
-                                KammusuFlg = (reader.GetInt32(4) == 1 ? true : false),
-                                Weapon = new List<WeaponData>(),
-                                Slot = new List<int>(),
-                            };
-                            for (int i = 0; i < 5; ++i) {
-                                int size = reader.GetInt32(5 + i);
-                                kd.Slot.Add(size);
-                                int wId = reader.GetInt32(10 + i);
-                                if (wId > 0) {
-                                    weaponList.Add(wId);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // setWeaponFlgが立っていた場合、装備データを復元する
-            if (setWeaponFlg) {
-                // N+1クエリの懸念もあるが、順序は重要なのでやむを得ずこうした
-                foreach (int wId in weaponList) {
-                    var weapon = WeaponDataById(wId);
-                    kd.Weapon.Add(weapon);
-                }
-            }
-            return kd;
+            var database = DataBaseService.instance;
+            return Convert(database.FindByKammusuId(id, setWeaponFlg));
         }
-        // 装備のデータをnameから逆引きする
+
+        /// <summary>
+        /// 装備のデータをnameから逆引きする
+        /// </summary>
+        /// <param name="name">装備名</param>
+        /// <returns>装備情報</returns>
         public static WeaponData WeaponDataByName(string name) {
-            var wd = new WeaponData {
-                Id = 0,
-                Name = name,
-                Type = new List<int> { 0, 0, 0, 0, 0 },
-                AntiAir = 0,
-                Intercept = 0,
-                Mas = 0,
-                Rf = 0,
-                BAURange = 0,
-                WeaponFlg = true,
-            };
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    // 艦娘データを正引き
-                    cmd.CommandText = $"SELECT id, antiair, intercept, weapon_flg, baurange, type1, type2, type3, type4, type5 FROM Weapon WHERE name='{name}'";
-                    using (var reader = cmd.ExecuteReader()) {
-                        if (reader.Read()) {
-                            wd = new WeaponData {
-                                Id = reader.GetInt32(0),
-                                Name = name,
-                                Type = new List<int> {
-                                    reader.GetInt32(5),
-                                    reader.GetInt32(6),
-                                    reader.GetInt32(7),
-                                    reader.GetInt32(8),
-                                    reader.GetInt32(9)
-                                },
-                                AntiAir = reader.GetInt32(1),
-                                Intercept = reader.GetInt32(2),
-                                Mas = 0,
-                                Rf = 0,
-                                BAURange = reader.GetInt32(4),
-                                WeaponFlg = (reader.GetInt32(3) == 1 ? true : false)
-                            };
-                        }
-                    }
-                }
-            }
-            wd.Refresh();
-            return wd;
+            var database = DataBaseService.instance;
+            return Convert(database.FindByWeaponName(name));
         }
-        // 深海棲艦の艦名一覧をid付きで返す
+
+        /// <summary>
+        /// 深海棲艦の艦名一覧をid付きで返す
+        /// </summary>
+        /// <returns>艦船ID, [艦名・艦種]</returns>
         public static Dictionary<int, KeyValuePair<string, string>> EnemyNameList() {
-            var list = new Dictionary<int, KeyValuePair<string, string>>();
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    cmd.CommandText = $"SELECT id, name, type FROM Kammusu WHERE kammusu_flg=0 ORDER BY id";
-                    using (var reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            list[reader.GetInt32(0)] = new KeyValuePair<string, string>(reader.GetString(1), reader.GetString(2));
-                        }
-                    }
-                }
+            var database = DataBaseService.instance;
+            var rawKammusuList = database.FindByKammusuFlg(false, false);
+            var kammusuList = new Dictionary<int, KeyValuePair<string, string>>();
+            foreach(var kammusu in rawKammusuList) {
+                var kammusuData = Convert(kammusu);
+                kammusuList[kammusuData.Id] = new KeyValuePair<string, string>(kammusuData.Name, kammusuData.Type);
             }
-            //俗称部分は、idの数字を10000だけ大きくして登録する
+
+            // 俗称部分は、idの数字を10000だけ大きくして登録する
             foreach (var pair in enemyFamiliarName) {
                 string name = pair.Key;
                 int id = pair.Value;
-                var kammusu = KammusuDataById(id);
-                list[id + 10000] = new KeyValuePair<string, string>($"*{name}", kammusu.Type);
+                var kammusu = Convert(database.FindByKammusuId(id, false));
+                kammusuList[id + 10000] = new KeyValuePair<string, string>($"*{name}", kammusu.Type);
             }
-            return list;
+            return kammusuList;
         }
-        // 基地航空隊に使用できる装備名一覧を返す
-        // (表示用に最適化済)
+
+        /// <summary>
+        /// 基地航空隊に使用できる装備種一覧
+        /// </summary>
+        private static HashSet<WeaponType> BAUWeaponTypeSet
+            = new HashSet<WeaponType> {
+                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
+                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
+                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
+        };
+
+        /// <summary>
+        /// 基地航空隊に使用できる装備名一覧を返す
+        /// </summary>
+        /// <returns>基地航空隊に使用できる装備名一覧</returns>
         public static List<string> BasedAirUnitNameList() {
-            var temp = new List<KeyValuePair<string, string>>();
-            // 基地航空隊を飛ばせる条件：
-            // ・type1=3 AND type2 not in (15, 16)
-            // ・type1 in (17, 21, 22)
-            // ・type1=5 AND type2 in (7, 36, 43)
-            // ※type1→type2→type3で詳細度が上がるので、その順にソートした
-            using (var con = new SQLiteConnection(connectionString)) {
-                con.Open();
-                using (var cmd = con.CreateCommand()) {
-                    cmd.CommandText = $"SELECT name,antiair,baurange,type1,type2,type3 FROM Weapon WHERE weapon_flg=1 AND ((type1=3 AND type2 NOT IN (15, 16)) OR type1 in (17, 21, 22) OR (type1=5 AND type2 in (7, 36, 43))) ORDER BY type1, type2, type3";
-                    using (var reader = cmd.ExecuteReader()) {
-                        while (reader.Read()) {
-                            string typeString = $"{reader.GetInt32(3)}：{reader.GetInt32(4)}：{reader.GetInt32(5)}";
-                            string nameString = $"{reader.GetString(0)}：{reader.GetInt32(1)}：{reader.GetInt32(2)}";
-                            temp.Add(new KeyValuePair<string, string>(typeString, nameString));
-                        }
-                    }
-                }
-            }
+            // 艦娘サイドの装備一覧を抽出
+            var database = DataBaseService.instance;
+            var rawWeaponList = database.FindByForKammusuFlg(true);
+
+            // 基地航空隊に使用できるものだけ抽出
+            var temp = rawWeaponList
+                .Where(w => BAUWeaponTypeSet.Contains(w.Type))
+                .OrderBy(w => w.Id)
+                .OrderBy(w => (int)w.Type)
+                .ToList();
+
+            // 一覧を生成する
             var list = new List<string>();
             list.Add("なし");
-            string temp2 = "";
-            foreach (var pair in temp) {
-                string typeString = pair.Key;
-                string nameString = pair.Value;
-                if (temp2 != typeString) {
-                    switch (typeString) {
-                    case "3：5：6":
-                        list.Add("【艦上戦闘機】");
-                        break;
-                    case "3：5：7":
-                        list.Add("【艦上爆撃機】");
-                        break;
-                    case "3：5：8":
-                        list.Add("【艦上攻撃機】");
-                        break;
-                    case "3：40：57":
-                        list.Add("【墳式爆撃機】");
-                        break;
-                    case "5：7：9":
-                        list.Add("【艦上偵察機】");
-                        break;
-                    case "5：7：10":
-                        list.Add("【水上偵察機】");
-                        break;
-                    case "5：36：45":
-                        list.Add("【水上戦闘機】");
-                        break;
-                    case "5：43：11":
-                        list.Add("【水上爆撃機】");
-                        break;
-                    case "17：33：41":
-                        list.Add("【大型飛行艇】");
-                        break;
-                    case "21：38：47":
-                        list.Add("【陸上攻撃機】");
-                        break;
-                    case "22：39：47":
-                        list.Add("【陸上爆撃機】");
-                        break;
-                    case "22：39：48":
-                        list.Add("【陸上戦闘機】");
-                        break;
-                    }
-                    temp2 = typeString;
+            for(int i = 0; i < temp.Count; ++i) {
+                if (i == 0 || temp[i].Type != temp[i - 1].Type) {
+                    list.Add($"【{WeaponTypeDic[temp[i].Type]}】");
                 }
-                list.Add(nameString);
+                list.Add(temp[i].Name);
             }
             return list;
         }
-        // JSONデータを分析する
+
+        /// <summary>
+        /// JSONデータを分析する
+        /// </summary>
+        /// <param name="jsonString">JSONによる艦隊データ</param>
+        /// <returns>艦隊データを表すクラス</returns>
         public static FleetData ParseFleetData(string jsonString) {
             var obj = DynamicJson.Parse(jsonString);
             var fleetData = new FleetData();
@@ -1087,6 +431,7 @@ namespace AWSK.Stores {
             }
         }
     }
+
     // 基地航空隊データ
     class BasedAirUnitData {
         public List<List<WeaponData>> Weapon { get; set; } = new List<List<WeaponData>>();
@@ -1173,6 +518,7 @@ namespace AWSK.Stores {
             }
         }
     }
+
     // 艦娘データ
     struct KammusuData {
         public int Id;
@@ -1185,6 +531,7 @@ namespace AWSK.Stores {
         public List<WeaponData> Weapon;
         public List<int> Slot;
     }
+
     // 装備データ
     struct WeaponData {
         public int Id;
@@ -1210,11 +557,11 @@ namespace AWSK.Stores {
         // 艦載機熟練度による制空ボーナス
         private void CalcAntiAirBonus() {
             // 艦戦・水戦制空ボーナス
-            var pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
+            int[] pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
             // 水爆制空ボーナス
-            var wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
+            int[] wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
             // 内部熟練ボーナス
-            var masBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
+            int[] masBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
             // 装備種を判断し、そこから制空ボーナスを算出
             // 艦戦・水戦・陸戦・局戦は+25
             if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
@@ -1295,6 +642,7 @@ namespace AWSK.Stores {
             return (calcFlg ? antiAirValue1[slot] : antiAirValue2[slot]);
         }
     }
+
     // データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
     enum DataStoreStatus { Exist, Success, Failed }
 }

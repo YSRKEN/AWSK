@@ -15,23 +15,23 @@ namespace AWSK.Service {
         /// <summary>
         /// 自分自身の唯一のinstance
         /// </summary>
-        static DataBaseService singleton = null;
+        private static DataBaseService singleton = null;
 
         /// <summary>
         /// 接続用文字列
         /// </summary>
-        const string CONNECTION_STRING = @"Data Source=GameData2.db";
+        private const string CONNECTION_STRING = @"Data Source=GameData2.db";
 
         /// <summary>
         /// privateコンストラクタ
         /// </summary>
-        DataBaseService() { }
+        private DataBaseService() { }
 
         /// <summary>
         /// 返り値が不要なクエリを実行する
         /// </summary>
         /// <param name="query">クエリ</param>
-        void ExecuteNonQuery(string query) {
+        private void ExecuteNonQuery(string query) {
             using (var con = new SQLiteConnection(CONNECTION_STRING)) {
                 con.Open();
                 using (var cmd = con.CreateCommand()) {
@@ -46,7 +46,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        List<Dictionary<string, dynamic>> ExecuteReader(string query) {
+        private List<Dictionary<string, dynamic>> ExecuteReader(string query) {
             var result = new List<Dictionary<string, dynamic>>();
             using (var con = new SQLiteConnection(CONNECTION_STRING)) {
                 con.Open();
@@ -82,19 +82,21 @@ namespace AWSK.Service {
         /// <param name="tableName">テーブル名</param>
         /// <param name="query">テーブルを作成するクエリ</param>
         /// <param name="forceFlg">既存のテーブルが存在していた場合でも作成する場合はtrue</param>
-        void CreateTable(string tableName, string query, bool forceFlg) {
+        /// <returns>テーブルを作成したならtrue</returns>
+        private bool CreateTable(string tableName, string query, bool forceFlg) {
             // 既存のテーブルが存在するかを調べる
             var result = ExecuteReader($"SELECT count(*) AS count FROM sqlite_master WHERE type='table' AND name='{tableName}'");
             if (result.Count > 0 && result[0]["count"] >= 1) {
                 if (forceFlg) {
                     ExecuteNonQuery($"DROP TABLE {tableName}");
                 } else {
-                    return;
+                    return false;
                 }
             }
 
             // CREATE TABLE処理を実行する
             ExecuteNonQuery(query);
+            return true;
         }
 
         /// <summary>
@@ -113,7 +115,9 @@ namespace AWSK.Service {
         /// <summary>
         /// 装備テーブルを作成する
         /// </summary>
-        public void CreateWeaponTable(bool forceFlg) {
+        /// <param name="forceFlg">強制的に作成するならtrue</param>
+        /// <returns>テーブルを作成したならtrue</returns>
+        public bool CreateWeaponTable(bool forceFlg) {
             string sql = @"
 				CREATE TABLE [weapon](
 				[id] INTEGER NOT NULL PRIMARY KEY,
@@ -124,13 +128,15 @@ namespace AWSK.Service {
 				[based_air_unit_range] INTEGER NOT NULL DEFAULT 0,
 				[for_kammusu_flg] INTEGER NOT NULL DEFAULT 1)
 			";
-            CreateTable("weapon", sql, forceFlg);
+            return CreateTable("weapon", sql, forceFlg);
         }
 
         /// <summary>
         /// 艦娘テーブルを作成する
         /// </summary>
-        public void CreateKammusuTable(bool forceFlg) {
+        /// <param name="forceFlg">強制的に作成するならtrue</param>
+        /// <returns>テーブルを作成したならtrue</returns>
+        public bool CreateKammusuTable(bool forceFlg) {
             string sql = @"
 				CREATE TABLE [kammusu](
 				[id] INTEGER NOT NULL PRIMARY KEY,
@@ -150,7 +156,7 @@ namespace AWSK.Service {
 				[weapon5] INTEGER NOT NULL DEFAULT 0,
 				[kammusu_flg] INTEGER NOT NULL DEFAULT 1)
 			";
-            CreateTable("kammusu", sql, forceFlg);
+            return CreateTable("kammusu", sql, forceFlg);
         }
 
         /// <summary>
@@ -215,6 +221,7 @@ namespace AWSK.Service {
                         }
                         trans.Commit();
                     } catch (Exception e) {
+                        Console.WriteLine(e);
                         trans.Rollback();
                     }
                 }
@@ -323,7 +330,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="id">装備ID</param>
         /// <returns>装備情報。未ヒットの場合はnull</returns>
-        public Weapon findByWeaponId(int id) {
+        public Weapon FindByWeaponId(int id) {
             // SELECT文を実行する
             var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE id={id}");
             if (queryResult.Count == 0) {
@@ -349,7 +356,7 @@ namespace AWSK.Service {
         /// <param name="id">艦船ID</param>
         /// <param name="setDefaultWeaponFlg">初期装備を持たせる場合はtrue</param>
         /// <returns>艦娘情報。未ヒットの場合はnull</returns>
-        public Kammusu findByKammusuId(int id, bool setDefaultWeaponFlg) {
+        public Kammusu FindByKammusuId(int id, bool setDefaultWeaponFlg) {
             // SELECT文を実行する
             var queryResult = ExecuteReader($"SELECT * FROM kammusu WHERE id={id}");
             if (queryResult.Count == 0) {
@@ -377,8 +384,105 @@ namespace AWSK.Service {
             // 初期装備を持たせる
             if (setDefaultWeaponFlg) {
                 for (int i = 0; i < slotSize; ++i) {
-                    result.WeaponList[i] = findByWeaponId(weaponList[i]);
+                    result.WeaponList[i] = FindByWeaponId(weaponList[i]);
                 }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 装備情報を装備名から検索して返す
+        /// </summary>
+        /// <param name="name">装備名</param>
+        /// <returns>装備情報。未ヒットの場合はnull</returns>
+        public Weapon FindByWeaponName(string name) {
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE name={name}");
+            if (queryResult.Count == 0) {
+                return null;
+            }
+
+            // SELECT文から結果を取得して返す
+            var queryResult2 = queryResult[0];
+            var result = new Weapon(
+                (int)queryResult2["id"],
+                (string)queryResult2["name"],
+                (WeaponType)queryResult2["type"],
+                (int)queryResult2["antiair"],
+                (int)queryResult2["intercept"],
+                (int)queryResult2["based_air_unit_range"],
+                queryResult2["for_kammusu_flg"] == 1);
+            return result;
+        }
+
+        /// <summary>
+        /// 艦娘情報を艦娘フラグで絞り込んで返す
+        /// </summary>
+        /// <param name="kammusuFlg">艦娘フラグ</param>
+        /// <param name="setDefaultWeaponFlg">初期装備を持たせる場合はtrue</param>
+        /// <returns>艦娘リスト。未ヒットの場合は空配列</returns>
+        public List<Kammusu> FindByKammusuFlg(bool kammusuFlg, bool setDefaultWeaponFlg) {
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM kammusu WHERE kammusu_flg={(kammusuFlg ? 1 : 0)}");
+            if (queryResult.Count == 0) {
+                return new List<Kammusu>();
+            }
+
+            // SELECT文から結果を取得する
+            var result = new List<Kammusu>();
+            foreach (var qr in queryResult) {
+                int slotSize = (int)qr["slotsize"];
+                var slotList = new List<int>();
+                var weaponList = new List<int>();
+                for (int i = 0; i < slotSize; ++i) {
+                    slotList.Add((int)qr[$"slot{i + 1}"]);
+                    weaponList.Add((int)qr[$"weapon{i + 1}"]);
+                }
+
+                var temp = new Kammusu(
+                    (int)qr["id"],
+                    (string)qr["name"],
+                    (KammusuType)qr["type"],
+                    (int)qr["antiair"],
+                    slotList,
+                    qr["kammusu_flg"] == 1);
+
+                // 初期装備を持たせる
+                if (setDefaultWeaponFlg) {
+                    for (int i = 0; i < slotSize; ++i) {
+                        temp.WeaponList[i] = FindByWeaponId(weaponList[i]);
+                    }
+                }
+
+                result.Add(temp);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 装備情報を装備フラグから絞り込んで返す
+        /// </summary>
+        /// <param name="forKammusuFlg">艦娘用装備か？</param>
+        /// <returns>装備リスト。未ヒットの場合は空配列</returns>
+        public List<Weapon> FindByForKammusuFlg(bool forKammusuFlg) {
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE for_kammusu_flg={(forKammusuFlg ? 1 : 0)}");
+            if (queryResult.Count == 0) {
+                return new List<Weapon>();
+            }
+
+            // SELECT文から結果を取得して返す
+            var result = new List<Weapon>();
+            foreach (var qr in queryResult) {
+                var temp = new Weapon(
+                    (int)qr["id"],
+                    (string)qr["name"],
+                    (WeaponType)qr["type"],
+                    (int)qr["antiair"],
+                    (int)qr["intercept"],
+                    (int)qr["based_air_unit_range"],
+                    qr["for_kammusu_flg"] == 1);
+                result.Add(temp);
             }
             return result;
         }
