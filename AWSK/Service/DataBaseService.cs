@@ -397,7 +397,7 @@ namespace AWSK.Service {
         /// <returns>装備情報。未ヒットの場合はnull</returns>
         public Weapon FindByWeaponName(string name) {
             // SELECT文を実行する
-            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE name={name}");
+            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE name='{name}'");
             if (queryResult.Count == 0) {
                 return null;
             }

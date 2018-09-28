@@ -75,7 +75,7 @@ namespace AWSK.Stores {
         private static WeaponData Convert(Weapon weapon) {
             // nullならば、デフォルト値を返す
             if (weapon == null) {
-                return new WeaponData {
+                var temp = new WeaponData {
                     Id = 0,
                     Name = "empty",
                     Type = new List<int> { 0, 0, 0, 0, 0 },
@@ -86,6 +86,8 @@ namespace AWSK.Stores {
                     BAURange = 0,
                     WeaponFlg = true,
                 };
+                temp.Refresh();
+                return temp;
             }
             
             // Type部分を変換
@@ -264,7 +266,7 @@ namespace AWSK.Stores {
                 if (i == 0 || temp[i].Type != temp[i - 1].Type) {
                     list.Add($"【{WeaponTypeDic[temp[i].Type]}】");
                 }
-                list.Add(temp[i].Name);
+                list.Add($"{temp[i].Name}：{temp[i].AntiAir}：{temp[i].BasedAirUnitRange}");
             }
             return list;
         }
@@ -614,7 +616,7 @@ namespace AWSK.Stores {
                 || (Type[0] == 5 && Type[1] == 36)
                 || (Type[0] == 22 && Type[2] == 48)) {
                 CorrectedAA += 0.2 * Rf;
-            } else if (Type[0] == 3 && Type[2] == 7 && Type[4] == 12) {
+            } else if (Type[0] == 3 && Type[2] == 7 && Name.Contains("爆戦")) {
                 CorrectedAA += 0.25 * Rf;
             }
         }
