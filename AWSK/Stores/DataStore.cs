@@ -15,39 +15,6 @@ using static AWSK.Constant;
 
 namespace AWSK.Stores {
     static class DataStore {
-        #region TODO
-        // 装備の俗称とIDとの対応表
-        private static Dictionary<string, int> enemyFamiliarName = ReadEnemyFamiliarName();
-
-        // 装備の俗称を読み込んでおく
-        private static Dictionary<string, int> ReadEnemyFamiliarName() {
-            var output = new Dictionary<string, int>();
-            if (System.IO.File.Exists(@"Resource\EnemyFamiliarName.csv")) {
-                using (var sr = new System.IO.StreamReader(@"Resource\EnemyFamiliarName.csv")) {
-                    while (!sr.EndOfStream) {
-                        try {
-                            // 1行読み込み、カンマ毎に区切る
-                            string line = sr.ReadLine();
-                            string[] values = line.Split(',');
-                            // 行数がおかしい場合は飛ばす
-                            if (values.Count() < 2)
-                                continue;
-                            // ヘッダー行は飛ばす
-                            if (values[0] == "俗称")
-                                continue;
-                            // データを読み取る
-                            string name = values[0];
-                            int id = int.Parse(values[1]);
-                            output[name] = id;
-                        } catch (Exception) { }
-                    }
-                }
-            }
-            return output;
-        }
-        #endregion
-
-
         /// <summary>
         /// WeaponTypeを、デッキビルダーのTypeに変換するための辞書
         /// </summary>
@@ -66,6 +33,16 @@ namespace AWSK.Stores {
                 { WeaponType.LB, new List<int> {22, 39, 47} },
                 { WeaponType.LF, new List<int> {22, 39, 48} },
             };
+
+        /// <summary>
+        /// 基地航空隊に使用できる装備種一覧
+        /// </summary>
+        private static HashSet<WeaponType> BAUWeaponTypeSet
+            = new HashSet<WeaponType> {
+                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
+                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
+                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
+        };
 
         /// <summary>
         /// Weapon型をWeaponData型に変換する
@@ -217,12 +194,37 @@ namespace AWSK.Stores {
         /// </summary>
         /// <returns>艦船ID, [艦名・艦種]</returns>
         public static Dictionary<int, KeyValuePair<string, string>> EnemyNameList() {
+            // 深海棲艦の艦名・艦種一覧を取得する
             var database = DataBaseService.instance;
             var rawKammusuList = database.FindByKammusuFlg(false, false);
             var kammusuList = new Dictionary<int, KeyValuePair<string, string>>();
             foreach(var kammusu in rawKammusuList) {
                 var kammusuData = Convert(kammusu);
                 kammusuList[kammusuData.Id] = new KeyValuePair<string, string>(kammusuData.Name, kammusuData.Type);
+            }
+
+            // 俗称一覧を取得する
+            var enemyFamiliarName = new Dictionary<string, int>();
+            if (System.IO.File.Exists(@"Resource\EnemyFamiliarName.csv")) {
+                using (var sr = new System.IO.StreamReader(@"Resource\EnemyFamiliarName.csv")) {
+                    while (!sr.EndOfStream) {
+                        try {
+                            // 1行読み込み、カンマ毎に区切る
+                            string line = sr.ReadLine();
+                            string[] values = line.Split(',');
+                            // 行数がおかしい場合は飛ばす
+                            if (values.Count() < 2)
+                                continue;
+                            // ヘッダー行は飛ばす
+                            if (values[0] == "俗称")
+                                continue;
+                            // データを読み取る
+                            string name = values[0];
+                            int id = int.Parse(values[1]);
+                            enemyFamiliarName[name] = id;
+                        } catch (Exception) { }
+                    }
+                }
             }
 
             // 俗称部分は、idの数字を10000だけ大きくして登録する
@@ -234,16 +236,6 @@ namespace AWSK.Stores {
             }
             return kammusuList;
         }
-
-        /// <summary>
-        /// 基地航空隊に使用できる装備種一覧
-        /// </summary>
-        private static HashSet<WeaponType> BAUWeaponTypeSet
-            = new HashSet<WeaponType> {
-                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
-                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
-                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
-        };
 
         /// <summary>
         /// 基地航空隊に使用できる装備名一覧を返す
