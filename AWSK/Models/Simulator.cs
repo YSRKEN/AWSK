@@ -124,7 +124,7 @@ namespace AWSK.Models
 			int minBAURange = weaponList.Min(w => w.BasedAirUnitRange);
 			// 航空隊に偵察機が含まれるなら延長後の半径を返す
 			// 含まれないならそのままの延長前の半径を返す
-			var list = weaponList.Where(weapon => weapon.Type == WeaponType.PS || weapon.Type == WeaponType.WS || weapon.Type == WeaponType.LFB);
+			var list = weaponList.Where(weapon => weapon.IsSearcher);
 			if (list.Count() > 0) {
 				int maxBAURange2 = list.Max(w => w.BasedAirUnitRange);
 				if (maxBAURange2 <= minBAURange)

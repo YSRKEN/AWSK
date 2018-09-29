@@ -42,17 +42,13 @@ namespace AWSK.Service {
         /// <returns></returns>
         public int CalcAntiAirValue(Weapon weapon, int slotSize, bool wsFlg) {
             // 航空戦に参加しない装備の場合はスルー
-            if (!Constant.AAVWeaponTypeSet.Contains(weapon.Type)) {
-                if (!wsFlg || weapon.Type != Constant.WeaponType.WS) {
-                    return 0;
-                }
+            if (!weapon.HasAAV(wsFlg)) {
+                return 0;
             }
 
             // 熟練度補正を計算
             double antiAirBonus = Math.Sqrt(1.0 * Constant.MasBonus[weapon.Mas] / 10);
-            if (weapon.Type == Constant.WeaponType.PF
-                || weapon.Type == Constant.WeaponType.WF
-                || weapon.Type == Constant.WeaponType.LF) {
+            if (weapon.IsFighter) {
                 // 艦戦・水戦・陸戦・局戦は+25
                 antiAirBonus += Constant.PfWfBonus[weapon.Mas];
             } else if (weapon.Type == Constant.WeaponType.WB) {

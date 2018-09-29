@@ -180,9 +180,9 @@ namespace AWSK.ViewModels {
                 var weapon = dataBase.FindByWeaponName(name);
                 weapon.Mas = BasedAirUnitMas[ui][wi].Value;
                 weapon.Rf = BasedAirUnitRf[ui][wi].Value;
-                int slot = (weapon.Type == WeaponType.PS || weapon.Type == WeaponType.WS || weapon.Type == WeaponType.LFB) ? 4 : 18;
+                int slot = weapon.IsSearcher ? 4 : 18;
                 // 表示用テキストを作成する
-                output += $"装備名：{weapon.Name}　航空戦：{(AAVWeaponTypeSet.Contains(weapon.Type) || weapon.Type == WeaponType.WS ? "参加" : "不参加")}\n";
+                output += $"装備名：{weapon.Name}　航空戦：{(weapon.HasAAV(true) ? "参加" : "不参加")}\n";
                 output += $"対空：{weapon.AntiAir}({weapon.CorrectedAntiAir})　迎撃：{weapon.Intercept}\n";
                 output += $"熟練度：{weapon.Mas}　改修度：{weapon.Rf}\n";
                 output += $"搭載数：{slot}　制空値：{simulation.CalcAntiAirValue(weapon, slot, true)}\n";

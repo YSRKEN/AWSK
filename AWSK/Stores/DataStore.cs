@@ -365,9 +365,7 @@ namespace AWSK.Stores {
                 var list = new List<int>();
                 foreach (var weapon in weaponList) {
                     // 搭載数は、偵察機が4機・それ以外は18機
-                    if (weapon.Type == WeaponType.PS
-                        || weapon.Type == WeaponType.WS
-                        || weapon.Type == WeaponType.LFB) {
+                    if (weapon.IsSearcher) {
                         list.Add(4);
                     } else {
                         list.Add(18);
