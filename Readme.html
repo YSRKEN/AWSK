@@ -74,24 +74,39 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/37255470-21e8da08-2590-11e8-9543-f3c9761874cb.png)
 
-- BasedAirUnitRange.csvは、戦闘行動半径に関する情報のキャッシュファイルです
+- ResourceフォルダのBasedAirUnitRange.csvは、戦闘行動半径に関する情報のキャッシュファイルです
 - BasedAirUnitRange.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
 - BasedAirUnitRange.csvに入力された内容は何よりも優先されます。と言うより、戦闘行動半径の情報をネットから読みに行くのに通信コストが馬鹿にならないので付けたファイルとも言えます(BasedAirUnitRange.csvが無くても更新はできるが、更新に掛かる時間がずっと長くなる)
 
 ![image](https://user-images.githubusercontent.com/3734392/37043235-7db5cec2-21a3-11e8-82ec-63661f510a8f.png)
 
-- EnemyFamiliarName.csvは、深海棲艦の俗称を登録するためのファイルです
+- ResourceフォルダのEnemyFamiliarName.csvは、深海棲艦の俗称を登録するためのファイルです
 - EnemyFamiliarName.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
 - ID欄で指定するのは、深海棲艦に割り振られた艦船IDです。分からない場合は[英wiki](http://kancolle.wikia.com/wiki/Kancolle_Wiki)を読むか、GameData.dbの中身をSQLite系のツールで読んで下さい
 
 ![image](https://user-images.githubusercontent.com/3734392/37255496-a2f2f552-2590-11e8-82af-d1910e7f02af.png)
 
+- ResourceフォルダのKammusuPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような艦』を追加するためのファイルです
+ - 例えばイベントが始まったばかりだと、英Wikiなどのサイトにはまだ新艦のデータが上がってなかったりします
+ - そこで、テキストファイルを編集することにより、まさに「パッチ」としてデータを補う機能がこれです
+- KammusuPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+ - 左から順に、ID・艦名・艦種・素の対空値・スロット数・スロットの搭載数・初期装備・艦娘フラグを入力します
+ - 艦名と艦種は文字列で入力しますが、引用符で囲まないでください
+ - 「スロットの搭載数」と「初期装備」はそれぞれ5スロット分あります
+ - 艦娘フラグは、艦娘なら「1」、深海棲艦なら「0」を入力してください
+ - IDの番号をどう付けたらいいかですが、 **お察しください**
+ - 艦種の文字列は今のところ「駆逐艦」「海防艦」「魚雷挺」「軽巡洋艦」「重雷装巡洋艦」「練習巡洋艦」「重巡洋艦」「航空巡洋艦」「正規空母」「装甲空母」「軽空母」「水上機母艦」「戦艦」「巡洋戦艦」「航空戦艦」「潜水艦」「潜水空母」「輸送艦」「補給艦」「揚陸艦」「工作艦」「潜水母艦」「陸上型」としています
+- KammusuPatch.csvに入力された内容は何よりも優先されます。「データベースを更新」ボタンを押すとまずオンラインの情報を拾い集めてデータベースを構築し、それからKammusuPatch.csvの内容が追加・上書きされます
+ - この上書きはIDの番号をキーとしますので、例えばKammusuPatch.csvでIDが410、type(艦種)が"戦艦"であるデータを重ねますと、既にID410に"清霜"がいることから、ソフトの上でだけ **清霜は戦艦になれます**
+
+![image](https://user-images.githubusercontent.com/3734392/36781797-5e4e3a08-1cba-11e8-9277-23b623cb3de5.png)
 
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.7.2** 以上が必要です
-- **BasedAirUnitRange.csv** には、装備の戦闘行動半径の情報が書かれています(無くても動作します)
 - **GameData2.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています(無いと動作しません)
-- **EnemyFamiliarName.csv**には、前述のように深海棲艦の俗称がCSV形式で書き込まれています(無くても動作します)
+- **BasedAirUnitRange.csv** には、装備の戦闘行動半径の情報が書かれています(無くても動作します)
+- **EnemyFamiliarName.csv**には、深海棲艦の俗称がCSV形式で書き込まれています(無くても動作します)
+- *KammusuPatch.csv**には、艦娘/深海棲艦の情報がCSV形式で書き込まれています(無くても動作します)
 
 ## 作者
 　YSR([Twitter](https://twitter.com/YSRKEN), [GitHub](https://github.com/YSRKEN/))

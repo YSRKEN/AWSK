@@ -431,5 +431,45 @@ namespace AWSK.Service {
             }
             return result;
         }
+
+        /// <summary>
+        /// 艦娘リストをKammusuPatch.csvから取得する(上書き用)
+        /// </summary>
+        /// <returns>艦娘リスト</returns>
+        public List<KeyValuePair<Kammusu, List<int>>> downloadKammusuDataFromLocalFile() {
+            var result = new List<KeyValuePair<Kammusu, List<int>>>();
+            if (System.IO.File.Exists(@"Resource\KammusuPatch.csv")) {
+                using (var sr = new System.IO.StreamReader(@"Resource\KammusuPatch.csv")) {
+                    while (!sr.EndOfStream) {
+                        // 1行読み込み、カンマ毎に区切る
+                        string line = sr.ReadLine();
+                        string[] values = line.Split(',');
+                        // 行数がおかしい場合は飛ばす
+                        if (values.Count() < 16)
+                            continue;
+                        // ヘッダー行は飛ばす
+                        if (values[0] == "id")
+                            continue;
+                        // データを読み取る
+                        int id = int.Parse(values[0]);
+                        string name = values[1];
+                        var type = KammusuTypeReverseDic.ContainsKey(values[2]) ? KammusuTypeReverseDic[values[2]] : KammusuType.Other;
+                        int antiAir = int.Parse(values[3]);
+                        int slotSize = int.Parse(values[4]);
+                        bool kammusuFlg = int.Parse(values[15]) == 1;
+                        var kammusu = new Kammusu(id, name, type, antiAir, new List<int>(), kammusuFlg);
+                        var defaultWeaponList = new List<int>();
+                        for(int i = 0; i < slotSize; ++i) {
+                            int slot = int.Parse(values[5 + i]);
+                            int defaultWeapon = int.Parse(values[10 + i]);
+                            kammusu.SlotList.Add(slot);
+                            defaultWeaponList.Add(defaultWeapon);
+                        }
+                        result.Add(new KeyValuePair<Kammusu, List<int>>(kammusu, defaultWeaponList));
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

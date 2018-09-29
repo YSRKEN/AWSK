@@ -182,6 +182,8 @@ namespace AWSK.Stores {
                 database.SaveAll(weaponData, true);
                 var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
                 database.SaveAll(kammusuData, true);
+                var kammusuData2 = downloader.downloadKammusuDataFromLocalFile();
+                database.SaveAll(kammusuData2, true);
                 return DataStoreStatus.Success;
             } catch (Exception e) {
                 Console.WriteLine(e);
