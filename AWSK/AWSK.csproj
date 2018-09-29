@@ -141,8 +141,16 @@
     </ApplicationDefinition>
     <Compile Include="Behaviors\CloseWindowAttachedBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Constant.cs" />
     <Compile Include="DynamicJson.cs" />
+    <Compile Include="Model\BasedAirUnit.cs" />
+    <Compile Include="Model\BasedAirUnitGroup.cs" />
+    <Compile Include="Model\Fleet.cs" />
+    <Compile Include="Model\Kammusu.cs" />
     <Compile Include="Models\Simulator.cs" />
+    <Compile Include="Model\Weapon.cs" />
+    <Compile Include="Service\DataBaseService.cs" />
+    <Compile Include="Service\DownloadService.cs" />
     <Compile Include="Stores\DataStore.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ResultViewModel.cs" />
@@ -184,13 +192,10 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="EnemyCategoryPatch.csv">
+    <None Include="Resource\BasedAirUnitRange.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="EnemyFamiliarName.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="KammusuPatch.csv">
+    <None Include="Resource\EnemyFamiliarName.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -198,11 +203,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="WeaponData.csv" />
-    <None Include="WeaponDataPatch.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="WeaponPatch.csv">
+    <None Include="Resource\KammusuPatch.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -224,6 +225,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
