@@ -35,16 +35,6 @@ namespace AWSK.Stores {
             };
 
         /// <summary>
-        /// 基地航空隊に使用できる装備種一覧
-        /// </summary>
-        private static HashSet<WeaponType> BAUWeaponTypeSet
-            = new HashSet<WeaponType> {
-                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
-                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
-                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
-        };
-
-        /// <summary>
         /// Weapon型をWeaponData型に変換する
         /// </summary>
         /// <param name="weapon">Weapon型</param>

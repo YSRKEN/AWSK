@@ -57,6 +57,35 @@ namespace AWSK {
         public static Dictionary<string, KammusuType> KammusuTypeReverseDic = null;
 
         /// <summary>
+        /// 艦種文字列を艦種enumに変換する(Wikia用)
+        /// </summary>
+        public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
+            = new Dictionary<string, KammusuType>{
+                {"AP", KammusuType.AO},
+                {"AV", KammusuType.AV},
+                {"BB", KammusuType.BB},
+                {"BBV", KammusuType.BBV},
+                {"CA", KammusuType.CA},
+                {"CAV", KammusuType.CAV},
+                {"CL", KammusuType.CL},
+                {"CLT", KammusuType.CLT},
+                {"CV", KammusuType.CV},
+                {"CVL", KammusuType.CVL},
+                {"DD", KammusuType.DD},
+                {"FBB", KammusuType.CC},
+                {"SS", KammusuType.SS},
+        };
+
+        /// <summary>
+        /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
+        /// </summary>
+        public static HashSet<string> AFSet = new HashSet<string> {
+            "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
+            "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
+            "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
+        };
+
+        /// <summary>
         /// 装備種を表すenum
         /// </summary>
         public enum WeaponType {
@@ -84,20 +113,8 @@ namespace AWSK {
         };
 
         /// <summary>
-        /// 最大のスロット数
+        /// 装備種文字列を装備種enumに変換する(Wikia用)
         /// </summary>
-        public static int MAX_SLOT_COUNT = 5;
-
-        /// <summary>
-        /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
-        /// </summary>
-        public static HashSet<string> AFSet = new HashSet<string> {
-            "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
-            "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
-            "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
-        };
-
-        //Other, PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF
         public static Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
             = new Dictionary<string, WeaponType>{
                 {"Carrier-based Fighter Aircraft", WeaponType.PF},
@@ -113,21 +130,19 @@ namespace AWSK {
                 {"Land-based Fighter", WeaponType.LF},
         };
 
-        public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
-            = new Dictionary<string, KammusuType>{
-                {"AP", KammusuType.AO},
-                {"AV", KammusuType.AV},
-                {"BB", KammusuType.BB},
-                {"BBV", KammusuType.BBV},
-                {"CA", KammusuType.CA},
-                {"CAV", KammusuType.CAV},
-                {"CL", KammusuType.CL},
-                {"CLT", KammusuType.CLT},
-                {"CV", KammusuType.CV},
-                {"CVL", KammusuType.CVL},
-                {"DD", KammusuType.DD},
-                {"FBB", KammusuType.CC},
-                {"SS", KammusuType.SS},
+        /// <summary>
+        /// 基地航空隊に使用できる装備種一覧
+        /// </summary>
+        public static HashSet<WeaponType> BAUWeaponTypeSet
+            = new HashSet<WeaponType> {
+                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
+                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
+                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
         };
+
+        /// <summary>
+        /// 最大のスロット数
+        /// </summary>
+        public static int MAX_SLOT_COUNT = 5;
     }
 }
