@@ -48,32 +48,20 @@ namespace AWSK.Service {
                 }
             }
 
-            // 改修補正を適用した対空値を計算
-            double correctedAA = 1.0 * weapon.AntiAir + 1.5 * weapon.Intercept;
-            if (weapon.Type == Constant.WeaponType.PF
-                || weapon.Type == Constant.WeaponType.WF
-                || weapon.Type == Constant.WeaponType.LF) {
-                // 艦戦・水戦・陸戦(便宜上局戦もこちらに含めた)
-                correctedAA += 0.2 * weapon.Rf;
-            } else if (weapon.Name.Contains("爆戦")) {
-                // 爆戦
-                correctedAA += 0.25 * weapon.Rf;
-            }
-
             // 熟練度補正を計算
             double antiAirBonus = Math.Sqrt(1.0 * Constant.MasBonus[weapon.Mas] / 10);
             if (weapon.Type == Constant.WeaponType.PF
                 || weapon.Type == Constant.WeaponType.WF
                 || weapon.Type == Constant.WeaponType.LF) {
                 // 艦戦・水戦・陸戦・局戦は+25
-                antiAirBonus += Constant.PfWfBonus[weapon.Mas]-;
+                antiAirBonus += Constant.PfWfBonus[weapon.Mas];
             } else if (weapon.Type == Constant.WeaponType.WB) {
                 // 水爆は+9
-                antiAirBonus += Constant.WbBonus[weapon.Mas]-;
+                antiAirBonus += Constant.WbBonus[weapon.Mas];
             }
 
             // 最終的な制空値を算出
-            return (int)(correctedAA * Math.Sqrt(slotSize) + antiAirBonus);
+            return (int)(weapon.CorrectedAntiAir * Math.Sqrt(slotSize) + antiAirBonus);
         }
     }
 }

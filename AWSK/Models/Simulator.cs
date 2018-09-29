@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MersenneTwister;
+using AWSK.Service;
+using static AWSK.Constant;
 
 namespace AWSK.Models
 {
@@ -15,8 +17,10 @@ namespace AWSK.Models
 		// St1撃墜の幅
 		private static List<int> st1Range;
 
-		// 制空状況を判断する
-		enum AirWarStatus { Best, Good, Even, Bad, Worst, Size }
+        private static SimulationService simulation = SimulationService.instance;
+
+        // 制空状況を判断する
+        enum AirWarStatus { Best, Good, Even, Bad, Worst, Size }
 		private static AirWarStatus JudgeAirWarStatus(int friend, int enemy) {
 			if(friend >= enemy * 3) {
 				return AirWarStatus.Best;
@@ -91,11 +95,11 @@ namespace AWSK.Models
 		}
 		// 制空値を計算する(1艦)
 		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
-		public static int CalcAntiAirValue(List<WeaponData> weaponList, List<int> slotData, bool calcFlg = false) {
+		public static int CalcAntiAirValue(List<Weapon> weaponList, List<int> slotData, bool calcFlg = false) {
 			int sum = 0;
 			for (int wi = 0; wi < weaponList.Count; ++wi) {
 				// 加算
-				sum += weaponList[wi].AntiAirValue(slotData[wi], calcFlg);
+				sum += simulation.CalcAntiAirValue(weaponList[wi], slotData[wi], calcFlg);
 			}
 			return sum;
 		}
@@ -112,20 +116,17 @@ namespace AWSK.Models
 			return sum;
 		}
 		// 戦闘行動半径を計算する
-		public static int CalcBAURange(List<WeaponData> weaponList) {
+		public static int CalcBAURange(List<Weapon> weaponList) {
 			// 全ての装備における戦闘行動半径が0なら0を返す
-			if (weaponList.Where(w => w.BAURange != 0).Count() == 0)
+			if (weaponList.Where(w => w.BasedAirUnitRange != 0).Count() == 0)
 				return 0;
 			// 航空隊の最低戦闘行動半径を算出する
-			int minBAURange = weaponList.Min(w => w.BAURange);
+			int minBAURange = weaponList.Min(w => w.BasedAirUnitRange);
 			// 航空隊に偵察機が含まれるなら延長後の半径を返す
 			// 含まれないならそのままの延長前の半径を返す
-			var list = weaponList.Where(w =>
-				((w.Type[0] == 5 && w.Type[1] == 7)
-				|| w.Type[0] == 17)
-			);
+			var list = weaponList.Where(weapon => weapon.Type == WeaponType.PS || weapon.Type == WeaponType.WS || weapon.Type == WeaponType.LFB);
 			if (list.Count() > 0) {
-				int maxBAURange2 = list.Max(w => w.BAURange);
+				int maxBAURange2 = list.Max(w => w.BasedAirUnitRange);
 				if (maxBAURange2 <= minBAURange)
 					return minBAURange;
 				double addRange = Math.Sqrt(maxBAURange2 - minBAURange);

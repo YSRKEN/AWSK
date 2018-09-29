@@ -10,67 +10,6 @@ using static AWSK.Constant;
 namespace AWSK.Stores {
     static class DataStore {
         /// <summary>
-        /// WeaponTypeを、デッキビルダーのTypeに変換するための辞書
-        /// </summary>
-        private static Dictionary<WeaponType, List<int>> weaponTypeDic
-            = new Dictionary<WeaponType, List<int>> {
-                { WeaponType.PF, new List<int> {3, 5, 6} },
-                { WeaponType.PB, new List<int> {3, 5, 7} },
-                { WeaponType.PA, new List<int> {3, 5, 8} },
-                { WeaponType.JPB, new List<int> {3, 40, 57} },
-                { WeaponType.PS, new List<int> {5, 7, 9} },
-                { WeaponType.WS, new List<int> {5, 7, 10} },
-                { WeaponType.WF, new List<int> {5, 36, 45} },
-                { WeaponType.WB, new List<int> {5, 43, 11} },
-                { WeaponType.LFB, new List<int> {17, 33, 41} },
-                { WeaponType.LA, new List<int> {21, 28, 47} },
-                { WeaponType.LB, new List<int> {22, 39, 47} },
-                { WeaponType.LF, new List<int> {22, 39, 48} },
-            };
-
-        /// <summary>
-        /// Weapon型をWeaponData型に変換する
-        /// </summary>
-        /// <param name="weapon">Weapon型</param>
-        /// <returns>WeaponData型</returns>
-        private static WeaponData Convert(Weapon weapon) {
-            // nullならば、デフォルト値を返す
-            if (weapon == null) {
-                var temp = new WeaponData {
-                    Id = 0,
-                    Name = "empty",
-                    Type = new List<int> { 0, 0, 0, 0, 0 },
-                    AntiAir = 0,
-                    Intercept = 0,
-                    Mas = 0,
-                    Rf = 0,
-                    BAURange = 0,
-                    WeaponFlg = true,
-                };
-                temp.Refresh();
-                return temp;
-            }
-            
-            // Type部分を変換
-            var type = weaponTypeDic.ContainsKey(weapon.Type) ? weaponTypeDic[weapon.Type] : new List<int> { 0, 0, 0, 0, 0 };
-
-            // 変換後の結果を算出して返す
-            var weaponData = new WeaponData {
-                Id = weapon.Id,
-                Name = weapon.Name,
-                Type = type,
-                AntiAir = weapon.AntiAir,
-                Intercept = weapon.Intercept,
-                Mas = weapon.Mas,
-                Rf = weapon.Rf,
-                BAURange = weapon.BasedAirUnitRange,
-                WeaponFlg = weapon.ForKammusuFlg,
-            };
-            weaponData.Refresh();
-            return weaponData;
-        }
-
-        /// <summary>
         /// Kammusu型をKammusuData型に変換する
         /// </summary>
         /// <param name="kammusu">Kammusu型</param>
@@ -86,7 +25,7 @@ namespace AWSK.Stores {
                     AntiAir = 0,
                     SlotSize = 0,
                     KammusuFlg = true,
-                    Weapon = new List<WeaponData>(),
+                    Weapon = new List<Weapon>(),
                     Slot = new List<int>(),
                 };
             }
@@ -103,23 +42,13 @@ namespace AWSK.Stores {
                 AntiAir = kammusu.AntiAir,
                 SlotSize = kammusu.SlotList.Count,
                 KammusuFlg = kammusu.KammusuFlg,
-                Weapon = new List<WeaponData>(),
+                Weapon = new List<Weapon>(),
                 Slot = kammusu.SlotList,
             };
             foreach(var weapon in kammusu.WeaponList){
-                kammusuData.Weapon.Add(Convert(weapon));
+                kammusuData.Weapon.Add(weapon);
             }
             return kammusuData;
-        }
-
-        /// <summary>
-        /// 装備のデータをidから正引きする
-        /// </summary>
-        /// <param name="id">装備id</param>
-        /// <returns>装備情報</returns>
-        public static WeaponData WeaponDataById(int id) {
-            var database = DataBaseService.instance;
-            return Convert(database.FindByWeaponId(id));
         }
 
         /// <summary>
@@ -161,16 +90,6 @@ namespace AWSK.Stores {
         public static KammusuData KammusuDataById(int id, bool setWeaponFlg = false) {
             var database = DataBaseService.instance;
             return Convert(database.FindByKammusuId(id, setWeaponFlg));
-        }
-
-        /// <summary>
-        /// 装備のデータをnameから逆引きする
-        /// </summary>
-        /// <param name="name">装備名</param>
-        /// <returns>装備情報</returns>
-        public static WeaponData WeaponDataByName(string name) {
-            var database = DataBaseService.instance;
-            return Convert(database.FindByWeaponName(name));
         }
 
         /// <summary>
@@ -257,6 +176,7 @@ namespace AWSK.Stores {
         public static FleetData ParseFleetData(string jsonString) {
             var obj = DynamicJson.Parse(jsonString);
             var fleetData = new FleetData();
+            var database = DataBaseService.instance;
             for (int fi = 1; fi <= 4; ++fi) {
                 // 定義されていない艦隊は飛ばす
                 if (!obj.IsDefined($"f{fi}"))
@@ -272,7 +192,7 @@ namespace AWSK.Stores {
                     // idを読み取り、そこから艦名を出力
                     int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
                     int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
-                    var kammusuData = DataStore.KammusuDataById(k_id);
+                    var kammusuData = KammusuDataById(k_id);
                     kammusuData.Level = lv;
                     for (int ii = 1; ii <= 5; ++ii) {
                         string key = (ii == 5 ? "ix" : $"i{ii}");
@@ -281,7 +201,7 @@ namespace AWSK.Stores {
                             continue;
                         // idを読み取り、そこから装備名を出力
                         int w_id = (int)(obj[$"f{fi}"][$"s{si}"].items[key].id);
-                        var weaponData = DataStore.WeaponDataById(w_id);
+                        var weaponData = database.FindByWeaponId(w_id);
                         // 艦載機熟練度を出力
                         // 「装備改修度が0なら『0』、1以上なら『"1"』」といった
                         // 恐ろしい仕様があるので対策が面倒だった
@@ -414,7 +334,7 @@ namespace AWSK.Stores {
 
     // 基地航空隊データ
     class BasedAirUnitData {
-        public List<List<WeaponData>> Weapon { get; set; } = new List<List<WeaponData>>();
+        public List<List<Weapon>> Weapon { get; set; } = new List<List<Weapon>>();
         public List<int> SallyCount { get; set; } = new List<int>();
         // 文字列化するメソッド
         public override string ToString() {
@@ -445,8 +365,9 @@ namespace AWSK.Stores {
                 var list = new List<int>();
                 foreach (var weapon in weaponList) {
                     // 搭載数は、偵察機が4機・それ以外は18機
-                    if ((weapon.Type[0] == 5 && weapon.Type[1] == 7)
-                        || weapon.Type[0] == 17) {
+                    if (weapon.Type == WeaponType.PS
+                        || weapon.Type == WeaponType.WS
+                        || weapon.Type == WeaponType.LFB) {
                         list.Add(4);
                     } else {
                         list.Add(18);
@@ -485,11 +406,12 @@ namespace AWSK.Stores {
             // JSONをパース
             var obj = DynamicJson.Parse(jsonString);
             // パース結果を翻訳する
+            var database = DataBaseService.instance;
             foreach (var weaponList in obj) {
                 SallyCount.Add((int)weaponList.count);
-                var list = new List<WeaponData>();
+                var list = new List<Weapon>();
                 foreach (var weapon in weaponList.weapon) {
-                    WeaponData weaponData = DataStore.WeaponDataById((int)weapon.id);
+                    var weaponData = database.FindByWeaponId((int)weapon.id);
                     weaponData.Mas = (int)weapon.mas;
                     weaponData.Rf = (int)weapon.rf;
                     list.Add(weaponData);
@@ -508,122 +430,7 @@ namespace AWSK.Stores {
         public int AntiAir;
         public int SlotSize;
         public bool KammusuFlg;
-        public List<WeaponData> Weapon;
+        public List<Weapon> Weapon;
         public List<int> Slot;
-    }
-
-    // 装備データ
-    struct WeaponData {
-        // 艦載機熟練度による制空ボーナス
-        private void CalcAntiAirBonus() {
-            // 艦戦・水戦制空ボーナス
-            int[] pfwfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
-            // 水爆制空ボーナス
-            int[] wbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
-            // 内部熟練ボーナス
-            int[] masBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
-            // 装備種を判断し、そこから制空ボーナスを算出
-            // 艦戦・水戦・陸戦・局戦は+25
-            if ((Type[0] == 3 && Type[2] == 6) || Type[1] == 36 || (Type[0] == 22 && Type[2] == 48)) {
-                AntiAirBonus = pfwfBonus[Mas] + Math.Sqrt(1.0 * masBonus[Mas] / 10);
-                // 水爆は+9
-            } else if (Type[1] == 43) {
-                AntiAirBonus = wbBonus[Mas] + Math.Sqrt(1.0 * masBonus[Mas] / 10);
-            } else {
-                AntiAirBonus = Math.Sqrt(1.0 * masBonus[Mas] / 10);
-            }
-        }
-        private double AntiAirBonus { get; set; }
-        // 航空戦に参加するか？(calcFlgがtrueなら、水上偵察機も参加するものとする)
-        private bool[] hasAAV;
-        private void CalcHasAAV() {
-            hasAAV = new[] { false, false };
-            // 艦戦・艦攻・艦爆・爆戦・噴式(カ号・三式指揮連絡機を除く)
-            if (Type[0] == 3 && Type[1] != 15 && Type[1] != 16) {
-                hasAAV[0] = true;
-                hasAAV[1] = true;
-                return;
-            }
-            // 水戦・水爆
-            if (Type[0] == 5 && (Type[1] == 36 || Type[1] == 43)) {
-                hasAAV[0] = true;
-                hasAAV[1] = true;
-                return;
-            }
-            // 陸攻・局戦・陸戦
-            if (Type[0] == 21 || Type[0] == 22) {
-                hasAAV[0] = true;
-                hasAAV[1] = true;
-                return;
-            }
-            // 艦偵・水偵・飛行艇
-            if ((Type[0] == 5 && Type[1] == 7) || Type[0] == 17) {
-                hasAAV[0] = true;
-                hasAAV[1] = true;
-                return;
-            }
-        }
-
-        // スロットサイズごとの制空値
-        private List<int> antiAirValue1, antiAirValue2;
-        private void CalcAntiAirValue() {
-            antiAirValue1 = new List<int>();
-            antiAirValue2 = new List<int>();
-            for (int slot = 0; slot <= 300; ++slot) {
-                int aav = (int)(Math.Floor(CorrectedAA * Math.Sqrt(slot) + AntiAirBonus));
-                if (HasAAV(true)) {
-                    antiAirValue1.Add(aav);
-                } else {
-                    antiAirValue1.Add(0);
-                }
-                if (HasAAV(false)) {
-                    antiAirValue2.Add(aav);
-                } else {
-                    antiAirValue2.Add(0);
-                }
-            }
-        }
-
-        // 各種影響を加味した最終対空値
-        private void CalcCorrectedAA() {
-            CorrectedAA = 1.0 * AntiAir + 1.5 * Intercept;
-            //改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
-            if ((Type[0] == 3 && Type[2] == 6)
-                || (Type[0] == 5 && Type[1] == 36)
-                || (Type[0] == 22 && Type[2] == 48)) {
-                CorrectedAA += 0.2 * Rf;
-            } else if (Type[0] == 3 && Type[2] == 7 && Name.Contains("爆戦")) {
-                CorrectedAA += 0.25 * Rf;
-            }
-        }
-
-        public int Id;
-        public string Name;
-        public List<int> Type;  //装備種
-        public int AntiAir;     //対空
-        public int Intercept;   //迎撃
-        public int Mas;         //艦載機熟練度
-        public int Rf;          //装備改修度
-        public int BAURange;    //戦闘行動半径
-        public bool WeaponFlg;
-
-        // 事前計算
-        public void Refresh() {
-            // 艦載機熟練度による制空ボーナス
-            CalcAntiAirBonus();
-            // 航空戦に参加するか？
-            CalcHasAAV();
-            // 最終対空値
-            CalcCorrectedAA();
-            // スロットサイズごとの制空値
-            CalcAntiAirValue();
-        }
-        public bool HasAAV(bool calcFlg) {
-            return (calcFlg ? hasAAV[0] : hasAAV[1]);
-        }
-        public double CorrectedAA { get; private set; }
-        public int AntiAirValue(int slot, bool calcFlg) {
-            return (calcFlg ? antiAirValue1[slot] : antiAirValue2[slot]);
-        }
     }
 }
