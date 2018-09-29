@@ -144,5 +144,8 @@ namespace AWSK {
         /// 最大のスロット数
         /// </summary>
         public static int MAX_SLOT_COUNT = 5;
+
+        // データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
+        public enum DataStoreStatus { Exist, Success, Failed }
     }
 }
