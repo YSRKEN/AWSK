@@ -38,28 +38,9 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/37255470-21e8da08-2590-11e8-9543-f3c9761874cb.png)
 
-- KammusuPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような艦』を追加するためのファイルです
- - 例えばイベントが始まったばかりだと、英Wikiなどのサイトにはまだ新艦のデータが上がってなかったりします
- - そこで、テキストファイルを編集することにより、まさに「パッチ」としてデータを補う機能がこれです
-- KammusuPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
- - 左から順に、ID・艦名・艦種・素の対空値・スロット数・スロットの搭載数・初期装備・艦娘フラグを入力します
- - 艦名と艦種は文字列で入力しますが、引用符で囲まないでください
- - 「スロットの搭載数」と「初期装備」はそれぞれ5スロット分ありますが **これは艦これの仕様です**
- - 艦娘フラグは、艦娘なら「1」、深海棲艦なら「0」を入力してください
- - IDの番号をどう付けたらいいかですが、 **お察しください**
- - 艦種の文字列は今のところ「駆逐艦」「軽巡洋艦」「重雷装巡洋艦」「練習巡洋艦」「重巡洋艦」「航空巡洋艦」「戦艦」「巡洋戦艦」「航空戦艦」「正規空母」「装甲空母」「軽空母」「水上機母艦」「潜水艦」「潜水空母」「海防艦」「潜水母艦」「揚陸艦」「工作艦」「補給艦」としています。なお、歴史的な事情により、 **PT小鬼群は「駆逐艦」、各種姫・鬼は概ね「航空戦艦」としています**
-- KammusuPatch.csvに入力された内容は何よりも優先されます。「データベースを更新」ボタンを押すとまずオンラインの情報を拾い集めてデータベースを構築し、それからKammusuPatch.csvの内容が追加・上書きされます
- - この上書きはIDの番号をキーとしますので、例えばKammusuPatch.csvでIDが410、type(艦種)が"戦艦"であるデータを重ねますと、既にID410に"清霜"がいることから、ソフトの上でだけ **清霜は戦艦になれます**
-
-![image](https://user-images.githubusercontent.com/3734392/36781797-5e4e3a08-1cba-11e8-9277-23b623cb3de5.png)
-
-- WeaponDataPatch.csvは、『「データベースを更新」ボタンでも引っ張れないような装備の戦闘行動半径』を追加するためのファイルです
- - 現状、艦娘データと違い装備データは、1種類のサイトでしか引っ張っていません。そのサイトには戦闘行動半径の情報がなく、やむを得ず[GitHubの当リポジトリにあるWeaponData.csv](https://github.com/YSRKEN/AWSK/blob/master/AWSK/WeaponData.csv)から戦闘行動半径の情報を引っ張るようにしています
- - しかし私の更新が遅れる可能性は(wikiなどの更新が遅れる可能性と同様)十分ありますので、それまでにパッチで補えるようにする仕掛けがこれです
-
-- WeaponDataPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
-- WeaponDataPatch.csvに入力された内容は何よりも優先されます。「データベースを更新」ボタンを押すとまずオンラインの情報を拾い集めてデータベースを構築し、それからWeaponDataPatch.csvの内容が追加・上書きされます
-- ちなみにVer.1.4.5から、KammusuPatch.csvやWeaponDataPatch.csvでどの艦・装備の情報が上書きされたかを見ることができます。逆に上書きされたくない場合は、KammusuPatch.csvやWeaponDataPatch.csvを一時的にリネームした上で「データベースを更新」し、GameData.dbの中身をSQLite系のツールで読んで下さい
+- BasedAirUnitRange.csvは、戦闘行動半径に関する情報のキャッシュファイルです
+- BasedAirUnitRange.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
+- BasedAirUnitRange.csvに入力された内容は何よりも優先されます。と言うより、戦闘行動半径の情報をネットから読みに行くのに通信コストが馬鹿にならないので付けたファイルとも言えます(BasedAirUnitRange.csvが無くても更新はできるが、更新に掛かる時間がずっと長くなる)
 
 ![image](https://user-images.githubusercontent.com/3734392/37043235-7db5cec2-21a3-11e8-82ec-63661f510a8f.png)
 
@@ -69,24 +50,12 @@ Air War Simulator for Kantai Collection
 
 ![image](https://user-images.githubusercontent.com/3734392/37255496-a2f2f552-2590-11e8-82af-d1910e7f02af.png)
 
-- WeaponPatch.csvには、自動ダウンロードしきれなかった装備情報のWikiaのURLと装備番号がCSV形式で書き込まれています
-- WeaponPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
-
-![image](https://user-images.githubusercontent.com/3734392/45603792-5bd7c580-ba69-11e8-81ba-483cd207c42d.png)
-
-- EnemyCategoryPatch.csvには、自動ダウンロードしきれなかった敵艦情報の名前とWikiaのURLがCSV形式で書き込まれています
-- EnemyCategoryPatch.csvはCSV(BOMなしUTF-8)形式で、見ての通りの入力フォーマットとなっています
-
-![image](https://user-images.githubusercontent.com/3734392/45603844-70b45900-ba69-11e8-975e-8da4675eb28f.png)
 
 ## 注意
 - ソフトウェアの動作には、 **.NET Framework 4.7.2** 以上が必要です
-- **WeaponData.csv** には、装備の戦闘行動半径の情報が書かれています
-- **GameData.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています
-- **KammusuPatch.csv** には、前述のように追加の艦娘(深海棲艦)の情報がCSV形式で書き込まれています
-- **EnemyFamiliarName.csv**には、前述のように深海棲艦の俗称がCSV形式で書き込まれています
-- **WeaponPatch.csv**には、自動ダウンロードしきれなかった装備情報のWikiaのURLと装備番号がCSV形式で書き込まれています
-- **EnemyCategoryPatch.csv**には、自動ダウンロードしきれなかった敵艦情報の名前とWikiaのURLがCSV形式で書き込まれています
+- **BasedAirUnitRange.csv** には、装備の戦闘行動半径の情報が書かれています(無くても動作します)
+- **GameData2.db** には、艦娘(深海棲艦)・装備の情報がSQLite3形式で書き込まれています(無いと動作しません)
+- **EnemyFamiliarName.csv**には、前述のように深海棲艦の俗称がCSV形式で書き込まれています(無くても動作します)
 
 ## 作者
 　YSR([Twitter](https://twitter.com/YSRKEN), [GitHub](https://github.com/YSRKEN/))
@@ -114,6 +83,10 @@ Air War Simulator for Kantai Collection
  - 乱数生成に使用
 
 ## 更新履歴
+
+### Ver.1.6.0
+- データベース部分の処理を全面的に書き直した
+- ↑により、データベースをダウンロード更新する時間が大きく減少し、より最新のデータを提供できるようになった
 
 ### Ver.1.5.4.2
 - 制空判定にミスがあったので修正
