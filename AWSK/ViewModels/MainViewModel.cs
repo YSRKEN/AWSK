@@ -392,7 +392,7 @@ namespace AWSK.ViewModels {
         // その他初期化用コード
         private async void Initialize() {
             // データベースの初期化
-            var status = await DataStore.Initialize();
+            var status = await dataBase.Initialize();
             switch (status) {
             case DataStoreStatus.Exist:
                 break;
@@ -414,7 +414,7 @@ namespace AWSK.ViewModels {
                 if (clipboardString == null)
                     throw new Exception();
                 // クリップボードの文字列をJSONとしてパースし、艦隊データに変換する
-                var fleetData = DataStore.ParseFleetData(clipboardString);
+                var fleetData = FleetData.ParseFleetData(clipboardString);
                 MessageBox.Show(fleetData.ToString(), "AWSK");
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
@@ -444,7 +444,7 @@ namespace AWSK.ViewModels {
         public async void UpdateDatabase() {
             UpdateDatabaseButtonFlg.Value = false;
             // データベースの初期化
-            var status = await DataStore.Initialize(true);
+            var status = await dataBase.Initialize(true);
             switch (status) {
             case DataStoreStatus.Success:
                 MessageBox.Show("ダウンロードに成功しました。", "AWSK");
@@ -589,7 +589,7 @@ namespace AWSK.ViewModels {
             }
             {
                 // 敵艦名のリストから、新たに表示用リストを作成
-                var enemyNameList = DataStore.EnemyNameList();
+                var enemyNameList = dataBase.EnemyNameList();
                 //まず艦種毎に艦名リストを再構成する
                 var enemyListEachType = new Dictionary<string, List<string>>();
                 foreach (var pair in enemyNameList) {
@@ -638,7 +638,7 @@ namespace AWSK.ViewModels {
                 EnemyTypeIndex[5].Subscribe(x => { ResetEnemyListByType(5, x); });
             }
             {
-                var oc = new ObservableCollection<string>(DataStore.BasedAirUnitNameList());
+                var oc = new ObservableCollection<string>(dataBase.BasedAirUnitNameList());
                 BasedAirUnitList = oc.ToReadOnlyReactiveCollection();
             }
             {

@@ -8,181 +8,6 @@ using System.Threading.Tasks;
 using static AWSK.Constant;
 
 namespace AWSK.Stores {
-    static class DataStore {
-        /// <summary>
-        /// データベースの初期化処理
-        /// </summary>
-        /// <param name="forceUpdateFlg">強制的に更新する場合はtrue</param>
-        /// <returns></returns>
-        public static async Task<DataStoreStatus> Initialize(bool forceUpdateFlg = false) {
-            // テーブルが存在しない場合、テーブルを作成する
-            var database = DataBaseService.instance;
-            bool createTableFlg = database.CreateWeaponTable(forceUpdateFlg)
-                || database.CreateKammusuTable(forceUpdateFlg);
-
-            // テーブルを作成したならば、データをダウンロードする
-            if (!createTableFlg) {
-                return DataStoreStatus.Exist;
-            }
-            try {
-                var downloader = DownloadService.instance;
-                var weaponData = await downloader.downloadWeaponDataFromWikiaAsync();
-                database.SaveAll(weaponData, true);
-                var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
-                database.SaveAll(kammusuData, true);
-                var kammusuData2 = downloader.downloadKammusuDataFromLocalFile();
-                database.SaveAll(kammusuData2, true);
-                return DataStoreStatus.Success;
-            } catch (Exception e) {
-                Console.WriteLine(e);
-                return DataStoreStatus.Failed;
-            }
-        }
-
-        /// <summary>
-        /// 深海棲艦の艦名一覧をid付きで返す
-        /// </summary>
-        /// <returns>艦船ID, [艦名・艦種]</returns>
-        public static Dictionary<int, KeyValuePair<string, string>> EnemyNameList() {
-            // 深海棲艦の艦名・艦種一覧を取得する
-            var database = DataBaseService.instance;
-            var rawKammusuList = database.FindByKammusuFlg(false, false);
-            var kammusuList = new Dictionary<int, KeyValuePair<string, string>>();
-            foreach(var kammusu in rawKammusuList) {
-                kammusuList[kammusu.Id] = new KeyValuePair<string, string>(kammusu.Name, KammusuTypeDic[kammusu.Type]);
-            }
-
-            // 俗称一覧を取得する
-            var enemyFamiliarName = new Dictionary<string, int>();
-            if (System.IO.File.Exists(@"Resource\EnemyFamiliarName.csv")) {
-                using (var sr = new System.IO.StreamReader(@"Resource\EnemyFamiliarName.csv")) {
-                    while (!sr.EndOfStream) {
-                        try {
-                            // 1行読み込み、カンマ毎に区切る
-                            string line = sr.ReadLine();
-                            string[] values = line.Split(',');
-                            // 行数がおかしい場合は飛ばす
-                            if (values.Count() < 2)
-                                continue;
-                            // ヘッダー行は飛ばす
-                            if (values[0] == "俗称")
-                                continue;
-                            // データを読み取る
-                            string name = values[0];
-                            int id = int.Parse(values[1]);
-                            enemyFamiliarName[name] = id;
-                        } catch (Exception) { }
-                    }
-                }
-            }
-
-            // 俗称部分は、idの数字を10000だけ大きくして登録する
-            foreach (var pair in enemyFamiliarName) {
-                string name = pair.Key;
-                int id = pair.Value;
-                var kammusu = database.FindByKammusuId(id, false);
-                kammusuList[id + 10000] = new KeyValuePair<string, string>($"*{name}", KammusuTypeDic[kammusu.Type]);
-            }
-            return kammusuList;
-        }
-
-        /// <summary>
-        /// 基地航空隊に使用できる装備名一覧を返す
-        /// </summary>
-        /// <returns>基地航空隊に使用できる装備名一覧</returns>
-        public static List<string> BasedAirUnitNameList() {
-            // 艦娘サイドの装備一覧を抽出
-            var database = DataBaseService.instance;
-            var rawWeaponList = database.FindByForKammusuFlg(true);
-
-            // 基地航空隊に使用できるものだけ抽出
-            var temp = rawWeaponList
-                .Where(w => BAUWeaponTypeSet.Contains(w.Type))
-                .OrderBy(w => w.Id)
-                .OrderBy(w => (int)w.Type)
-                .ToList();
-
-            // 一覧を生成する
-            var list = new List<string>();
-            list.Add("なし");
-            for(int i = 0; i < temp.Count; ++i) {
-                if (i == 0 || temp[i].Type != temp[i - 1].Type) {
-                    list.Add($"【{WeaponTypeDic[temp[i].Type]}】");
-                }
-                list.Add($"{temp[i].Name}：{temp[i].AntiAir}：{temp[i].BasedAirUnitRange}");
-            }
-            return list;
-        }
-
-        /// <summary>
-        /// JSONデータを分析する
-        /// </summary>
-        /// <param name="jsonString">JSONによる艦隊データ</param>
-        /// <returns>艦隊データを表すクラス</returns>
-        public static FleetData ParseFleetData(string jsonString) {
-            var obj = DynamicJson.Parse(jsonString);
-            var fleetData = new FleetData();
-            var database = DataBaseService.instance;
-            for (int fi = 1; fi <= 4; ++fi) {
-                // 定義されていない艦隊は飛ばす
-                if (!obj.IsDefined($"f{fi}"))
-                    continue;
-                var kammusuList = new List<Kammusu>();
-                for (int si = 1; si <= 6; ++si) {
-                    // 定義されていない艦隊は飛ばす
-                    if (!obj[$"f{fi}"].IsDefined($"s{si}"))
-                        continue;
-                    // 中身が定義されていないようなら飛ばす
-                    if (!obj[$"f{fi}"][$"s{si}"].IsDefined("id"))
-                        continue;
-                    // idを読み取り、そこから艦名を出力
-                    int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
-                    int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
-                    var kammusuData = database.FindByKammusuId(k_id, false);
-                    kammusuData.Level = lv;
-                    for (int ii = 1; ii <= 5; ++ii) {
-                        string key = (ii == 5 ? "ix" : $"i{ii}");
-                        // 定義されていない装備は飛ばす
-                        if (!obj[$"f{fi}"][$"s{si}"].items.IsDefined(key))
-                            continue;
-                        // idを読み取り、そこから装備名を出力
-                        int w_id = (int)(obj[$"f{fi}"][$"s{si}"].items[key].id);
-                        var weaponData = database.FindByWeaponId(w_id);
-                        // 艦載機熟練度を出力
-                        // 「装備改修度が0なら『0』、1以上なら『"1"』」といった
-                        // 恐ろしい仕様があるので対策が面倒だった
-                        if (obj[$"f{fi}"][$"s{si}"].items[key].IsDefined("mas")) {
-                            var rawMas = obj[$"f{fi}"][$"s{si}"].items[key].mas;
-                            int mas = 0;
-                            if (rawMas.GetType() == typeof(string)) {
-                                mas = int.Parse(rawMas);
-                            } else {
-                                mas = (int)(rawMas);
-                            }
-                            weaponData.Mas = mas;
-                        }
-                        //
-                        // 装備改修度を出力
-                        // ヤバさは艦載機熟練度と同様
-                        if (obj[$"f{fi}"][$"s{si}"].items[key].IsDefined("rf")) {
-                            var rawRf = obj[$"f{fi}"][$"s{si}"].items[key].rf;
-                            int rf = 0;
-                            if (rawRf.GetType() == typeof(string)) {
-                                rf = int.Parse(rawRf);
-                            } else {
-                                rf = (int)(rawRf);
-                            }
-                            weaponData.Rf = rf;
-                        }
-                        kammusuData.WeaponList.Add(weaponData);
-                    }
-                    kammusuList.Add(kammusuData);
-                }
-                fleetData.Kammusu.Add(kammusuList);
-            }
-            return fleetData;
-        }
-    }
     // 艦隊データ
     class FleetData {
         public List<List<Kammusu>> Kammusu { get; set; } = new List<List<Kammusu>>();
@@ -259,6 +84,74 @@ namespace AWSK.Stores {
             }
             output += "]";
             return output;
+        }
+        /// <summary>
+        /// JSONデータを分析する
+        /// </summary>
+        /// <param name="jsonString">JSONによる艦隊データ</param>
+        /// <returns>艦隊データを表すクラス</returns>
+        public static FleetData ParseFleetData(string jsonString) {
+            var obj = DynamicJson.Parse(jsonString);
+            var fleetData = new FleetData();
+            var database = DataBaseService.instance;
+            for (int fi = 1; fi <= 4; ++fi) {
+                // 定義されていない艦隊は飛ばす
+                if (!obj.IsDefined($"f{fi}"))
+                    continue;
+                var kammusuList = new List<Kammusu>();
+                for (int si = 1; si <= 6; ++si) {
+                    // 定義されていない艦隊は飛ばす
+                    if (!obj[$"f{fi}"].IsDefined($"s{si}"))
+                        continue;
+                    // 中身が定義されていないようなら飛ばす
+                    if (!obj[$"f{fi}"][$"s{si}"].IsDefined("id"))
+                        continue;
+                    // idを読み取り、そこから艦名を出力
+                    int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
+                    int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
+                    var kammusuData = database.FindByKammusuId(k_id, false);
+                    kammusuData.Level = lv;
+                    for (int ii = 1; ii <= 5; ++ii) {
+                        string key = (ii == 5 ? "ix" : $"i{ii}");
+                        // 定義されていない装備は飛ばす
+                        if (!obj[$"f{fi}"][$"s{si}"].items.IsDefined(key))
+                            continue;
+                        // idを読み取り、そこから装備名を出力
+                        int w_id = (int)(obj[$"f{fi}"][$"s{si}"].items[key].id);
+                        var weaponData = database.FindByWeaponId(w_id);
+                        // 艦載機熟練度を出力
+                        // 「装備改修度が0なら『0』、1以上なら『"1"』」といった
+                        // 恐ろしい仕様があるので対策が面倒だった
+                        if (obj[$"f{fi}"][$"s{si}"].items[key].IsDefined("mas")) {
+                            var rawMas = obj[$"f{fi}"][$"s{si}"].items[key].mas;
+                            int mas = 0;
+                            if (rawMas.GetType() == typeof(string)) {
+                                mas = int.Parse(rawMas);
+                            } else {
+                                mas = (int)(rawMas);
+                            }
+                            weaponData.Mas = mas;
+                        }
+                        //
+                        // 装備改修度を出力
+                        // ヤバさは艦載機熟練度と同様
+                        if (obj[$"f{fi}"][$"s{si}"].items[key].IsDefined("rf")) {
+                            var rawRf = obj[$"f{fi}"][$"s{si}"].items[key].rf;
+                            int rf = 0;
+                            if (rawRf.GetType() == typeof(string)) {
+                                rf = int.Parse(rawRf);
+                            } else {
+                                rf = (int)(rawRf);
+                            }
+                            weaponData.Rf = rf;
+                        }
+                        kammusuData.WeaponList.Add(weaponData);
+                    }
+                    kammusuList.Add(kammusuData);
+                }
+                fleetData.Kammusu.Add(kammusuList);
+            }
+            return fleetData;
         }
         // コンストラクタ
         public FleetData() { }
