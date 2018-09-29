@@ -17,9 +17,9 @@ namespace AWSK.ViewModels
 {
 	public class MainViewModel
 	{
-		#region プロパティ(ReactiveProperty)
-		// trueにすると画面を閉じる
-		public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
+        #region プロパティ(ReactiveProperty)
+        // trueにすると画面を閉じる
+        public ReactiveProperty<bool> CloseWindow { get; } = new ReactiveProperty<bool>(false);
 		// 基地航空隊をどれほど送り込むか？
 		public List<ReactiveProperty<int>> BasedAirUnitMode { get; } = new List<ReactiveProperty<int>>();
 		// 基地航空隊を飛ばしたか？

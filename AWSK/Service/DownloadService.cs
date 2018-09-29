@@ -191,6 +191,26 @@ namespace AWSK.Service {
             var result = new List<Weapon>();
 
             // 艦娘の装備
+            var basedAirUnitRangeHash = new Dictionary<string, int>();
+            if (System.IO.File.Exists(@"BasedAirUnitRange.csv")) {
+                using (var sr = new System.IO.StreamReader(@"BasedAirUnitRange.csv")) {
+                    while (!sr.EndOfStream) {
+                        // 1行読み込み、カンマ毎に区切る
+                        string line = sr.ReadLine();
+                        string[] values = line.Split(',');
+                        // 行数がおかしい場合は飛ばす
+                        if (values.Count() < 2)
+                            continue;
+                        // ヘッダー行は飛ばす
+                        if (values[0] == "名称")
+                            continue;
+                        // データを読み取る
+                        string name = values[0];
+                        int id = int.Parse(values[1]);
+                        basedAirUnitRangeHash[name] = id;
+                    }
+                }
+            }
             using (var client = new HttpClient()) {
                 // テキストデータダウンロード
                 string rawData = await client.GetStringAsync("http://kancolle.wikia.com/wiki/Equipment");
@@ -248,18 +268,22 @@ namespace AWSK.Service {
                         intersept = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
                     }
 
-                    // 迎撃値と戦闘行動半径を取得する
+                    // 戦闘行動半径を取得する
                     int basedAirUnitRange = 0;
                     if (type != WeaponType.Other) {
-                        string url = tdList[2].GetElementsByTagName("a").First().GetAttribute("href");
-                        string rawData2 = await client.GetStringAsync($"http://kancolle.wikia.com{url}");
-                        var doc2 = default(IHtmlDocument);
-                        var parser2 = new HtmlParser();
-                        doc2 = parser2.Parse(rawData2);
-                        var tempElement = doc2.QuerySelectorAll("div.mw-content-text > table.infobox > tbody > tr").ToList()[1];
-                        basedAirUnitRange = int.Parse(tempElement.GetElementsByTagName("b")
-                            .Where(e => e.TextContent.Contains("Combat Radius: "))
-                            .First().TextContent.Replace("Combat Radius: ", ""));
+                        if (basedAirUnitRangeHash.ContainsKey(name)) {
+                            basedAirUnitRange = basedAirUnitRangeHash[name];
+                        } else {
+                            string url = tdList[2].GetElementsByTagName("a").First().GetAttribute("href");
+                            string rawData2 = await client.GetStringAsync($"http://kancolle.wikia.com{url}");
+                            var doc2 = default(IHtmlDocument);
+                            var parser2 = new HtmlParser();
+                            doc2 = parser2.Parse(rawData2);
+                            var tempElement = doc2.QuerySelectorAll("div.mw-content-text > table.infobox > tbody > tr").ToList()[1];
+                            basedAirUnitRange = int.Parse(tempElement.GetElementsByTagName("b")
+                                .Where(e => e.TextContent.Contains("Combat Radius: "))
+                                .First().TextContent.Replace("Combat Radius: ", ""));
+                        }
                     }
 
                     // 追記する
