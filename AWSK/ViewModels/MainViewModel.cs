@@ -271,7 +271,7 @@ namespace AWSK.ViewModels {
         private FleetData GetEnemyData() {
             var fleetData = new FleetData();
             // 艦隊データを格納するインスタンスを作成
-            var kammusuList = new List<KammusuData>();
+            var kammusuList = new List<Kammusu>();
             // 作成
             for (int ki = 0; ki < 6; ++ki) {
                 int enemyIndex = EnemyUnitIndex[ki].Value;
@@ -286,7 +286,7 @@ namespace AWSK.ViewModels {
                 // idを算出する
                 int enemyId = int.Parse(comboBoxName.Substring(comboBoxName.LastIndexOf("[") + 1, comboBoxName.LastIndexOf("]") - comboBoxName.LastIndexOf("[") - 1));
                 // idから敵艦情報を得る
-                var enemy = DataStore.KammusuDataById(enemyId, true);
+                var enemy = dataBase.FindByKammusuId(enemyId, true);
                 // 追加
                 kammusuList.Add(enemy);
             }
@@ -329,7 +329,7 @@ namespace AWSK.ViewModels {
                         if (enemyData.Kammusu.Count > 0) {
                             for (int ki = 0; ki < enemyData.Kammusu[0].Count; ++ki) {
                                 var kammusu = enemyData.Kammusu[0][ki];
-                                int typeIndex = EnemyTypeList.IndexOf(kammusu.Type);
+                                int typeIndex = EnemyTypeList.IndexOf(KammusuTypeDic[kammusu.Type]);
                                 int kammusuIndex = EnemyList.IndexOf($"{kammusu.Name} [{kammusu.Id}]");
                                 EnemyTypeIndex[ki].Value = typeIndex;
                                 EnemyUnitIndex[ki].Value = kammusuIndex;

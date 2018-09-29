@@ -10,48 +10,6 @@ using static AWSK.Constant;
 namespace AWSK.Stores {
     static class DataStore {
         /// <summary>
-        /// Kammusu型をKammusuData型に変換する
-        /// </summary>
-        /// <param name="kammusu">Kammusu型</param>
-        /// <returns>KammusuData型</returns>
-        private static KammusuData Convert(Kammusu kammusu) {
-            // nullならば、デフォルト値を返す
-            if (kammusu == null) {
-                var kd = new KammusuData {
-                    Id = 0,
-                    Name = "なし",
-                    Type = "その他",
-                    Level = 0,
-                    AntiAir = 0,
-                    SlotSize = 0,
-                    KammusuFlg = true,
-                    Weapon = new List<Weapon>(),
-                    Slot = new List<int>(),
-                };
-            }
-
-            // Type部分を変換
-            string type = KammusuTypeDic.ContainsKey(kammusu.Type) ? KammusuTypeDic[kammusu.Type] : "";
-
-            // 変換後の結果を算出して返す
-            var kammusuData = new KammusuData {
-                Id = kammusu.Id,
-                Name = kammusu.Name,
-                Type = type,
-                Level = 1,
-                AntiAir = kammusu.AntiAir,
-                SlotSize = kammusu.SlotList.Count,
-                KammusuFlg = kammusu.KammusuFlg,
-                Weapon = new List<Weapon>(),
-                Slot = kammusu.SlotList,
-            };
-            foreach(var weapon in kammusu.WeaponList){
-                kammusuData.Weapon.Add(weapon);
-            }
-            return kammusuData;
-        }
-
-        /// <summary>
         /// データベースの初期化処理
         /// </summary>
         /// <param name="forceUpdateFlg">強制的に更新する場合はtrue</param>
@@ -82,17 +40,6 @@ namespace AWSK.Stores {
         }
 
         /// <summary>
-        /// 艦娘のデータをidから正引きする
-        /// </summary>
-        /// <param name="id">艦船ID</param>
-        /// <param name="setWeaponFlg">trueの場合、初期装備を握って登場する</param>
-        /// <returns>艦船情報</returns>
-        public static KammusuData KammusuDataById(int id, bool setWeaponFlg = false) {
-            var database = DataBaseService.instance;
-            return Convert(database.FindByKammusuId(id, setWeaponFlg));
-        }
-
-        /// <summary>
         /// 深海棲艦の艦名一覧をid付きで返す
         /// </summary>
         /// <returns>艦船ID, [艦名・艦種]</returns>
@@ -102,8 +49,7 @@ namespace AWSK.Stores {
             var rawKammusuList = database.FindByKammusuFlg(false, false);
             var kammusuList = new Dictionary<int, KeyValuePair<string, string>>();
             foreach(var kammusu in rawKammusuList) {
-                var kammusuData = Convert(kammusu);
-                kammusuList[kammusuData.Id] = new KeyValuePair<string, string>(kammusuData.Name, kammusuData.Type);
+                kammusuList[kammusu.Id] = new KeyValuePair<string, string>(kammusu.Name, KammusuTypeDic[kammusu.Type]);
             }
 
             // 俗称一覧を取得する
@@ -134,8 +80,8 @@ namespace AWSK.Stores {
             foreach (var pair in enemyFamiliarName) {
                 string name = pair.Key;
                 int id = pair.Value;
-                var kammusu = Convert(database.FindByKammusuId(id, false));
-                kammusuList[id + 10000] = new KeyValuePair<string, string>($"*{name}", kammusu.Type);
+                var kammusu = database.FindByKammusuId(id, false);
+                kammusuList[id + 10000] = new KeyValuePair<string, string>($"*{name}", KammusuTypeDic[kammusu.Type]);
             }
             return kammusuList;
         }
@@ -181,7 +127,7 @@ namespace AWSK.Stores {
                 // 定義されていない艦隊は飛ばす
                 if (!obj.IsDefined($"f{fi}"))
                     continue;
-                var kammusuList = new List<KammusuData>();
+                var kammusuList = new List<Kammusu>();
                 for (int si = 1; si <= 6; ++si) {
                     // 定義されていない艦隊は飛ばす
                     if (!obj[$"f{fi}"].IsDefined($"s{si}"))
@@ -192,7 +138,7 @@ namespace AWSK.Stores {
                     // idを読み取り、そこから艦名を出力
                     int k_id = int.Parse(obj[$"f{fi}"][$"s{si}"].id);
                     int lv = (int)(obj[$"f{fi}"][$"s{si}"].lv);
-                    var kammusuData = KammusuDataById(k_id);
+                    var kammusuData = database.FindByKammusuId(k_id, false);
                     kammusuData.Level = lv;
                     for (int ii = 1; ii <= 5; ++ii) {
                         string key = (ii == 5 ? "ix" : $"i{ii}");
@@ -228,7 +174,7 @@ namespace AWSK.Stores {
                             }
                             weaponData.Rf = rf;
                         }
-                        kammusuData.Weapon.Add(weaponData);
+                        kammusuData.WeaponList.Add(weaponData);
                     }
                     kammusuList.Add(kammusuData);
                 }
@@ -239,7 +185,7 @@ namespace AWSK.Stores {
     }
     // 艦隊データ
     class FleetData {
-        public List<List<KammusuData>> Kammusu { get; set; } = new List<List<KammusuData>>();
+        public List<List<Kammusu>> Kammusu { get; set; } = new List<List<Kammusu>>();
         // 文字列化するメソッド
         public override string ToString() {
             string[] masList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
@@ -258,12 +204,12 @@ namespace AWSK.Stores {
                     // 艦名と練度を出力
                     output += $"{kammusu.Name} Lv{kammusu.Level}　";
                     // 装備とスロット数情報を出力
-                    for (int ii = 0; ii < kammusu.Weapon.Count; ++ii) {
-                        var weapon = kammusu.Weapon[ii];
+                    for (int ii = 0; ii < kammusu.WeaponList.Count; ++ii) {
+                        var weapon = kammusu.WeaponList[ii];
                         if (ii != 0)
                             output += ",";
                         //搭載数
-                        output += $"[{kammusu.Slot[ii]}]";
+                        output += $"[{kammusu.SlotList[ii]}]";
                         // 装備名
                         output += $"{weapon.Name}";
                         // 艦載機熟練度
@@ -285,8 +231,8 @@ namespace AWSK.Stores {
                 var list1 = new List<List<int>>();
                 foreach (var kammusu in kammusuList) {
                     var list2 = new List<int>();
-                    for (int si = 0; si < kammusu.SlotSize; ++si) {
-                        list2.Add(kammusu.Slot[si]);
+                    for (int si = 0; si < kammusu.SlotList.Count; ++si) {
+                        list2.Add(kammusu.SlotList[si]);
                     }
                     list1.Add(list2);
                 }
@@ -320,11 +266,12 @@ namespace AWSK.Stores {
             // JSONをパース
             var obj = DynamicJson.Parse(jsonString);
             // パース結果を翻訳する
+            var database = DataBaseService.instance;
             foreach (var kammusuList in obj) {
                 if (kammusuList.IsDefined("kammusu")) {
-                    var list = new List<KammusuData>();
+                    var list = new List<Kammusu>();
                     foreach (int kId in kammusuList.kammusu) {
-                        list.Add(DataStore.KammusuDataById(kId, setWeaponFlg));
+                        list.Add(database.FindByKammusuId(kId, setWeaponFlg));
                     }
                     Kammusu.Add(list);
                 }
@@ -417,18 +364,5 @@ namespace AWSK.Stores {
                 Weapon.Add(list);
             }
         }
-    }
-
-    // 艦娘データ
-    struct KammusuData {
-        public int Id;
-        public string Name;
-        public string Type;
-        public int Level;
-        public int AntiAir;
-        public int SlotSize;
-        public bool KammusuFlg;
-        public List<Weapon> Weapon;
-        public List<int> Slot;
     }
 }

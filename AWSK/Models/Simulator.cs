@@ -68,7 +68,7 @@ namespace AWSK.Models
 			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
 				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
 					var kammusu = fleet.Kammusu[ui][ki];
-					for (int wi = 0; wi < kammusu.Weapon.Count; ++wi) {
+					for (int wi = 0; wi < kammusu.WeaponList.Count; ++wi) {
 						// St1撃墜を計算して書き戻す
 						slotData[ui][ki][wi] = CalcKilledSlot(slotData[ui][ki][wi], aws);
 					}
@@ -110,7 +110,7 @@ namespace AWSK.Models
 			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
 				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
 					var kammusu = fleet.Kammusu[ui][ki];
-					sum += CalcAntiAirValue(kammusu.Weapon, slotData[ui][ki], calcFlg);
+					sum += CalcAntiAirValue(kammusu.WeaponList, slotData[ui][ki], calcFlg);
 				}
 			}
 			return sum;
