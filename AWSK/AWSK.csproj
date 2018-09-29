@@ -192,10 +192,10 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="BasedAirUnitRange.csv">
+    <None Include="Resource\BasedAirUnitRange.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="EnemyFamiliarName.csv">
+    <None Include="Resource\EnemyFamiliarName.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

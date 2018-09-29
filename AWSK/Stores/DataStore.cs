@@ -22,8 +22,8 @@ namespace AWSK.Stores {
         // 装備の俗称を読み込んでおく
         private static Dictionary<string, int> ReadEnemyFamiliarName() {
             var output = new Dictionary<string, int>();
-            if (System.IO.File.Exists(@"EnemyFamiliarName.csv")) {
-                using (var sr = new System.IO.StreamReader(@"EnemyFamiliarName.csv")) {
+            if (System.IO.File.Exists(@"Resource\EnemyFamiliarName.csv")) {
+                using (var sr = new System.IO.StreamReader(@"Resource\EnemyFamiliarName.csv")) {
                     while (!sr.EndOfStream) {
                         try {
                             // 1行読み込み、カンマ毎に区切る

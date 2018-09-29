@@ -192,8 +192,8 @@ namespace AWSK.Service {
 
             // 艦娘の装備
             var basedAirUnitRangeHash = new Dictionary<string, int>();
-            if (System.IO.File.Exists(@"BasedAirUnitRange.csv")) {
-                using (var sr = new System.IO.StreamReader(@"BasedAirUnitRange.csv")) {
+            if (System.IO.File.Exists(@"Resource\BasedAirUnitRange.csv")) {
+                using (var sr = new System.IO.StreamReader(@"Resource\BasedAirUnitRange.csv")) {
                     while (!sr.EndOfStream) {
                         // 1行読み込み、カンマ毎に区切る
                         string line = sr.ReadLine();
