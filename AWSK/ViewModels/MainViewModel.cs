@@ -1,6 +1,5 @@
 ﻿using AWSK.Models;
 using AWSK.Stores;
-using Codeplex.Data;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
@@ -9,14 +8,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using static AWSK.Constant;
 
-namespace AWSK.ViewModels
-{
-	public class MainViewModel
+namespace AWSK.ViewModels {
+    public class MainViewModel
 	{
         #region プロパティ(ReactiveProperty)
         // trueにすると画面を閉じる

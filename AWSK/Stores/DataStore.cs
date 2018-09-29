@@ -1,16 +1,10 @@
-﻿using AngleSharp.Dom.Html;
-using AngleSharp.Parser.Html;
-using AWSK.Models;
+﻿using AWSK.Models;
 using AWSK.Service;
 using Codeplex.Data;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using static AWSK.Constant;
 
 namespace AWSK.Stores {
@@ -520,26 +514,6 @@ namespace AWSK.Stores {
 
     // 装備データ
     struct WeaponData {
-        public int Id;
-        public string Name;
-        public List<int> Type;  //装備種
-        public int AntiAir;     //対空
-        public int Intercept;   //迎撃
-        public int Mas;         //艦載機熟練度
-        public int Rf;          //装備改修度
-        public int BAURange;    //戦闘行動半径
-        public bool WeaponFlg;
-        // 事前計算
-        public void Refresh() {
-            // 艦載機熟練度による制空ボーナス
-            CalcAntiAirBonus();
-            // 航空戦に参加するか？
-            CalcHasAAV();
-            // 最終対空値
-            CalcCorrectedAA();
-            // スロットサイズごとの制空値
-            CalcAntiAirValue();
-        }
         // 艦載機熟練度による制空ボーナス
         private void CalcAntiAirBonus() {
             // 艦戦・水戦制空ボーナス
@@ -559,7 +533,7 @@ namespace AWSK.Stores {
                 AntiAirBonus = Math.Sqrt(1.0 * masBonus[Mas] / 10);
             }
         }
-        public double AntiAirBonus { get; private set; }
+        private double AntiAirBonus { get; set; }
         // 航空戦に参加するか？(calcFlgがtrueなら、水上偵察機も参加するものとする)
         private bool[] hasAAV;
         private void CalcHasAAV() {
@@ -589,22 +563,7 @@ namespace AWSK.Stores {
                 return;
             }
         }
-        public bool HasAAV(bool calcFlg) {
-            return (calcFlg ? hasAAV[0] : hasAAV[1]);
-        }
-        // 各種影響を加味した最終対空値
-        private void CalcCorrectedAA() {
-            CorrectedAA = 1.0 * AntiAir + 1.5 * Intercept;
-            //改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
-            if ((Type[0] == 3 && Type[2] == 6)
-                || (Type[0] == 5 && Type[1] == 36)
-                || (Type[0] == 22 && Type[2] == 48)) {
-                CorrectedAA += 0.2 * Rf;
-            } else if (Type[0] == 3 && Type[2] == 7 && Name.Contains("爆戦")) {
-                CorrectedAA += 0.25 * Rf;
-            }
-        }
-        public double CorrectedAA { get; private set; }
+
         // スロットサイズごとの制空値
         private List<int> antiAirValue1, antiAirValue2;
         private void CalcAntiAirValue() {
@@ -624,6 +583,45 @@ namespace AWSK.Stores {
                 }
             }
         }
+
+        // 各種影響を加味した最終対空値
+        private void CalcCorrectedAA() {
+            CorrectedAA = 1.0 * AntiAir + 1.5 * Intercept;
+            //改修効果補正(艦戦・水戦・陸戦は★×0.2、爆戦は★×0.25だけ追加。局戦は★×0.2とした)
+            if ((Type[0] == 3 && Type[2] == 6)
+                || (Type[0] == 5 && Type[1] == 36)
+                || (Type[0] == 22 && Type[2] == 48)) {
+                CorrectedAA += 0.2 * Rf;
+            } else if (Type[0] == 3 && Type[2] == 7 && Name.Contains("爆戦")) {
+                CorrectedAA += 0.25 * Rf;
+            }
+        }
+
+        public int Id;
+        public string Name;
+        public List<int> Type;  //装備種
+        public int AntiAir;     //対空
+        public int Intercept;   //迎撃
+        public int Mas;         //艦載機熟練度
+        public int Rf;          //装備改修度
+        public int BAURange;    //戦闘行動半径
+        public bool WeaponFlg;
+
+        // 事前計算
+        public void Refresh() {
+            // 艦載機熟練度による制空ボーナス
+            CalcAntiAirBonus();
+            // 航空戦に参加するか？
+            CalcHasAAV();
+            // 最終対空値
+            CalcCorrectedAA();
+            // スロットサイズごとの制空値
+            CalcAntiAirValue();
+        }
+        public bool HasAAV(bool calcFlg) {
+            return (calcFlg ? hasAAV[0] : hasAAV[1]);
+        }
+        public double CorrectedAA { get; private set; }
         public int AntiAirValue(int slot, bool calcFlg) {
             return (calcFlg ? antiAirValue1[slot] : antiAirValue2[slot]);
         }
