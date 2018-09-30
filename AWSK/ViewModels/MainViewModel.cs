@@ -1,4 +1,5 @@
-﻿using AWSK.Models;
+﻿using AWSK.Model;
+using AWSK.Models;
 using AWSK.Service;
 using AWSK.Stores;
 using Reactive.Bindings;
@@ -268,8 +269,8 @@ namespace AWSK.ViewModels {
         #endregion
         #region メソッド(敵艦隊用)
         // 敵艦隊のデータを取得
-        private FleetData GetEnemyData() {
-            var fleetData = new FleetData();
+        private Fleet GetEnemyData() {
+            var fleetData = new Fleet();
             // 艦隊データを格納するインスタンスを作成
             var kammusuList = new List<Kammusu>();
             // 作成
@@ -292,13 +293,13 @@ namespace AWSK.ViewModels {
             }
             // インスタンスを代入
             if (kammusuList.Count > 0)
-                fleetData.Kammusu.Add(kammusuList);
+                fleetData.KammusuList.Add(kammusuList);
             return fleetData;
         }
         // 敵艦隊の制空値を返す
         private int GetEnemyUnitAAV() {
             var enemyData = GetEnemyData();
-            return Simulator.CalcAntiAirValue(enemyData, enemyData.GetSlotData(), true);
+            return Simulator.CalcAntiAirValue(enemyData, enemyData.SlotList, true);
         }
         // 敵艦隊の制空値変更処理
         private void ReCalcEnemyUnitAAV() {
@@ -320,15 +321,15 @@ namespace AWSK.ViewModels {
                     using (var sr = new System.IO.StreamReader(ofd.FileName)) {
                         // テキストとして読み込んでパース
                         string output = sr.ReadToEnd();
-                        var enemyData = new FleetData(output);
+                        var enemyData = new Fleet(output);
                         // 敵艦隊の情報を初期化
                         for (int ki = 0; ki < 6; ++ki) {
                             EnemyUnitIndex[ki].Value = 0;
                         }
                         // 敵艦隊の情報を書き込む
-                        if (enemyData.Kammusu.Count > 0) {
-                            for (int ki = 0; ki < enemyData.Kammusu[0].Count; ++ki) {
-                                var kammusu = enemyData.Kammusu[0][ki];
+                        if (enemyData.KammusuList.Count > 0) {
+                            for (int ki = 0; ki < enemyData.KammusuList[0].Count; ++ki) {
+                                var kammusu = enemyData.KammusuList[0][ki];
                                 int typeIndex = EnemyTypeList.IndexOf(KammusuTypeDic[kammusu.Type]);
                                 int kammusuIndex = EnemyList.IndexOf($"{kammusu.Name} [{kammusu.Id}]");
                                 EnemyTypeIndex[ki].Value = typeIndex;
@@ -351,7 +352,7 @@ namespace AWSK.ViewModels {
             };
             if ((bool)sfd.ShowDialog()) {
                 try {
-                    string output = GetEnemyData().GetJsonData();
+                    string output = GetEnemyData().ToJson();
                     using (var sw = new System.IO.StreamWriter(sfd.FileName)) {
                         sw.Write(output);
                     }
@@ -406,28 +407,13 @@ namespace AWSK.ViewModels {
             }
         }
 
-        // クリップボードからインポート
-        public void ImportClipboardText() {
-            try {
-                // クリップボードから文字列を取得する
-                string clipboardString = Clipboard.GetText();
-                if (clipboardString == null)
-                    throw new Exception();
-                // クリップボードの文字列をJSONとしてパースし、艦隊データに変換する
-                var fleetData = FleetData.ParseFleetData(clipboardString);
-                MessageBox.Show(fleetData.ToString(), "AWSK");
-            } catch (Exception e) {
-                Console.WriteLine(e.ToString());
-                MessageBox.Show("クリップボードから艦隊データを取得できませんでした。", "AWSK");
-            }
-        }
         // 航空戦をシミュレートする
         public void RunSimulation() {
             // 基地航空隊のデータを取得
             var basedAirUnitData = GetBasedAirUnitData();
             // 敵艦隊のデータを取得
             var enemyData = GetEnemyData();
-            if (enemyData.Kammusu.Count <= 0)
+            if (enemyData.KammusuList.Count <= 0)
                 return;
             // シミュレーションを行う
             int[] simulationCount = new[] { 1000, 10000, 100000, 1000000 };

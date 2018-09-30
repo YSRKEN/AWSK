@@ -5,6 +5,7 @@ using System.Linq;
 using MersenneTwister;
 using AWSK.Service;
 using static AWSK.Constant;
+using AWSK.Model;
 
 namespace AWSK.Models
 {
@@ -63,11 +64,11 @@ namespace AWSK.Models
 		private static int CalcKilledSlot(int slot, AirWarStatus aws) {
 			return killedSlot[slot][(int)aws][random.Next(st1Range[(int)aws])];
 		}
-		private static void LostEnemySlotBySt1(FleetData fleet, ref List<List<List<int>>> slotData, AirWarStatus aws) {
+		private static void LostEnemySlotBySt1(Fleet fleet, ref List<List<List<int>>> slotData, AirWarStatus aws) {
 			// 計算
-			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
-				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
-					var kammusu = fleet.Kammusu[ui][ki];
+			for (int ui = 0; ui < fleet.KammusuList.Count; ++ui) {
+				for (int ki = 0; ki < fleet.KammusuList[ui].Count; ++ki) {
+					var kammusu = fleet.KammusuList[ui][ki];
 					for (int wi = 0; wi < kammusu.WeaponList.Count; ++wi) {
 						// St1撃墜を計算して書き戻す
 						slotData[ui][ki][wi] = CalcKilledSlot(slotData[ui][ki][wi], aws);
@@ -105,11 +106,11 @@ namespace AWSK.Models
 		}
 		// 制空値を計算する(艦隊全体)
 		// calcFlgがtrueなら、水上偵察機の制空値も反映するようにする
-		public static int CalcAntiAirValue(FleetData fleet, List<List<List<int>>> slotData, bool calcFlg = false) {
+		public static int CalcAntiAirValue(Fleet fleet, List<List<List<int>>> slotData, bool calcFlg = false) {
 			int sum = 0;
-			for (int ui = 0; ui < fleet.Kammusu.Count; ++ui) {
-				for (int ki = 0; ki < fleet.Kammusu[ui].Count; ++ki) {
-					var kammusu = fleet.Kammusu[ui][ki];
+			for (int ui = 0; ui < fleet.KammusuList.Count; ++ui) {
+				for (int ki = 0; ki < fleet.KammusuList[ui].Count; ++ki) {
+					var kammusu = fleet.KammusuList[ui][ki];
 					sum += CalcAntiAirValue(kammusu.WeaponList, slotData[ui][ki], calcFlg);
 				}
 			}
@@ -139,7 +140,7 @@ namespace AWSK.Models
 		// 航空戦の基地航空隊におけるシミュレーションを行う
 		public static void BasedAirUnitSimulation(
 			BasedAirUnitData friend,
-			FleetData enemy,
+			Fleet enemy,
 			int simulationCount,
 			out Dictionary<int, double> finalAAV,
 			out List<List<List<int>>> awsCount) {
@@ -162,7 +163,7 @@ namespace AWSK.Models
 			// シミュレーションを行う
 			for (int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
-				var enemySlotData = enemy.GetSlotData();
+				var enemySlotData = enemy.SlotList;
 				// 指定した回数だけ基地航空隊をぶつける
 				for (int si = 0; si < friend.SallyCount.Count; ++si) {
 					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {

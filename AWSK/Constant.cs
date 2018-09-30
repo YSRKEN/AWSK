@@ -170,6 +170,8 @@ namespace AWSK {
         /// </summary>
         public static int[] MasBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
 
+        public static string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+
         // データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
         public enum DataStoreStatus { Exist, Success, Failed }
     }
