@@ -1,7 +1,6 @@
 ﻿using AWSK.Model;
 using AWSK.Models;
 using AWSK.Service;
-using AWSK.Stores;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
@@ -84,15 +83,15 @@ namespace AWSK.ViewModels {
 
         #region メソッド(基地航空隊用)
         // 基地航空隊のデータを取得
-        private BasedAirUnitData GetBasedAirUnitData() {
+        private BasedAirUnitGroup GetBasedAirUnitData() {
             // 作成
-            var basedAirUnitData = new BasedAirUnitData();
+            var basedAirUnitData = new BasedAirUnitGroup();
             for (int ui = 0; ui < 3; ++ui) {
                 // チェックを入れてない編成は無視する
                 if (!BasedAirUnitFlg[ui].Value)
                     continue;
                 //
-                var temp = new List<Weapon>();
+                var basedAirUnit = new BasedAirUnit();
                 for (int wi = 0; wi < 4; ++wi) {
                     // 「なし」が選択されている装備は無視する
                     if (BasedAirUnitIndex[ui][wi].Value == 0)
@@ -103,11 +102,11 @@ namespace AWSK.ViewModels {
                     var weapon = dataBase.FindByWeaponName(name);
                     weapon.Mas = BasedAirUnitMas[ui][wi].Value;
                     weapon.Rf = BasedAirUnitRf[ui][wi].Value;
-                    temp.Add(weapon);
+                    basedAirUnit.WeaponList.Add(weapon);
                 }
-                if (temp.Count > 0) {
-                    basedAirUnitData.Weapon.Add(temp);
-                    basedAirUnitData.SallyCount.Add(BasedAirUnitMode[ui].Value);
+                if (basedAirUnit.WeaponList.Count > 0) {
+                    basedAirUnit.SallyCount = BasedAirUnitMode[ui].Value;
+                    basedAirUnitData.BasedAirUnitList.Add(basedAirUnit);
                 }
             }
             return basedAirUnitData;
@@ -154,7 +153,7 @@ namespace AWSK.ViewModels {
             if (bauIndex[index] < 0) {
                 return 0;
             }
-            return Simulator.CalcAntiAirValue(bauData.Weapon[bauIndex[index]], bauData.GetSlotData()[bauIndex[index]]);
+            return Simulator.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]]);
         }
         // 基地航空隊の指定されたインデックスにおける戦闘行動半径を返す
         private int GetBasedAirUnitRange(int index) {
@@ -163,7 +162,7 @@ namespace AWSK.ViewModels {
             if (bauIndex[index] < 0) {
                 return 0;
             }
-            return Simulator.CalcBAURange(bauData.Weapon[bauIndex[index]]);
+            return Simulator.CalcBAURange(bauData.BasedAirUnitList[bauIndex[index]].WeaponList);
         }
         // 基地航空隊のツールチップ情報を書き換え
         private void ResetBasedAirUnitInfo(int ui, int wi) {
@@ -215,7 +214,7 @@ namespace AWSK.ViewModels {
                     using (var sr = new System.IO.StreamReader(ofd.FileName)) {
                         // テキストとして読み込んでパース
                         string output = sr.ReadToEnd();
-                        var bauData = new BasedAirUnitData(output);
+                        var bauData = new BasedAirUnitGroup(output);
                         #region 基地航空隊の情報を初期化
                         for (int ui = 0; ui < 3; ++ui) {
                             BasedAirUnitMode[ui].Value = 0;
@@ -227,12 +226,12 @@ namespace AWSK.ViewModels {
                         }
                         #endregion
                         // 基地航空隊の情報を書き込む
-                        for (int ui = 0; ui < bauData.Weapon.Count; ++ui) {
+                        for (int ui = 0; ui < bauData.BasedAirUnitList.Count; ++ui) {
                             // 出撃回数
-                            int count = bauData.SallyCount[ui];
+                            int count = bauData.BasedAirUnitList[ui].SallyCount;
                             BasedAirUnitMode[ui].Value = count;
                             // 装備情報
-                            var weaponList = bauData.Weapon[ui];
+                            var weaponList = bauData.BasedAirUnitList[ui].WeaponList;
                             for (int wi = 0; wi < weaponList.Count; ++wi) {
                                 var weapon = weaponList[wi];
                                 BasedAirUnitIndex[ui][wi].Value = BasedAirUnitList.IndexOf($"{weapon.Name}：{weapon.AntiAir}：{weapon.BasedAirUnitRange}");
@@ -256,7 +255,7 @@ namespace AWSK.ViewModels {
             };
             if ((bool)sfd.ShowDialog()) {
                 try {
-                    string output = GetBasedAirUnitData().GetJsonData();
+                    string output = GetBasedAirUnitData().ToJson();
                     using (var sw = new System.IO.StreamWriter(sfd.FileName)) {
                         sw.Write(output);
                     }

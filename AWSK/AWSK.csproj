@@ -152,7 +152,6 @@
     <Compile Include="Service\DataBaseService.cs" />
     <Compile Include="Service\DownloadService.cs" />
     <Compile Include="Service\SimulationService.cs" />
-    <Compile Include="Stores\DataStore.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ResultViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">

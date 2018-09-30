@@ -23,7 +23,7 @@ namespace AWSK {
         /// <summary>
         /// 艦種enumを艦種文字列に変換する
         /// </summary>
-        public static Dictionary<KammusuType, string> KammusuTypeDic =
+        public static readonly Dictionary<KammusuType, string> KammusuTypeDic =
             new Dictionary<KammusuType, string>{
                 { KammusuType.Other, "その他" },
                 { KammusuType.DD, "駆逐艦" },
@@ -59,7 +59,7 @@ namespace AWSK {
         /// <summary>
         /// 艦種文字列を艦種enumに変換する(Wikia用)
         /// </summary>
-        public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
+        public static readonly Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
             = new Dictionary<string, KammusuType>{
                 {"AP", KammusuType.AO},
                 {"AV", KammusuType.AV},
@@ -79,7 +79,7 @@ namespace AWSK {
         /// <summary>
         /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
         /// </summary>
-        public static HashSet<string> AFSet = new HashSet<string> {
+        public static readonly HashSet<string> AFSet = new HashSet<string> {
             "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
             "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
             "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
@@ -95,7 +95,7 @@ namespace AWSK {
         /// <summary>
         /// 装備種enumを装備文字列に変換する
         /// </summary>
-        public static Dictionary<WeaponType, string> WeaponTypeDic =
+        public static readonly Dictionary<WeaponType, string> WeaponTypeDic =
             new Dictionary<WeaponType, string>{
                 { WeaponType.Other, "その他" },
                 { WeaponType.PF, "艦上戦闘機" },
@@ -115,7 +115,7 @@ namespace AWSK {
         /// <summary>
         /// 装備種文字列を装備種enumに変換する(Wikia用)
         /// </summary>
-        public static Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
+        public static readonly Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
             = new Dictionary<string, WeaponType>{
                 {"Carrier-based Fighter Aircraft", WeaponType.PF},
                 {"Carrier-based Dive Bomber", WeaponType.PB},
@@ -133,7 +133,7 @@ namespace AWSK {
         /// <summary>
         /// 基地航空隊に使用できる装備種一覧
         /// </summary>
-        public static HashSet<WeaponType> BAUWeaponTypeSet
+        public static readonly HashSet<WeaponType> BAUWeaponTypeSet
             = new HashSet<WeaponType> {
                 WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
                 WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
@@ -143,7 +143,7 @@ namespace AWSK {
         /// <summary>
         /// 航空戦に参加する装備種一覧
         /// </summary>
-        public static HashSet<WeaponType> AAVWeaponTypeSet
+        public static readonly HashSet<WeaponType> AAVWeaponTypeSet
             = new HashSet<WeaponType> {
                 WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
                 WeaponType.WF, WeaponType.WB,
@@ -153,24 +153,24 @@ namespace AWSK {
         /// <summary>
         /// 最大のスロット数
         /// </summary>
-        public static int MAX_SLOT_COUNT = 5;
+        public static readonly int MAX_SLOT_COUNT = 5;
 
         /// <summary>
         /// 艦戦・水戦制空ボーナス
         /// </summary>
-        public static int[] PfWfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
+        public static readonly int[] PfWfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
 
         /// <summary>
         /// 水爆制空ボーナス
         /// </summary>
-        public static int[] WbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
+        public static readonly int[] WbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
 
         /// <summary>
         /// 内部熟練ボーナス
         /// </summary>
-        public static int[] MasBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
+        public static readonly int[] MasBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
 
-        public static string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+        public static readonly string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 
         // データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
         public enum DataStoreStatus { Exist, Success, Failed }

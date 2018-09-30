@@ -113,6 +113,8 @@ namespace AWSK.Model {
             // 艦隊が登録されていない場合は
             if (KammusuList.Count == 0)
                 return "[]";
+
+            // 順に読み取って記録していく
             var output = new StringBuilder("[");
             for (int i = 0; i < KammusuList.Count; ++i) {
                 if (i != 0)

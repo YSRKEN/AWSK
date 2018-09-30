@@ -1,15 +1,12 @@
-﻿using AWSK.Stores;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using MersenneTwister;
 using AWSK.Service;
-using static AWSK.Constant;
 using AWSK.Model;
 
-namespace AWSK.Models
-{
-	static class Simulator
+namespace AWSK.Models {
+    static class Simulator
 	{
 		// 乱数の起点
 		private static Random random = DsfmtRandom.Create();
@@ -139,7 +136,7 @@ namespace AWSK.Models
 		}
 		// 航空戦の基地航空隊におけるシミュレーションを行う
 		public static void BasedAirUnitSimulation(
-			BasedAirUnitData friend,
+			BasedAirUnitGroup friend,
 			Fleet enemy,
 			int simulationCount,
 			out Dictionary<int, double> finalAAV,
@@ -147,9 +144,9 @@ namespace AWSK.Models
 			// 出力先を準備する
 			finalAAV = new Dictionary<int, double>();	//最終的な制空値のデータ
 			awsCount = new List<List<List<int>>>();	//制空状況をカウントする配列
-			for (int si = 0; si < friend.SallyCount.Count; ++si) {
+			for (int si = 0; si < friend.BasedAirUnitList.Count; ++si) {
 				var temp1 = new List<List<int>>();
-				for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
+				for (int ci = 0; ci < friend.BasedAirUnitList[si].SallyCount; ++ci) {
 					var temp2 = new List<int> { 0, 0, 0, 0, 0 };
 					temp1.Add(temp2);
 				}
@@ -157,16 +154,16 @@ namespace AWSK.Models
 			}
 			// テンポラリな変数を用意する
 			var friendAntiAirValue = new List<int>();	//基地航空隊の制空値を記録した配列
-			for (int si = 0; si < friend.SallyCount.Count; ++si) {
-				friendAntiAirValue.Add(CalcAntiAirValue(friend.Weapon[si], friend.GetSlotData()[si]));
+			for (int si = 0; si < friend.BasedAirUnitList.Count; ++si) {
+				friendAntiAirValue.Add(CalcAntiAirValue(friend.BasedAirUnitList[si].WeaponList, friend.SlotList[si]));
 			}
 			// シミュレーションを行う
 			for (int li = 0; li < simulationCount; ++li) {
 				// 基地航空隊・敵艦隊のデータから、スロット毎の搭載数を読み取る
 				var enemySlotData = enemy.SlotList;
 				// 指定した回数だけ基地航空隊をぶつける
-				for (int si = 0; si < friend.SallyCount.Count; ++si) {
-					for (int ci = 0; ci < friend.SallyCount[si]; ++ci) {
+				for (int si = 0; si < friend.BasedAirUnitList.Count; ++si) {
+					for (int ci = 0; ci < friend.BasedAirUnitList[si].SallyCount; ++ci) {
 						// 敵艦隊の制空値を計算する
 						int enemyAntiAirValue = CalcAntiAirValue(enemy, enemySlotData, true);
 						// 制空状況を判断する
