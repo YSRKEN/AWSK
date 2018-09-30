@@ -172,7 +172,32 @@ namespace AWSK {
 
         public static readonly string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
 
-        // データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
+        /// <summary>
+        /// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
+        /// </summary>
         public enum DataStoreStatus { Exist, Success, Failed }
+
+        /// <summary>
+        /// 制空状況(制空権確保～制空権喪失、種類数)
+        /// </summary>
+        public enum AirWarStatus { Best, Good, Even, Bad, Worst, Size }
+
+        /// <summary>
+        /// 制空状況enumを制空状況文字列に変換する
+        /// </summary>
+        public static readonly Dictionary<AirWarStatus, string> AirWarStatusDic
+            = new Dictionary<AirWarStatus, string>{
+                { AirWarStatus.Best, "確保" },
+                { AirWarStatus.Good, "優勢" },
+                { AirWarStatus.Even, "均衡" },
+                { AirWarStatus.Bad, "劣勢" },
+                { AirWarStatus.Worst, "喪失" },
+            };
+
+        /// <summary>
+        /// ゲーム内で登場する最大のスロットサイズ
+        /// </summary>
+        public static readonly int MaxSlotSize = 300;
     }
 }
+;

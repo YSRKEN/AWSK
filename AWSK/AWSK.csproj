@@ -147,7 +147,6 @@
     <Compile Include="Model\BasedAirUnitGroup.cs" />
     <Compile Include="Model\Fleet.cs" />
     <Compile Include="Model\Kammusu.cs" />
-    <Compile Include="Models\Simulator.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Service\DataBaseService.cs" />
     <Compile Include="Service\DownloadService.cs" />

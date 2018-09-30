@@ -153,7 +153,7 @@ namespace AWSK.ViewModels {
             if (bauIndex[index] < 0) {
                 return 0;
             }
-            return Simulator.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]]);
+            return simulation.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]]);
         }
         // 基地航空隊の指定されたインデックスにおける戦闘行動半径を返す
         private int GetBasedAirUnitRange(int index) {
@@ -162,7 +162,7 @@ namespace AWSK.ViewModels {
             if (bauIndex[index] < 0) {
                 return 0;
             }
-            return Simulator.CalcBAURange(bauData.BasedAirUnitList[bauIndex[index]].WeaponList);
+            return simulation.CalcBAURange(bauData.BasedAirUnitList[bauIndex[index]].WeaponList);
         }
         // 基地航空隊のツールチップ情報を書き換え
         private void ResetBasedAirUnitInfo(int ui, int wi) {
@@ -199,7 +199,7 @@ namespace AWSK.ViewModels {
             int aav1 = GetBasedAirUnitAAV(ui);
             int aav2 = GetEnemyUnitAAV();
             int range = GetBasedAirUnitRange(ui);
-            BasedAirUnitAAV[ui].Value = $"制空値：{aav1}({Simulator.JudgeAirWarStatusStr(aav1, aav2)})　戦闘行動半径：{range}";
+            BasedAirUnitAAV[ui].Value = $"制空値：{aav1}({AirWarStatusDic[simulation.JudgeAirWarStatus(aav1, aav2)]})　戦闘行動半径：{range}";
         }
         // 基地航空隊の読み込み処理
         private void LoadBasedAirUnit() {
@@ -298,7 +298,7 @@ namespace AWSK.ViewModels {
         // 敵艦隊の制空値を返す
         private int GetEnemyUnitAAV() {
             var enemyData = GetEnemyData();
-            return Simulator.CalcAntiAirValue(enemyData, enemyData.SlotList, true);
+            return simulation.CalcAntiAirValue(enemyData, enemyData.SlotList, true);
         }
         // 敵艦隊の制空値変更処理
         private void ReCalcEnemyUnitAAV() {
@@ -419,7 +419,7 @@ namespace AWSK.ViewModels {
             {
                 Dictionary<int, double> finalAAV;
                 List<List<List<int>>> awsCount;
-                Simulator.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out finalAAV, out awsCount);
+                simulation.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out finalAAV, out awsCount);
                 var vm = new ResultViewModel(finalAAV, awsCount);
                 var view = new Views.ResultView { DataContext = vm };
                 view.Show();
