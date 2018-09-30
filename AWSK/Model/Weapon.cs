@@ -84,5 +84,51 @@ namespace AWSK.Models {
         /// 装備改修度
         /// </summary>
         public int Rf { get; set; }
+
+        /// <summary>
+        /// 改修補正を適用した対空値
+        /// </summary>
+        public double CorrectedAntiAir {
+            get {
+                double correctedAA = 1.0 * AntiAir + 1.5 * Intercept;
+                if (IsFighter) {
+                    // 艦戦・水戦・陸戦(便宜上局戦もこちらに含めた)
+                    correctedAA += 0.2 * Rf;
+                } else if (Name.Contains("爆戦")) {
+                    // 爆戦
+                    correctedAA += 0.25 * Rf;
+                }
+                return correctedAA;
+            }
+        }
+
+        /// <summary>
+        /// 戦闘機系ならtrue
+        /// </summary>
+        public bool IsFighter {
+            get => Type == WeaponType.PF || Type == WeaponType.WF || Type == WeaponType.LF;
+        }
+
+        /// <summary>
+        /// 偵察機系ならtrue
+        /// </summary>
+        public bool IsSearcher {
+            get => Type == WeaponType.PS || Type == WeaponType.WS || Type == WeaponType.LFB;
+        }
+
+        /// <summary>
+        /// 航空戦に参加するならtrue
+        /// </summary>
+        /// <param name="wsFlg">水上偵察機が関わる場合はtrue</param>
+        /// <returns></returns>
+        public bool HasAAV(bool wsFlg) {
+            if (AAVWeaponTypeSet.Contains(Type)){
+                return true;
+            }
+            if (wsFlg && Type != WeaponType.WS) {
+                return true;
+            }
+            return false;
+        }
     }
 }

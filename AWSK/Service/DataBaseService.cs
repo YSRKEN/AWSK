@@ -100,24 +100,11 @@ namespace AWSK.Service {
         }
 
         /// <summary>
-        /// 唯一のinstanceを返す(Singletonパターン)
-        /// </summary>
-        /// <returns></returns>
-        public static DataBaseService instance {
-            get {
-                if (singleton == null) {
-                    singleton = new DataBaseService();
-                }
-                return singleton;
-            }
-        }
-
-        /// <summary>
         /// 装備テーブルを作成する
         /// </summary>
         /// <param name="forceFlg">強制的に作成するならtrue</param>
         /// <returns>テーブルを作成したならtrue</returns>
-        public bool CreateWeaponTable(bool forceFlg) {
+        private bool CreateWeaponTable(bool forceFlg) {
             string sql = @"
 				CREATE TABLE [weapon](
 				[id] INTEGER NOT NULL PRIMARY KEY,
@@ -136,7 +123,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="forceFlg">強制的に作成するならtrue</param>
         /// <returns>テーブルを作成したならtrue</returns>
-        public bool CreateKammusuTable(bool forceFlg) {
+        private bool CreateKammusuTable(bool forceFlg) {
             string sql = @"
 				CREATE TABLE [kammusu](
 				[id] INTEGER NOT NULL PRIMARY KEY,
@@ -164,7 +151,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="weapon">装備情報</param>
         /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
-        public void Save(Weapon weapon, bool forceFlg) {
+        private void Save(Weapon weapon, bool forceFlg) {
             if (!forceFlg) {
                 var temp = ExecuteReader($"SELECT count(id) AS count FROM weapon WHERE id={weapon.Id}");
                 if (temp.Count > 0 && temp[0]["count"] >= 1) {
@@ -187,7 +174,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="weaponList">装備リスト</param>
         /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
-        public void SaveAll(List<Weapon> weaponList, bool forceFlg) {
+        private void SaveAll(List<Weapon> weaponList, bool forceFlg) {
             // 上書きしないオプションを反映する
             var weaponList2 = weaponList;
             if (!forceFlg) {
@@ -195,7 +182,7 @@ namespace AWSK.Service {
                 var temp = ExecuteReader($"SELECT id FROM weapon WHERE id IN ({idList})");
                 var temp2 = temp.Select(r => (int)r["id"]).ToHashSet();
                 weaponList2 = new List<Weapon>();
-                foreach(var weapon in weaponList) {
+                foreach (var weapon in weaponList) {
                     if (!temp2.Contains(weapon.Id)) {
                         weaponList2.Add(weapon);
                     }
@@ -235,7 +222,7 @@ namespace AWSK.Service {
         /// <param name="kammusu">艦娘情報</param>
         /// <param name="defaultWeaponIdList">初期装備</param>
         /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
-        public void Save(Kammusu kammusu, List<int> defaultWeaponIdList, bool forceFlg) {
+        private void Save(Kammusu kammusu, List<int> defaultWeaponIdList, bool forceFlg) {
             if (!forceFlg) {
                 var temp = ExecuteReader($"SELECT count(id) AS count FROM kammusu WHERE id={kammusu.Id}");
                 if (temp.Count > 0 && temp[0]["count"] >= 1) {
@@ -270,7 +257,7 @@ namespace AWSK.Service {
         /// </summary>
         /// <param name="kammusuList">艦娘と初期装備のペアのリスト</param>
         /// <param name="forceFlg">既存データがある場合上書きしないならfalse</param>
-        public void SaveAll(List<KeyValuePair<Kammusu, List<int>>> kammusuList, bool forceFlg) {
+        private void SaveAll(List<KeyValuePair<Kammusu, List<int>>> kammusuList, bool forceFlg) {
             // 上書きしないオプションを反映する
             var kammusuList2 = kammusuList;
             if (!forceFlg) {
@@ -323,6 +310,48 @@ namespace AWSK.Service {
                 }
             }
             return;
+        }
+
+        /// <summary>
+        /// 唯一のinstanceを返す(Singletonパターン)
+        /// </summary>
+        /// <returns></returns>
+        public static DataBaseService instance {
+            get {
+                if (singleton == null) {
+                    singleton = new DataBaseService();
+                }
+                return singleton;
+            }
+        }
+
+        /// <summary>
+        /// データベースの初期化処理
+        /// </summary>
+        /// <param name="forceUpdateFlg">強制的に更新する場合はtrue</param>
+        /// <returns></returns>
+        public async Task<DataStoreStatus> Initialize(bool forceUpdateFlg = false) {
+            // テーブルが存在しない場合、テーブルを作成する
+            bool createTableFlg = CreateWeaponTable(forceUpdateFlg)
+                || CreateKammusuTable(forceUpdateFlg);
+
+            // テーブルを作成したならば、データをダウンロードする
+            if (!createTableFlg) {
+                return DataStoreStatus.Exist;
+            }
+            try {
+                var downloader = DownloadService.instance;
+                var weaponData = await downloader.downloadWeaponDataFromWikiaAsync();
+                SaveAll(weaponData, true);
+                var kammusuData = await downloader.downloadKammusuDataFromWikiaAsync();
+                SaveAll(kammusuData, true);
+                var kammusuData2 = downloader.downloadKammusuDataFromLocalFile();
+                SaveAll(kammusuData2, true);
+                return DataStoreStatus.Success;
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return DataStoreStatus.Failed;
+            }
         }
 
         /// <summary>
@@ -485,6 +514,79 @@ namespace AWSK.Service {
                 result.Add(temp);
             }
             return result;
+        }
+
+        /// <summary>
+        /// 深海棲艦の艦名一覧をid付きで返す
+        /// </summary>
+        /// <returns>艦船ID, [艦名・艦種]</returns>
+        public Dictionary<int, KeyValuePair<string, string>> EnemyNameList() {
+            // 深海棲艦の艦名・艦種一覧を取得する
+            var rawKammusuList = FindByKammusuFlg(false, false);
+            var kammusuList = new Dictionary<int, KeyValuePair<string, string>>();
+            foreach (var kammusu in rawKammusuList) {
+                kammusuList[kammusu.Id] = new KeyValuePair<string, string>(kammusu.Name, KammusuTypeDic[kammusu.Type]);
+            }
+
+            // 俗称一覧を取得する
+            var enemyFamiliarName = new Dictionary<string, int>();
+            if (System.IO.File.Exists(@"Resource\EnemyFamiliarName.csv")) {
+                using (var sr = new System.IO.StreamReader(@"Resource\EnemyFamiliarName.csv")) {
+                    while (!sr.EndOfStream) {
+                        try {
+                            // 1行読み込み、カンマ毎に区切る
+                            string line = sr.ReadLine();
+                            string[] values = line.Split(',');
+                            // 行数がおかしい場合は飛ばす
+                            if (values.Count() < 2)
+                                continue;
+                            // ヘッダー行は飛ばす
+                            if (values[0] == "俗称")
+                                continue;
+                            // データを読み取る
+                            string name = values[0];
+                            int id = int.Parse(values[1]);
+                            enemyFamiliarName[name] = id;
+                        } catch (Exception) { }
+                    }
+                }
+            }
+
+            // 俗称部分は、idの数字を10000だけ大きくして登録する
+            foreach (var pair in enemyFamiliarName) {
+                string name = pair.Key;
+                int id = pair.Value;
+                var kammusu = FindByKammusuId(id, false);
+                kammusuList[id + 10000] = new KeyValuePair<string, string>($"*{name}", KammusuTypeDic[kammusu.Type]);
+            }
+            return kammusuList;
+        }
+
+        /// <summary>
+        /// 基地航空隊に使用できる装備名一覧を返す
+        /// </summary>
+        /// <returns>基地航空隊に使用できる装備名一覧</returns>
+        public List<string> BasedAirUnitNameList() {
+            // 艦娘サイドの装備一覧を抽出
+            var rawWeaponList = FindByForKammusuFlg(true);
+
+            // 基地航空隊に使用できるものだけ抽出
+            var temp = rawWeaponList
+                .Where(w => BAUWeaponTypeSet.Contains(w.Type))
+                .OrderBy(w => w.Id)
+                .OrderBy(w => (int)w.Type)
+                .ToList();
+
+            // 一覧を生成する
+            var list = new List<string>();
+            list.Add("なし");
+            for (int i = 0; i < temp.Count; ++i) {
+                if (i == 0 || temp[i].Type != temp[i - 1].Type) {
+                    list.Add($"【{WeaponTypeDic[temp[i].Type]}】");
+                }
+                list.Add($"{temp[i].Name}：{temp[i].AntiAir}：{temp[i].BasedAirUnitRange}");
+            }
+            return list;
         }
     }
 }
