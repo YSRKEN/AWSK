@@ -142,6 +142,9 @@
     <Compile Include="Behaviors\CloseWindowAttachedBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Constant.cs" />
+    <Compile Include="Control\SelectWeaponBox.xaml.cs">
+      <DependentUpon>SelectWeaponBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DynamicJson.cs" />
     <Compile Include="Entity\BasedAirUnit.cs" />
     <Compile Include="Entity\BasedAirUnitGroup.cs" />
@@ -149,6 +152,8 @@
     <Compile Include="Entity\Kammusu.cs" />
     <Compile Include="Model\MainModel.cs" />
     <Compile Include="Entity\Weapon.cs" />
+    <Compile Include="Model\SelectWeaponModel.cs" />
+    <Compile Include="ViewModel\SelectWeaponViewModel.cs" />
     <Compile Include="Service\DataBaseService.cs" />
     <Compile Include="Service\DownloadService.cs" />
     <Compile Include="Service\SimulationService.cs" />
@@ -168,6 +173,10 @@
     <Compile Include="View\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Control\SelectWeaponBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
