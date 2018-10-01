@@ -13,6 +13,6 @@
     <Grid>
         <TextBlock Text="{Binding SampleProperty.Value,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
         <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5" Width="300" MasterLevel="7" RefurbishmentLevel="0"
-            WeaponName="{Binding TestProperty.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            WeaponName="{Binding SampleProperty.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
     </Grid>
 </Window>

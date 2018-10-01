@@ -17,7 +17,6 @@ namespace AWSK.ViewModel {
         private MainModel model = new MainModel();
 
         public ReactiveProperty<string> SampleProperty { get; }
-        public ReactiveProperty<string> TestProperty { get; } = new ReactiveProperty<string>();
 
         /// <summary>
         /// コンストラクタ
@@ -25,10 +24,6 @@ namespace AWSK.ViewModel {
         public MainViewModel() {
             // 各プロパティにインジェクションする
             SampleProperty = model.SampleProperty;
-
-            TestProperty.Subscribe(value => {
-                Console.WriteLine(value);
-            });
         }
     }
 }
