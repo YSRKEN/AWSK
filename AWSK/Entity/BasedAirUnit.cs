@@ -8,11 +8,6 @@ namespace AWSK.Model {
     /// </summary>
     class BasedAirUnit {
         /// <summary>
-        /// スロット毎の搭載数
-        /// </summary>
-        public List<int> SlotList { get; } = new List<int>();
-
-        /// <summary>
         /// スロット毎の装備リスト
         /// (スロットに存在しない場合はnullが入る)
         /// </summary>

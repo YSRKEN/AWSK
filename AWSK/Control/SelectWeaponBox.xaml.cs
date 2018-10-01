@@ -14,9 +14,6 @@ namespace AWSK.Control {
         /// </summary>
         public SelectWeaponBox() {
             InitializeComponent();
-            WeaponName = "";
-            MasterLevel = "0";
-            RefurbishmentLevel = "0";
         }
 
         #region 装備名
@@ -25,7 +22,7 @@ namespace AWSK.Control {
         /// </summary>
         public static readonly DependencyProperty WeaponNameProperty =
             DependencyProperty.Register("WeaponName", typeof(string), typeof(SelectWeaponBox),
-            new FrameworkPropertyMetadata("WeaponName", new PropertyChangedCallback(OnWeaponNameChanged)));
+            new FrameworkPropertyMetadata("", new PropertyChangedCallback(OnWeaponNameChanged)));
 
         /// <summary>
         /// 装備名を参照するためのプロパティ
@@ -60,7 +57,7 @@ namespace AWSK.Control {
         /// </summary>
         public static readonly DependencyProperty MasterLevelProperty =
             DependencyProperty.Register("MasterLevel", typeof(string), typeof(SelectWeaponBox),
-            new FrameworkPropertyMetadata("MasterLevel", new PropertyChangedCallback(MasterLevelChanged)));
+            new FrameworkPropertyMetadata("0", new PropertyChangedCallback(OnMasterLevelChanged)));
 
         /// <summary>
         /// 熟練度を参照するためのプロパティ
@@ -75,7 +72,7 @@ namespace AWSK.Control {
         /// </summary>
         /// <param name="obj">DependencyObject</param>
         /// <param name="e">DependencyPropertyChangedEventArgs</param>
-        private static void MasterLevelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
+        private static void OnMasterLevelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
             // オブジェクトを取得して処理する
             var control = obj as SelectWeaponBox;
             if (control != null) {
@@ -90,7 +87,7 @@ namespace AWSK.Control {
         /// </summary>
         public static readonly DependencyProperty RefurbishmentLevelProperty =
             DependencyProperty.Register("RefurbishmentLevel", typeof(string), typeof(SelectWeaponBox),
-            new FrameworkPropertyMetadata("RefurbishmentLevel", new PropertyChangedCallback(RefurbishmentLevelChanged)));
+            new FrameworkPropertyMetadata("0", new PropertyChangedCallback(OnRefurbishmentLevelChanged)));
 
         /// <summary>
         /// 改修度を参照するためのプロパティ
@@ -105,7 +102,7 @@ namespace AWSK.Control {
         /// </summary>
         /// <param name="obj">DependencyObject</param>
         /// <param name="e">DependencyPropertyChangedEventArgs</param>
-        private static void RefurbishmentLevelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
+        private static void OnRefurbishmentLevelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
             // オブジェクトを取得して処理する
             var control = obj as SelectWeaponBox;
             if (control != null) {

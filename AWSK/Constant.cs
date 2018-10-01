@@ -227,6 +227,11 @@ namespace AWSK {
         /// ゲーム内で登場する最大のスロットサイズ
         /// </summary>
         public static readonly int MaxSlotSize = 300;
+
+        /// <summary>
+        /// 基地航空隊に属する装備の最大数
+        /// </summary>
+        public static readonly int BasedAirUnitMaxSize = 4;
     }
 }
 ;

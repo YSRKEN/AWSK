@@ -6,16 +6,25 @@
         xmlns:local="clr-namespace:AWSK.ViewModel"
         xmlns:c="clr-namespace:AWSK.Control"
         mc:Ignorable="d"
-        Title="MainView" Height="450" Width="800">
+        Title="航空戦シミュレーター改(AWSK) Ver.2.0.0 Product by YSR" Height="250" Width="800">
     <Window.DataContext>
         <local:MainViewModel/>
     </Window.DataContext>
     <Window.Resources>
         <local:MainViewModel x:Key="MainViewModel"/>
     </Window.Resources>
-    <Grid>
-        <TextBlock Text="{Binding SampleProperty.Value,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
-        <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5" Width="300" MasterLevel="7" RefurbishmentLevel="0"
-            WeaponName="{Binding Path=SampleProperty.Value,Source={StaticResource MainViewModel},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+    <Grid Margin="2.5,2.5,2.5,2.5">
+        <GroupBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Header="基地航空隊" Margin="2.5,2.5,2.5,2.5">
+            <Grid Margin="2.5,2.5,2.5,2.5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <c:BasedAirUnitControl Grid.Column="0" BasedAirUnitUnitText="第1航空隊"/>
+                <c:BasedAirUnitControl Grid.Column="1" BasedAirUnitUnitText="第2航空隊"/>
+                <c:BasedAirUnitControl Grid.Column="2" BasedAirUnitUnitText="第3航空隊"/>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
