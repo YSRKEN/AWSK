@@ -45,7 +45,7 @@ namespace AWSK.Model {
             var obj = DynamicJson.Parse(jsonString);
 
             // パース結果を翻訳する
-            var database = DataBaseService.instance;
+            var database = DataBaseService.Instance;
             foreach (var kammusuList in obj) {
                 if (!kammusuList.IsDefined("kammusu")) {
                     continue;

@@ -315,7 +315,7 @@ namespace AWSK.Service {
         /// 唯一のinstanceを返す(Singletonパターン)
         /// </summary>
         /// <returns></returns>
-        public static DataBaseService instance {
+        public static DataBaseService Instance {
             get {
                 if (singleton == null) {
                     singleton = new DataBaseService();
@@ -577,8 +577,9 @@ namespace AWSK.Service {
                 .ToList();
 
             // 一覧を生成する
-            var list = new List<string>();
-            list.Add("なし");
+            var list = new List<string> {
+                "なし"
+            };
             for (int i = 0; i < temp.Count; ++i) {
                 if (i == 0 || temp[i].Type != temp[i - 1].Type) {
                     list.Add($"【{WeaponTypeDic[temp[i].Type]}】");

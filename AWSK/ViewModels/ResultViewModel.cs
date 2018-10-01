@@ -12,8 +12,8 @@ namespace AWSK.ViewModels
 	class ResultViewModel
 	{
 		// 制空値情報および制空状況情報
-		private Dictionary<int, double> finalAAV;
-		private List<List<List<int>>> awsCount;
+		private readonly Dictionary<int, double> finalAAV;
+		private readonly List<List<List<int>>> awsCount;
 		// タイトルバー
 		public ReactiveProperty<string> TitleStr { get; } = new ReactiveProperty<string>("計算結果");
 		// 制空値情報のグラフおよび制空状況情報のグラフ
@@ -57,10 +57,11 @@ namespace AWSK.ViewModels
 			return graphModel;
 		}
 		private PlotModel CreateAwsCountGraphModel(List<List<List<int>>> awsCount) {
-			var graphModel = new PlotModel();
-			graphModel.IsLegendVisible = false;
-			// 横軸・縦軸を追加する
-			graphModel.Axes.Add(new LinearAxis {
+            var graphModel = new PlotModel {
+                IsLegendVisible = false
+            };
+            // 横軸・縦軸を追加する
+            graphModel.Axes.Add(new LinearAxis {
 				Position = AxisPosition.Left, Title = "割合(％)", Minimum = 0, Maximum = 100});
 			{
 				var categoryAxis = new CategoryAxis { Position = AxisPosition.Bottom };
@@ -77,10 +78,11 @@ namespace AWSK.ViewModels
 			// 各制空状態(k)毎に入力することに注意
 			string[] columnLabel = new[] { "制空権確保", "航空優勢", "制空均衡", "航空劣勢", "制空権喪失" };
 			for (int k = 0; k < 5; ++k) {
-				var columnSeries = new ColumnSeries();
-				columnSeries.IsStacked = true;
-				columnSeries.Title = $"{columnLabel[k]}";
-				for (int si = 0; si < awsCount.Count; ++si) {
+                var columnSeries = new ColumnSeries {
+                    IsStacked = true,
+                    Title = $"{columnLabel[k]}"
+                };
+                for (int si = 0; si < awsCount.Count; ++si) {
 					for (int ci = 0; ci < awsCount[si].Count; ++ci) {
 						int all_sum = awsCount[si][ci].Sum();
 						// 各制空状態毎に入力する

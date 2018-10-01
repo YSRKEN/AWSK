@@ -29,10 +29,11 @@ namespace AWSK.Model {
             var obj = DynamicJson.Parse(jsonString);
 
             // パース結果を翻訳する
-            var database = DataBaseService.instance;
+            var database = DataBaseService.Instance;
             foreach (var weaponList in obj) {
-                var basedAirUnit = new BasedAirUnit();
-                basedAirUnit.SallyCount = (int)weaponList.count;
+                var basedAirUnit = new BasedAirUnit {
+                    SallyCount = (int)weaponList.count
+                };
                 foreach (var weapon in weaponList.weapon) {
                     var weaponData = database.FindByWeaponId((int)weapon.id);
                     weaponData.Mas = (int)weapon.mas;

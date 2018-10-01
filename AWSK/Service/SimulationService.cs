@@ -20,7 +20,7 @@ namespace AWSK.Service {
         private Random random = DsfmtRandom.Create();
 
         // St1撃墜用のメモ。killedSlot[搭載数][制空状況]＝[可能性の一覧]
-        private List<List<List<int>>> killedSlot;
+        private readonly List<List<List<int>>> killedSlot;
 
         /// <summary>
         /// St1撃墜用のメモを事前計算する
@@ -90,7 +90,7 @@ namespace AWSK.Service {
         /// 唯一のinstanceを返す(Singletonパターン)
         /// </summary>
         /// <returns></returns>
-        public static SimulationService instance {
+        public static SimulationService Instance {
             get {
                 if (singleton == null) {
                     singleton = new SimulationService();
@@ -160,13 +160,13 @@ namespace AWSK.Service {
             }
 
             // 熟練度補正を計算
-            double antiAirBonus = Math.Sqrt(1.0 * Constant.MasBonus[weapon.Mas] / 10);
+            double antiAirBonus = Math.Sqrt(1.0 * MasBonus[weapon.Mas] / 10);
             if (weapon.IsFighter) {
                 // 艦戦・水戦・陸戦・局戦は+25
-                antiAirBonus += Constant.PfWfBonus[weapon.Mas];
-            } else if (weapon.Type == Constant.WeaponType.WB) {
+                antiAirBonus += PfWfBonus[weapon.Mas];
+            } else if (weapon.Type == WeaponType.WB) {
                 // 水爆は+9
-                antiAirBonus += Constant.WbBonus[weapon.Mas];
+                antiAirBonus += WbBonus[weapon.Mas];
             }
 
             // 最終的な制空値を算出

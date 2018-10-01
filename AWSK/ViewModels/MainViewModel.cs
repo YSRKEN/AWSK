@@ -78,8 +78,8 @@ namespace AWSK.ViewModels {
         public ReactiveCommand SaveBasedAirUnitCommand { get; } = new ReactiveCommand();
         #endregion
         
-        private DataBaseService dataBase = DataBaseService.instance;
-        private SimulationService simulation = SimulationService.instance;
+        private DataBaseService dataBase = DataBaseService.Instance;
+        private SimulationService simulation = SimulationService.Instance;
 
         #region メソッド(基地航空隊用)
         // 基地航空隊のデータを取得
@@ -417,9 +417,7 @@ namespace AWSK.ViewModels {
             // シミュレーションを行う
             int[] simulationCount = new[] { 1000, 10000, 100000, 1000000 };
             {
-                Dictionary<int, double> finalAAV;
-                List<List<List<int>>> awsCount;
-                simulation.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out finalAAV, out awsCount);
+                simulation.BasedAirUnitSimulation(basedAirUnitData, enemyData, simulationCount[SimulationCountIndex.Value], out var finalAAV, out var awsCount);
                 var vm = new ResultViewModel(finalAAV, awsCount);
                 var view = new Views.ResultView { DataContext = vm };
                 view.Show();
@@ -441,7 +439,7 @@ namespace AWSK.ViewModels {
             UpdateDatabaseButtonFlg.Value = true;
         }
 
-        private async Task<int[]> getNewestVersion() {
+        private async Task<int[]> GetNewestVersion() {
             try {
                 using (var client = new HttpClient()) {
                     // ダウンロード
@@ -469,7 +467,7 @@ namespace AWSK.ViewModels {
             }
             TitleText.Value = $"航空戦シミュレーター改(AWSK) Ver.{nowVersion[0]}.{nowVersion[1]}.{nowVersion[2]}.{nowVersion[3]}";
             // ネット上の最新のバージョン
-            int[] newestVersion = await getNewestVersion();
+            int[] newestVersion = await GetNewestVersion();
             // 比較
             bool flg = false;
             for (int i = 0; i < 4; ++i) {
@@ -601,8 +599,9 @@ namespace AWSK.ViewModels {
                     EnemyTypeIndex.Add(new ReactiveProperty<int>(0));
                 }
                 //最後にコンボボックス用の艦名一覧を作成する
-                var enemyNameList2 = new List<string>();
-                enemyNameList2.Add("なし");
+                var enemyNameList2 = new List<string> {
+                    "なし"
+                };
                 foreach (var pair in enemyListEachType) {
                     string type = pair.Key;
                     enemyNameList2.Add($"【{type}】");

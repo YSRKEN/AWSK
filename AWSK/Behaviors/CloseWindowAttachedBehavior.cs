@@ -17,14 +17,13 @@ namespace AWSK.Behaviors
 			DependencyProperty.RegisterAttached("Close", typeof(bool), typeof(CloseWindowAttachedBehavior), new PropertyMetadata(false, OnCloseChanged));
 
 		private static void OnCloseChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-			var win = d as Window;
-			if (win == null) {
-				// Window以外のコントロールにこの添付ビヘイビアが付けられていた場合は、
-				// コントロールの属しているWindowを取得
-				win = Window.GetWindow(d);
-			}
+            if (!(d is Window win)) {
+                // Window以外のコントロールにこの添付ビヘイビアが付けられていた場合は、
+                // コントロールの属しているWindowを取得
+                win = Window.GetWindow(d);
+            }
 
-			if (GetClose(d))
+            if (GetClose(d))
 				win.Close();
 		}
 	}
