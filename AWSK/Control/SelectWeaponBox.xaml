@@ -11,9 +11,9 @@
     <Grid Height="30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
-            <ColumnDefinition Width="160"/>
+            <ColumnDefinition/>
             <ColumnDefinition Width="60"/>
-            <ColumnDefinition Width="60"/>
+            <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
         <ComboBox Grid.Column="0" Margin="2.5,2.5,2.5,2.5"
                   SelectedItem="{Binding Category.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

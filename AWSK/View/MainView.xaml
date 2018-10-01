@@ -12,6 +12,6 @@
     </Window.DataContext>
     <Grid>
         <TextBlock Text="{Binding SampleProperty.Value}"/>
-        <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5"/>
+        <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5" Width="300"/>
     </Grid>
 </Window>
