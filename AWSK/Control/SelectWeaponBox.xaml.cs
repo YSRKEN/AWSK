@@ -60,7 +60,7 @@ namespace AWSK.Control {
         /// </summary>
         public static readonly DependencyProperty MasterLevelProperty =
             DependencyProperty.Register("MasterLevel", typeof(string), typeof(SelectWeaponBox),
-            new FrameworkPropertyMetadata("MasterLevel", new PropertyChangedCallback(MasterChanged)));
+            new FrameworkPropertyMetadata("MasterLevel", new PropertyChangedCallback(MasterLevelChanged)));
 
         /// <summary>
         /// 熟練度を参照するためのプロパティ
@@ -75,7 +75,7 @@ namespace AWSK.Control {
         /// </summary>
         /// <param name="obj">DependencyObject</param>
         /// <param name="e">DependencyPropertyChangedEventArgs</param>
-        private static void MasterChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
+        private static void MasterLevelChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
             // オブジェクトを取得して処理する
             var control = obj as SelectWeaponBox;
             if (control != null) {
