@@ -8,7 +8,7 @@
     <UserControl.DataContext>
         <local:SelectWeaponViewModel/>
     </UserControl.DataContext>
-    <Grid Height="30" DataContext="{Binding ElementName=parent}">
+    <Grid Height="30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="120"/>
             <ColumnDefinition Width="160"/>
