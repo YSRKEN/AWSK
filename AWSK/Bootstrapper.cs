@@ -1,7 +1,7 @@
 ﻿using Microsoft.Practices.Unity;
 using Prism.Unity;
 using System.Windows;
-using AWSK.Views;
+using AWSK.View;
 
 namespace AWSK
 {
