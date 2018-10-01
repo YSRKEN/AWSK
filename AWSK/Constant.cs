@@ -199,7 +199,7 @@ namespace AWSK {
         /// </summary>
         public static readonly int[] MasBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
 
-        public static readonly string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+        public static readonly string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>", ">>>" };
 
         /// <summary>
         /// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
