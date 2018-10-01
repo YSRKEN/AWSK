@@ -20,6 +20,7 @@ namespace AWSK.Model {
         /// </summary>
         /// <param name="index"></param>
         private void RefreshWeapon(string value, int index) {
+            Console.WriteLine($"{value} {index}");
             if (value != null) {
                 var weapon = database.FindByWeaponName(value);
                 BasedAirUnit.Value.WeaponList[index] = weapon;

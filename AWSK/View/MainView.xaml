@@ -24,7 +24,6 @@
                 <c:BasedAirUnitControl Grid.Column="0" BasedAirUnitUnitText="第1航空隊"/>
                 <c:BasedAirUnitControl Grid.Column="1" BasedAirUnitUnitText="第2航空隊"/>
                 <c:BasedAirUnitControl Grid.Column="2" BasedAirUnitUnitText="第3航空隊"/>
-                <c:SelectWeaponBox WeaponName="{Binding SampleProperty.Value, Source={StaticResource MainViewModel}}"/>
             </Grid>
         </GroupBox>
     </Grid>

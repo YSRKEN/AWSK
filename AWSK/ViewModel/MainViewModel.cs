@@ -16,8 +16,6 @@ namespace AWSK.ViewModel {
         /// </summary>
         private MainModel model = new MainModel();
 
-        public ReactiveProperty<string> SampleProperty { get; } = new ReactiveProperty<string>("瑞雲");
-
         /// <summary>
         /// コンストラクタ
         /// </summary>
