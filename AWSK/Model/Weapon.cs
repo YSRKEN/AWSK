@@ -48,7 +48,16 @@ namespace AWSK.Models {
         /// <summary>
         /// 装備名
         /// </summary>
-        public string Name { get; }
+        private string name;
+        public string Name {
+            get => name;
+            private set {
+                this.name = value;
+
+                // 爆戦系かの判定を連動して設定している
+                this.IsBombFighter = value.Contains("爆戦");
+            }
+        }
 
         /// <summary>
         /// 装備種
@@ -94,7 +103,7 @@ namespace AWSK.Models {
                 if (IsFighter) {
                     // 艦戦・水戦・陸戦(便宜上局戦もこちらに含めた)
                     correctedAA += 0.2 * Rf;
-                } else if (Name.Contains("爆戦")) {
+                } else if (IsBombFighter) {
                     // 爆戦
                     correctedAA += 0.25 * Rf;
                 }
@@ -130,5 +139,10 @@ namespace AWSK.Models {
             }
             return false;
         }
+
+        /// <summary>
+        /// 爆戦系ならtrue
+        /// </summary>
+        public bool IsBombFighter { get; private set; }
     }
 }
