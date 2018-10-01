@@ -10,9 +10,6 @@
     <UserControl.DataContext>
         <local:BasedAirUnitViewModel/>
     </UserControl.DataContext>
-    <UserControl.Resources>
-        <local:BasedAirUnitViewModel x:Key="BasedAirUnitViewModel"/>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -26,23 +23,23 @@
                 <ComboBoxItem Content="集中"/>
             </ComboBox>
         </StackPanel>
-        <StackPanel Grid.Row="1" IsEnabled="{Binding Path=IsEnabled.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <StackPanel Grid.Row="1" IsEnabled="{Binding Model.Value.IsEnabled.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
             <c:SelectWeaponBox Grid.Row="1" Margin="2.5,2.5,2.5,2.5"
-                               WeaponName="{Binding WeaponName[0].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               MasterLevel="{Binding MasterLevelIndex[0].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[0].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
+                               WeaponName="{Binding Model.Value.WeaponName[0].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               MasterLevel="{Binding Model.Value.MasterLevelIndex[0].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               RefurbishmentLevel="{Binding Model.Value.RefurbishmentLevelIndex[0].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <c:SelectWeaponBox Grid.Row="2" Margin="2.5,2.5,2.5,2.5"
-                               WeaponName="{Binding WeaponName[1].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               MasterLevel="{Binding MasterLevelIndex[1].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[1].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
+                               WeaponName="{Binding Model.Value.WeaponName[1].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               MasterLevel="{Binding Model.Value.MasterLevelIndex[1].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               RefurbishmentLevel="{Binding Model.Value.RefurbishmentLevelIndex[1].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <c:SelectWeaponBox Grid.Row="3" Margin="2.5,2.5,2.5,2.5"
-                               WeaponName="{Binding WeaponName[2].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               MasterLevel="{Binding MasterLevelIndex[2].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[2].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
+                               WeaponName="{Binding Model.Value.WeaponName[2].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               MasterLevel="{Binding Model.Value.MasterLevelIndex[2].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               RefurbishmentLevel="{Binding Model.Value.RefurbishmentLevelIndex[2].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <c:SelectWeaponBox Grid.Row="4" Margin="2.5,2.5,2.5,2.5"
-                               WeaponName="{Binding WeaponName[3].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               MasterLevel="{Binding MasterLevelIndex[3].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[3].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
+                               WeaponName="{Binding Model.Value.WeaponName[3].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               MasterLevel="{Binding Model.Value.MasterLevelIndex[3].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               RefurbishmentLevel="{Binding Model.Value.RefurbishmentLevelIndex[3].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
     </Grid>
 </UserControl>

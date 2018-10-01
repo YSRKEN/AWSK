@@ -52,7 +52,7 @@ namespace AWSK.Control {
             // オブジェクトを取得して処理する
             var control = obj as BasedAirUnitControl;
             if (control != null) {
-                (control.DataContext as BasedAirUnitViewModel).BasedAirUnitUnitText.Value = control.BasedAirUnitUnitText;
+                (control.DataContext as BasedAirUnitViewModel).Model.Value.BasedAirUnitUnitText.Value = control.BasedAirUnitUnitText;
             }
         }
         #endregion
