@@ -16,7 +16,7 @@ namespace AWSK.Control {
             InitializeComponent();
             WeaponName = "";
             MasterLevel = "0";
-            //RefurbishmentLevel = 0;
+            RefurbishmentLevel = "0";
         }
 
         #region 装備名
