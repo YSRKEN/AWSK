@@ -10,8 +10,6 @@ namespace AWSK.Model {
     /// MainViewに対するModelクラス
     /// </summary>
     class MainModel {
-        public ReactiveProperty<string> SampleProperty { get; } = new ReactiveProperty<string>("烈風");
-
         public MainModel() {
         }
     }

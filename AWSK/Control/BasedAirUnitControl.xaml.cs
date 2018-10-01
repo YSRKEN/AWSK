@@ -33,7 +33,7 @@ namespace AWSK.Control {
         /// </summary>
         public static readonly DependencyProperty BasedAirUnitUnitTextProperty =
             DependencyProperty.Register("BasedAirUnitUnitText", typeof(string), typeof(BasedAirUnitControl),
-            new FrameworkPropertyMetadata("BasedAirUnitUnitText", new PropertyChangedCallback(OnBasedAirUnitUnitTextChanged)));
+            new FrameworkPropertyMetadata("", new PropertyChangedCallback(OnBasedAirUnitUnitTextChanged)));
 
         /// <summary>
         /// 部隊名を参照するためのプロパティ

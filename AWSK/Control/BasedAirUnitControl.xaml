@@ -26,27 +26,23 @@
                 <ComboBoxItem Content="集中"/>
             </ComboBox>
         </StackPanel>
-        <!--
-        なぜか動かない
-        <StackPanel Grid.Row="1" IsEnabled="{Binding Path=IsEnabled.Value, Source={StaticResource ResourceKey=BasedAirUnitViewModel}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-        -->
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1" IsEnabled="{Binding Path=IsEnabled.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
             <c:SelectWeaponBox Grid.Row="1" Margin="2.5,2.5,2.5,2.5"
                                WeaponName="{Binding WeaponName[0].Value, Source={StaticResource BasedAirUnitViewModel}}"
                                MasterLevel="{Binding MasterLevelIndex[0].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[0].Value, Source={StaticResource ResourceKey=BasedAirUnitViewModel}}"/>
+                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[0].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
             <c:SelectWeaponBox Grid.Row="2" Margin="2.5,2.5,2.5,2.5"
                                WeaponName="{Binding WeaponName[1].Value, Source={StaticResource BasedAirUnitViewModel}}"
                                MasterLevel="{Binding MasterLevelIndex[1].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[1].Value, Source={StaticResource ResourceKey=BasedAirUnitViewModel}}"/>
+                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[1].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
             <c:SelectWeaponBox Grid.Row="3" Margin="2.5,2.5,2.5,2.5"
                                WeaponName="{Binding WeaponName[2].Value, Source={StaticResource BasedAirUnitViewModel}}"
                                MasterLevel="{Binding MasterLevelIndex[2].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[2].Value, Source={StaticResource ResourceKey=BasedAirUnitViewModel}}"/>
+                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[2].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
             <c:SelectWeaponBox Grid.Row="4" Margin="2.5,2.5,2.5,2.5"
                                WeaponName="{Binding WeaponName[3].Value, Source={StaticResource BasedAirUnitViewModel}}"
                                MasterLevel="{Binding MasterLevelIndex[3].Value, Source={StaticResource BasedAirUnitViewModel}}"
-                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[3].Value, Source={StaticResource ResourceKey=BasedAirUnitViewModel}}"/>
+                               RefurbishmentLevel="{Binding RefurbishmentLevelIndex[3].Value, Source={StaticResource BasedAirUnitViewModel}}"/>
         </StackPanel>
     </Grid>
 </UserControl>
