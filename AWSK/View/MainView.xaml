@@ -12,6 +12,6 @@
     </Window.DataContext>
     <Grid>
         <TextBlock Text="{Binding SampleProperty.Value}"/>
-        <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5" Width="300"/>
+        <c:SelectWeaponBox Margin="2.5,2.5,2.5,2.5" Width="300" WeaponName="烈風" MasterLevel="7" RefurbishmentLevel="0"/>
     </Grid>
 </Window>
