@@ -10,6 +10,10 @@ namespace AWSK {
             foreach (var pair in KammusuTypeDic) {
                 KammusuTypeReverseDic[pair.Value] = pair.Key;
             }
+            WeaponTypeReverseDicShort = new Dictionary<string, WeaponType>();
+            foreach (var pair in WeaponTypeDicShort) {
+                WeaponTypeReverseDicShort[pair.Value] = pair.Key;
+            }
         }
 
         /// <summary>
@@ -111,6 +115,31 @@ namespace AWSK {
                 { WeaponType.LA, "陸上攻撃機" },
                 { WeaponType.LF, "陸上戦闘機" },
         };
+
+        /// <summary>
+        /// 装備種enumを短縮された装備文字列に変換する
+        /// </summary>
+        public static readonly Dictionary<WeaponType, string> WeaponTypeDicShort =
+            new Dictionary<WeaponType, string>{
+                { WeaponType.Other, "他" },
+                { WeaponType.PF, "艦戦" },
+                { WeaponType.PB, "艦爆" },
+                { WeaponType.PA, "艦攻" },
+                { WeaponType.JPB, "墳式" },
+                { WeaponType.PS, "艦偵" },
+                { WeaponType.WF, "水戦" },
+                { WeaponType.WB, "水爆" },
+                { WeaponType.WS, "水偵" },
+                { WeaponType.LFB, "大艇" },
+                { WeaponType.LB, "陸爆" },
+                { WeaponType.LA, "陸攻" },
+                { WeaponType.LF, "陸戦" },
+        };
+
+        /// <summary>
+        /// 短縮された装備種文字列を装備種enumに変換する
+        /// </summary>
+        public static Dictionary<string, WeaponType> WeaponTypeReverseDicShort = null;
 
         /// <summary>
         /// 装備種文字列を装備種enumに変換する(Wikia用)

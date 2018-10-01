@@ -10,14 +10,14 @@
     </UserControl.DataContext>
     <Grid Height="30">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="60"/>
             <ColumnDefinition Width="160"/>
             <ColumnDefinition Width="60"/>
             <ColumnDefinition Width="60"/>
         </Grid.ColumnDefinitions>
         <ComboBox Grid.Column="0" Margin="2.5,2.5,2.5,2.5"
                   SelectedItem="{Binding Category.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                  ItemsSource="{Binding CategoryList, UpdateSourceTrigger=PropertyChanged}"/>
+                  ItemsSource="{Binding CategoryList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
         <ComboBox Grid.Column="1" Margin="2.5,2.5,2.5,2.5"
                   SelectedItem="{Binding Name.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   ItemsSource="{Binding NameList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>

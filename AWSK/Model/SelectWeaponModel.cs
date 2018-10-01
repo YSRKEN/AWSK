@@ -8,6 +8,7 @@ using static AWSK.Constant;
 using Reactive.Bindings.Extensions;
 using System.Reactive.Linq;
 using System.Collections.ObjectModel;
+using AWSK.Service;
 
 namespace AWSK.Model {
     /// <summary>
@@ -19,7 +20,7 @@ namespace AWSK.Model {
         /// <summary>
         /// 装備種
         /// </summary>
-        public ReactiveProperty<string> Category { get; }
+        public ReactiveProperty<string> Category { get; } = new ReactiveProperty<string>();
 
         /// <summary>
         /// 装備種リスト
@@ -29,11 +30,12 @@ namespace AWSK.Model {
         /// <summary>
         /// 装備名
         /// </summary>
-        public ReactiveProperty<string> Name { get; }
+        public ReactiveProperty<string> Name { get; } = new ReactiveProperty<string>();
 
         /// <summary>
         /// 装備名リスト
         /// </summary>
+        private ObservableCollection<string> nameList = new ObservableCollection<string>();
         public ReadOnlyReactiveCollection<string> NameList { get; }
 
         /// <summary>
@@ -63,9 +65,22 @@ namespace AWSK.Model {
         public SelectWeaponModel() {
             // 装備種、装備種リストを初期化
             CategoryList = new ObservableCollection<string>(
-                BAUWeaponTypeSet.Select(t => WeaponTypeDic[t])
+                BAUWeaponTypeSet.Select(t => WeaponTypeDicShort[t])
             ).ToReadOnlyReactiveCollection();
-            Category = new ReactiveProperty<string>(CategoryList[0]);
+            Category = new ReactiveProperty<string>();
+
+            // 装備名、装備名リストを「装備種の選択に追従するように」初期化
+            NameList = nameList.ToReadOnlyReactiveCollection();
+            Category.Subscribe(value => {
+                if (value == null)
+                    return;
+                var database = DataBaseService.Instance;
+                nameList.Clear();
+                nameList.Add("なし");
+                database.FindByType(WeaponTypeReverseDicShort[value]).ForEach(w => nameList.Add(w.Name));
+                Name.Value = nameList[0];
+            });
+            Category.Value = CategoryList[0];
         }
     }
 }

@@ -516,6 +516,34 @@ namespace AWSK.Service {
         }
 
         /// <summary>
+        /// 装備情報を装備種から絞り込んで返す
+        /// </summary>
+        /// <param name="type">装備種</param>
+        /// <returns>装備リスト。未ヒットの場合は空配列</returns>
+        public List<Weapon> FindByType(WeaponType type) {
+            // SELECT文を実行する
+            var queryResult = ExecuteReader($"SELECT * FROM weapon WHERE type={(int)type}");
+            if (queryResult.Count == 0) {
+                return new List<Weapon>();
+            }
+
+            // SELECT文から結果を取得して返す
+            var result = new List<Weapon>();
+            foreach (var qr in queryResult) {
+                var temp = new Weapon(
+                    (int)qr["id"],
+                    (string)qr["name"],
+                    (WeaponType)qr["type"],
+                    (int)qr["antiair"],
+                    (int)qr["intercept"],
+                    (int)qr["based_air_unit_range"],
+                    qr["for_kammusu_flg"] == 1);
+                result.Add(temp);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 深海棲艦の艦名一覧をid付きで返す
         /// </summary>
         /// <returns>艦船ID, [艦名・艦種]</returns>
