@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AWSK.Model;
+using AWSK.Models;
 
 namespace AWSK.ViewModel {
     /// <summary>
@@ -56,6 +57,11 @@ namespace AWSK.ViewModel {
         /// 改修度リスト
         /// </summary>
         public ReadOnlyReactiveCollection<string> RefurbishmentLevelList { get; }
+
+        /// <summary>
+        /// 装備
+        /// </summary>
+        public ReactiveProperty<Weapon> Weapon { get; }
         #endregion
 
         /// <summary>
@@ -71,6 +77,7 @@ namespace AWSK.ViewModel {
             this.MasterLevelList = model.MasterLevelList;
             this.RefurbishmentLevel = model.RefurbishmentLevel;
             this.RefurbishmentLevelList = model.RefurbishmentLevelList;
+            this.Weapon = model.Weapon;
         }
     }
 }

@@ -10,6 +10,7 @@ using System.Reactive.Linq;
 using System.Collections.ObjectModel;
 using AWSK.Service;
 using System.Collections;
+using AWSK.Models;
 
 namespace AWSK.Model {
     /// <summary>
@@ -58,6 +59,11 @@ namespace AWSK.Model {
         /// 改修度リスト
         /// </summary>
         public ReadOnlyReactiveCollection<string> RefurbishmentLevelList { get; }
+
+        /// <summary>
+        /// 装備
+        /// </summary>
+        public ReactiveProperty<Weapon> Weapon { get; }
         #endregion
 
         /// <summary>
@@ -86,6 +92,25 @@ namespace AWSK.Model {
 
             // 改修度リストを初期化
             RefurbishmentLevelList = new ObservableCollection<string>(Enumerable.Range(0, 11).Select(i => i.ToString())).ToReadOnlyReactiveCollection();
+
+            // 装備を初期化
+            Weapon = new ReactiveProperty<Weapon>(new Weapon());
+            Category.Subscribe(value => {
+                if (value == null)
+                    return;
+                Weapon.Value.Type = WeaponTypeReverseDicShort[value];
+            });
+            Name.Subscribe(value => {
+                if (value == null)
+                    return;
+                Weapon.Value.Name = value;
+            });
+            MasterLevel.Subscribe(value => {
+                Weapon.Value.Mas = value;
+            });
+            RefurbishmentLevel.Subscribe(value => {
+                Weapon.Value.Rf = value;
+            });
         }
     }
 }
