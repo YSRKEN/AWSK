@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AWSK.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static AWSK.Constant;
 
 namespace AWSK.View {
     /// <summary>
@@ -19,6 +21,16 @@ namespace AWSK.View {
     public partial class MainView : Window {
         public MainView() {
             InitializeComponent();
+            var swVM = this.test.DataContext as SelectWeaponViewModel;
+            var mVM = this.DataContext as MainViewModel;
+            swVM.Category.Value = WeaponTypeDicShort[mVM.SampleWeapon.Value.Type];
+            swVM.Name.Value = mVM.SampleWeapon.Value.Name;
+            swVM.MasterLevel.Value = mVM.SampleWeapon.Value.Mas;
+            swVM.RefurbishmentLevel.Value = mVM.SampleWeapon.Value.Rf;
+            swVM.Category.Subscribe(value => mVM.SampleWeapon.Value.Type = WeaponTypeReverseDicShort[value]);
+            swVM.Name.Subscribe(value => mVM.SampleWeapon.Value.Name = value);
+            swVM.MasterLevel.Subscribe(value => mVM.SampleWeapon.Value.Mas = value);
+            swVM.RefurbishmentLevel.Subscribe(value => mVM.SampleWeapon.Value.Rf = value);
         }
     }
 }

@@ -13,7 +13,8 @@
     <Window.Resources>
         <local:MainViewModel x:Key="MainViewModel"/>
     </Window.Resources>
-    <Grid Margin="2.5,2.5,2.5,2.5">
+    <StackPanel Margin="2.5,2.5,2.5,2.5">
+        <!--
         <GroupBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Header="基地航空隊" Margin="2.5,2.5,2.5,2.5">
             <Grid Margin="2.5,2.5,2.5,2.5">
                 <Grid.ColumnDefinitions>
@@ -26,5 +27,8 @@
                 <c:BasedAirUnitControl Grid.Column="2" BasedAirUnitUnitText="第3航空隊"/>
             </Grid>
         </GroupBox>
-    </Grid>
+        -->
+        <c:SelectWeaponBox x:Name="test"/>
+        <Button Height="20" Width="60" Content="テスト" Command="{Binding SampleCommand}"/>
+    </StackPanel>
 </Window>

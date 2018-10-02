@@ -5,7 +5,7 @@ namespace AWSK.Models {
     /// <summary>
     /// 装備を表現するクラス
     /// </summary>
-    class Weapon {
+    public class Weapon {
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -43,7 +43,7 @@ namespace AWSK.Models {
         /// <summary>
         /// 装備ID(図鑑番号と一致)
         /// </summary>
-        public int Id { get; }
+        public int Id { get; set; }
 
         /// <summary>
         /// 装備名
@@ -51,7 +51,7 @@ namespace AWSK.Models {
         private string name;
         public string Name {
             get => name;
-            private set {
+            set {
                 this.name = value;
 
                 // 爆戦系かの判定を連動して設定している
@@ -62,27 +62,27 @@ namespace AWSK.Models {
         /// <summary>
         /// 装備種
         /// </summary>
-        public WeaponType Type { get; }
+        public WeaponType Type { get; set; }
 
         /// <summary>
         /// 対空値
         /// </summary>
-        public int AntiAir { get; }
+        public int AntiAir { get; set; }
 
         /// <summary>
         /// 迎撃値
         /// </summary>
-        public int Intercept { get; }
+        public int Intercept { get; set; }
 
         /// <summary>
         /// 戦闘行動半径
         /// </summary>
-        public int BasedAirUnitRange { get; }
+        public int BasedAirUnitRange { get; set; }
 
         /// <summary>
         /// 艦娘用装備か？
         /// </summary>
-        public bool ForKammusuFlg { get; }
+        public bool ForKammusuFlg { get; set; }
 
         /// <summary>
         /// 艦載機熟練度

@@ -23,6 +23,7 @@
                 <ComboBoxItem Content="集中"/>
             </ComboBox>
         </StackPanel>
+        <!--
         <StackPanel Grid.Row="1" IsEnabled="{Binding Model.Value.IsEnabled.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
             <c:SelectWeaponBox Grid.Row="1" Margin="2.5,2.5,2.5,2.5"
                                WeaponName="{Binding Model.Value.WeaponName[0].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -41,5 +42,6 @@
                                MasterLevel="{Binding Model.Value.MasterLevelIndex[3].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                RefurbishmentLevel="{Binding Model.Value.RefurbishmentLevelIndex[3].Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
+        -->
     </Grid>
 </UserControl>
