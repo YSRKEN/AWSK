@@ -8,9 +8,6 @@ namespace AWSK.View {
     public partial class MainView : Window {
         public MainView() {
             InitializeComponent();
-            var swVM = this.test.DataContext as SelectWeaponViewModel;
-            var mVM = this.DataContext as MainViewModel;
-            swVM.Weapon.Value = mVM.SampleWeapon.Value;
         }
     }
 }

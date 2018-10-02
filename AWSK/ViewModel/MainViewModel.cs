@@ -17,7 +17,7 @@ namespace AWSK.ViewModel {
         /// <summary>
         /// Model
         /// </summary>
-        private MainModel model = new MainModel();
+        private readonly MainModel model = new MainModel();
 
         public ReactiveProperty<Weapon> SampleWeapon { get; }
 

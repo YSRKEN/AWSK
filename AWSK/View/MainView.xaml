@@ -28,7 +28,7 @@
             </Grid>
         </GroupBox>
         -->
-        <c:SelectWeaponBox x:Name="test"/>
+        <c:BasedAirUnitControl BasedAirUnitUnitText="第1航空隊" Margin="2.5,2.5,2.5,2.5" Width="300" Height="300"/>
         <Button Height="20" Width="60" Content="テスト" Command="{Binding SampleCommand}"/>
     </StackPanel>
 </Window>

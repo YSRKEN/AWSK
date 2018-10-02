@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static AWSK.Constant;
 
 namespace AWSK.Control {
     /// <summary>
@@ -24,7 +25,10 @@ namespace AWSK.Control {
         /// </summary>
         public BasedAirUnitControl() {
             InitializeComponent();
-            BasedAirUnitUnitText = "第1航空隊";
+            (DataContext as BasedAirUnitViewModel).WeaponList[0] = (Weapon1.DataContext as SelectWeaponViewModel).Weapon;
+            (DataContext as BasedAirUnitViewModel).WeaponList[1] = (Weapon2.DataContext as SelectWeaponViewModel).Weapon;
+            (DataContext as BasedAirUnitViewModel).WeaponList[2] = (Weapon3.DataContext as SelectWeaponViewModel).Weapon;
+            (DataContext as BasedAirUnitViewModel).WeaponList[3] = (Weapon4.DataContext as SelectWeaponViewModel).Weapon;
         }
 
         #region 部隊名
@@ -50,9 +54,8 @@ namespace AWSK.Control {
         /// <param name="e">DependencyPropertyChangedEventArgs</param>
         private static void OnBasedAirUnitUnitTextChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e) {
             // オブジェクトを取得して処理する
-            var control = obj as BasedAirUnitControl;
-            if (control != null) {
-                (control.DataContext as BasedAirUnitViewModel).Model.Value.BasedAirUnitUnitText.Value = control.BasedAirUnitUnitText;
+            if (obj is BasedAirUnitControl control) {
+                (control.DataContext as BasedAirUnitViewModel).BasedAirUnitUnitText.Value = control.BasedAirUnitUnitText;
             }
         }
         #endregion
