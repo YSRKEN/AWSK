@@ -148,6 +148,7 @@
     <Compile Include="Model\Fleet.cs" />
     <Compile Include="Model\Kammusu.cs" />
     <Compile Include="Model\MainModel.cs" />
+    <Compile Include="Model\PresetLoaderViewModel.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Service\DataBaseService.cs" />
     <Compile Include="Service\DownloadService.cs" />

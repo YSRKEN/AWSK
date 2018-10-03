@@ -18,7 +18,7 @@ namespace AWSK.Model
         /// 敵編成検索画面を開く
         /// </summary>
         private void OpenPresetLoader() {
-            var view = new View.PresetLoaderView();
+            var view = new View.PresetLoaderView { DataContext = new PresetLoaderViewModel() };
             view.Show();
         }
 
