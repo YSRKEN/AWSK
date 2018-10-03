@@ -13,6 +13,6 @@ namespace AWSK.Model
     class PresetLoaderViewModel : INotifyPropertyChanged {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private PresetLoaderModel model = new PresetLoaderModel();
+        private readonly PresetLoaderModel model = new PresetLoaderModel();
     }
 }
