@@ -1,0 +1,32 @@
+﻿<Window x:Class="AWSK.View.PresetLoaderView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AWSK.View"
+        mc:Ignorable="d"
+        Topmost="True"
+        Title="敵編成検索画面" Height="280" Width="300">
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="5,5,5,5" Text="海域"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="5,5,5,5" Text="マス"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="5,5,5,5" Text="難易度"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="5,5,5,5" Text="内容"/>
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="5,5,5,5"/>
+        <ComboBox Grid.Row="1" Grid.Column="1" Margin="5,5,5,5"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" Margin="5,5,5,5"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Margin="5,5,5,5" IsReadOnly="True"/>
+        <Button Grid.Row="4" Grid.Column="1" Margin="5,5,5,5" Content="決定"/>
+    </Grid>
+</Window>

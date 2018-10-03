@@ -147,6 +147,7 @@
     <Compile Include="Model\BasedAirUnitGroup.cs" />
     <Compile Include="Model\Fleet.cs" />
     <Compile Include="Model\Kammusu.cs" />
+    <Compile Include="Model\MainModel.cs" />
     <Compile Include="Model\Weapon.cs" />
     <Compile Include="Service\DataBaseService.cs" />
     <Compile Include="Service\DownloadService.cs" />
@@ -163,11 +164,18 @@
     <Compile Include="Views\ResultView.xaml.cs">
       <DependentUpon>ResultView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\PresetLoaderView.xaml.cs">
+      <DependentUpon>PresetLoaderView.xaml</DependentUpon>
+    </Compile>
     <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ResultView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\PresetLoaderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -76,8 +76,12 @@ namespace AWSK.ViewModels {
         public ReactiveCommand LoadBasedAirUnitCommand { get; } = new ReactiveCommand();
         // 右クリックから基地航空隊を保存
         public ReactiveCommand SaveBasedAirUnitCommand { get; } = new ReactiveCommand();
+        // 右クリックから敵編成検索画面を開く
+        public ReactiveCommand OpenPresetLoaderCommand { get; }
         #endregion
-        
+
+        private MainModel model = new MainModel();
+
         private DataBaseService dataBase = DataBaseService.Instance;
         private SimulationService simulation = SimulationService.Instance;
 
@@ -661,6 +665,7 @@ namespace AWSK.ViewModels {
             SaveEnemyUnitCommand.Subscribe(_ => SaveEnemyUnit());
             LoadBasedAirUnitCommand.Subscribe(_ => LoadBasedAirUnit());
             SaveBasedAirUnitCommand.Subscribe(_ => SaveBasedAirUnit());
+            OpenPresetLoaderCommand = model.OpenPresetLoaderCommand;
 
             // バージョンチェック
             VersionCheck();
