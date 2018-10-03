@@ -25,10 +25,6 @@ namespace AWSK.Control {
         /// </summary>
         public BasedAirUnitControl() {
             InitializeComponent();
-            (DataContext as BasedAirUnitViewModel).WeaponList[0] = (Weapon1.DataContext as SelectWeaponViewModel).Weapon;
-            (DataContext as BasedAirUnitViewModel).WeaponList[1] = (Weapon2.DataContext as SelectWeaponViewModel).Weapon;
-            (DataContext as BasedAirUnitViewModel).WeaponList[2] = (Weapon3.DataContext as SelectWeaponViewModel).Weapon;
-            (DataContext as BasedAirUnitViewModel).WeaponList[3] = (Weapon4.DataContext as SelectWeaponViewModel).Weapon;
         }
 
         #region 部隊名

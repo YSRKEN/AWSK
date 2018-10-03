@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static AWSK.Constant;
 
 namespace AWSK.ViewModel {
     class BasedAirUnitViewModel {
@@ -14,15 +15,26 @@ namespace AWSK.ViewModel {
         /// </summary>
         private BasedAirUnitModel model = new BasedAirUnitModel();
 
-        public List<ReactiveProperty<Weapon>> WeaponList;
+        private List<ReactiveProperty<Weapon>> WeaponList;
 
-        public ReactiveProperty<string> BasedAirUnitUnitText;
+        public List<SelectWeaponViewModel> SelectWeaponViewModelList { get; }
+
+        public ReactiveProperty<string> BasedAirUnitUnitText { get; }
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public BasedAirUnitViewModel() {
             WeaponList = model.WeaponList;
+            SelectWeaponViewModelList = new List<SelectWeaponViewModel>() {
+                new SelectWeaponViewModel(),
+                new SelectWeaponViewModel(),
+                new SelectWeaponViewModel(),
+                new SelectWeaponViewModel(),
+            };
+            for (int i = 0; i < BasedAirUnitMaxSize; ++i) {
+                SelectWeaponViewModelList[i].Weapon.Value = WeaponList[i].Value;
+            }
             BasedAirUnitUnitText = model.BasedAirUnitUnitText;
         }
     }

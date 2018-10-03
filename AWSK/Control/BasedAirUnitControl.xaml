@@ -24,10 +24,14 @@
             </ComboBox>
         </StackPanel>
         <StackPanel Grid.Row="1" IsEnabled="{Binding Model.Value.IsEnabled.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-            <c:SelectWeaponBox x:Name="Weapon1" Grid.Row="1" Margin="2.5,2.5,2.5,2.5"/>
-            <c:SelectWeaponBox x:Name="Weapon2" Grid.Row="2" Margin="2.5,2.5,2.5,2.5"/>
-            <c:SelectWeaponBox x:Name="Weapon3" Grid.Row="3" Margin="2.5,2.5,2.5,2.5"/>
-            <c:SelectWeaponBox x:Name="Weapon4" Grid.Row="4" Margin="2.5,2.5,2.5,2.5"/>
+            <c:SelectWeaponBox x:Name="Weapon1" Grid.Row="1" Margin="2.5,2.5,2.5,2.5"
+                               DataContext="{Binding SelectWeaponViewModelList[0], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <c:SelectWeaponBox x:Name="Weapon2" Grid.Row="2" Margin="2.5,2.5,2.5,2.5"
+                               DataContext="{Binding SelectWeaponViewModelList[1], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <c:SelectWeaponBox x:Name="Weapon3" Grid.Row="3" Margin="2.5,2.5,2.5,2.5"
+                               DataContext="{Binding SelectWeaponViewModelList[2], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <c:SelectWeaponBox x:Name="Weapon4" Grid.Row="4" Margin="2.5,2.5,2.5,2.5"
+                               DataContext="{Binding SelectWeaponViewModelList[3], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
     </Grid>
 </UserControl>

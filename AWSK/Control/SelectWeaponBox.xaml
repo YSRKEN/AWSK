@@ -5,9 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AWSK.ViewModel"
              mc:Ignorable="d">
-    <UserControl.DataContext>
-        <local:SelectWeaponViewModel/>
-    </UserControl.DataContext>
     <Grid Height="30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
