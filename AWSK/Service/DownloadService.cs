@@ -470,5 +470,37 @@ namespace AWSK.Service {
             }
             return result;
         }
+
+        /// <summary>
+        /// 出撃するマップ一覧と、それに対応するURLを算出して返す。
+        /// 対象とするマップは、恒常マップと、最新のイベントのマップ。
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Dictionary<string, string>> downloadMapList() {
+            var result = new Dictionary<string, string>();
+            // 通常海域
+            for(int i = 1; i <= 7; ++i) {
+                using (var client = new HttpClient()) {
+                    // テキストデータをダウンロード
+                    string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/World_{i}");
+
+                    // テキストデータをパース
+                    var doc = default(IHtmlDocument);
+                    var parser = new HtmlParser();
+                    doc = parser.Parse(rawData);
+
+                    // 情報を取り出す
+                    var eventDiv = doc.GetElementById("flytabs_0");
+                    var tabLis = eventDiv.QuerySelectorAll("ul.tabs > li");
+                    foreach(var tabLi in tabLis) {
+                        var aTag = tabLi.GetElementsByTagName("a")[0];
+                        string mapLink = $"http://kancolle.wikia.com{aTag.GetAttribute("href")}";
+                        string mapName = aTag.TextContent;
+                        result[mapName] = mapLink;
+                    }
+                }
+            }
+            return result;
+        }
     }
 }
