@@ -478,6 +478,21 @@ namespace AWSK.Service {
         /// <returns></returns>
         public async Task<Dictionary<string, string>> downloadMapList() {
             var result = new Dictionary<string, string>();
+
+            // 海域ページからマップ一覧を取り出すAPI
+            Func<IHtmlDocument, Dictionary<string, string>> func = (doc) => {
+                var dic = new Dictionary<string, string>();
+                var eventDiv = doc.GetElementById("EventTemplate");
+                var tabLis = eventDiv.QuerySelectorAll("ul > li");
+                foreach (var tabLi in tabLis) {
+                    var aTag = tabLi.GetElementsByTagName("a")[0];
+                    string mapLink = $"http://kancolle.wikia.com{aTag.GetAttribute("href")}";
+                    string mapName = aTag.TextContent;
+                    dic[mapName] = mapLink;
+                }
+                return dic;
+            };
+
             // 通常海域
             for(int i = 1; i <= 7; ++i) {
                 using (var client = new HttpClient()) {
@@ -490,14 +505,50 @@ namespace AWSK.Service {
                     doc = parser.Parse(rawData);
 
                     // 情報を取り出す
-                    var eventDiv = doc.GetElementById("flytabs_0");
-                    var tabLis = eventDiv.QuerySelectorAll("ul.tabs > li");
-                    foreach(var tabLi in tabLis) {
-                        var aTag = tabLi.GetElementsByTagName("a")[0];
-                        string mapLink = $"http://kancolle.wikia.com{aTag.GetAttribute("href")}";
-                        string mapName = aTag.TextContent;
-                        result[mapName] = mapLink;
+                    var temp = func(doc);
+                    foreach(var pair in temp) {
+                        result[pair.Key] = pair.Value;
                     }
+                }
+            }
+
+            // イベント海域
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/Events");
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+
+                // 情報を取り出す
+                var wikitableList = doc.QuerySelectorAll("table");
+                string eventUrl = "http://kancolle.wikia.com/wiki/Early_Fall_2018_Event";
+                foreach(var wikitable in wikitableList) {
+                    var firstTh = wikitable.QuerySelector("th");
+                    if (firstTh.TextContent != "Event") {
+                        continue;
+                    }
+                    var trList = wikitable.QuerySelectorAll("tr");
+                    foreach(var trTag in trList) {
+                        var eventTitleTag = trTag.QuerySelector("td").QuerySelector("b").QuerySelector("a");
+                        eventUrl = eventTitleTag.GetAttribute("href");
+                    }
+                }
+
+                // イベントURLから情報を取り出す
+                if (eventUrl == "") {
+                    return result;
+                }
+                rawData = await client.GetStringAsync(eventUrl);
+                doc = parser.Parse(rawData);
+                var temp = func(doc);
+                foreach (var pair in temp) {
+                    if (pair.Key.Substring(0, 2) != "E-") {
+                        continue;
+                    }
+                    result[pair.Key] = pair.Value;
                 }
             }
             return result;

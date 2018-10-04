@@ -1,6 +1,7 @@
 ﻿using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -19,13 +20,16 @@ namespace AWSK.Model
         /// <summary>
         ///  出撃マップ一覧
         /// </summary>
-        public ReadOnlyReactiveCollection<string> MapList { get; private set; }
+        public ObservableCollection<string> MapList { get; } = new ObservableCollection<string>();
 
         /// <summary>
         /// async/awaitを伴う初期化
         /// </summary>
         private async void initialize() {
-            MapList = (await model.GetMapList()).ToReadOnlyReactiveCollection();
+            var list = await model.GetMapList();
+           foreach(string mapName in list) {
+                MapList.Add(mapName);
+            }
         }
 
         /// <summary>

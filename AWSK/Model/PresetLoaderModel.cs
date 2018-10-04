@@ -24,9 +24,9 @@ namespace AWSK.Model
         /// 出撃マップ一覧を算出して返す
         /// </summary>
         /// <returns></returns>
-        public async Task<ObservableCollection<string>> GetMapList() {
+        public async Task<List<string>> GetMapList() {
             mapDic = await download.downloadMapList();
-            return new ObservableCollection<string>(mapDic.Keys);
+            return mapDic.Keys.ToList();
         }
     }
 }
