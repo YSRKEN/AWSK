@@ -25,8 +25,13 @@ namespace AWSK.Model
         /// </summary>
         /// <returns></returns>
         public async Task<List<string>> GetMapList() {
-            mapDic = await download.downloadMapList();
-            return mapDic.Keys.ToList();
+            try {
+                mapDic = await download.downloadMapList();
+                return mapDic.Keys.ToList();
+            }catch(Exception e) {
+                Console.WriteLine(e);
+                return new List<string>();
+            }
         }
     }
 }

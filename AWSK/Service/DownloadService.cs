@@ -515,7 +515,7 @@ namespace AWSK.Service {
             // イベント海域
             using (var client = new HttpClient()) {
                 // テキストデータをダウンロード
-                string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/Events");
+                string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/Events/Main");
 
                 // テキストデータをパース
                 var doc = default(IHtmlDocument);
@@ -524,7 +524,7 @@ namespace AWSK.Service {
 
                 // 情報を取り出す
                 var wikitableList = doc.QuerySelectorAll("table");
-                string eventUrl = "http://kancolle.wikia.com/wiki/Early_Fall_2018_Event";
+                string eventUrl = "";
                 foreach(var wikitable in wikitableList) {
                     var firstTh = wikitable.QuerySelector("th");
                     if (firstTh.TextContent != "Event") {
@@ -532,8 +532,10 @@ namespace AWSK.Service {
                     }
                     var trList = wikitable.QuerySelectorAll("tr");
                     foreach(var trTag in trList) {
-                        var eventTitleTag = trTag.QuerySelector("td").QuerySelector("b").QuerySelector("a");
-                        eventUrl = eventTitleTag.GetAttribute("href");
+                        var eventTitleTag = trTag.QuerySelector("td > b > a");
+                        if (eventTitleTag != null) {
+                            eventUrl = eventTitleTag.GetAttribute("href");
+                        }
                     }
                 }
 
@@ -541,7 +543,7 @@ namespace AWSK.Service {
                 if (eventUrl == "") {
                     return result;
                 }
-                rawData = await client.GetStringAsync(eventUrl);
+                rawData = await client.GetStringAsync($"http://kancolle.wikia.com{eventUrl}");
                 doc = parser.Parse(rawData);
                 var temp = func(doc);
                 foreach (var pair in temp) {

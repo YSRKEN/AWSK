@@ -6,9 +6,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
-namespace AWSK.Model
-{
+namespace AWSK.Model {
     /// <summary>
     /// 敵編成検索画面のViewModel
     /// </summary>
@@ -26,8 +26,13 @@ namespace AWSK.Model
         /// async/awaitを伴う初期化
         /// </summary>
         private async void initialize() {
+            // マップ一覧を取得
             var list = await model.GetMapList();
-           foreach(string mapName in list) {
+            if (list.Count == 0) {
+                MessageBox.Show("マップ情報をダウンロードできませんでした。", "AWSK", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            foreach (string mapName in list) {
                 MapList.Add(mapName);
             }
         }
