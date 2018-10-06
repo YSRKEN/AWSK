@@ -722,7 +722,12 @@ namespace AWSK.Service {
                         continue;
                     }
                     if (imgTag.GetAttribute("alt").Contains("Map")) {
-                        return imgTag.GetAttribute("data-src");
+                        if (imgTag.HasAttribute("data-src")) {
+                            return imgTag.GetAttribute("data-src");
+                        }
+                        else if (imgTag.HasAttribute("src")) {
+                            return imgTag.GetAttribute("src");
+                        }
                     }
                 }
             }
