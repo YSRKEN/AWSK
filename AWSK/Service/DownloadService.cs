@@ -626,6 +626,7 @@ namespace AWSK.Service {
                             spanTag.Remove();
                         }
 
+                        // 敵編成を読み取る
                         var aList = tdList[tempIndex].QuerySelectorAll("a.link-internal");
                         var enemyList = new List<Kammusu>();
                         var fleet = new Fleet();
@@ -651,8 +652,12 @@ namespace AWSK.Service {
                             }
                         }
 
+                        // ラスダンで編成が変わる場合の対策
+                        var formationTd = tdList[tempIndex - 1];
+                        bool finalFlg = formationTd.TextContent.Contains("(Final)");
+
                         // 読み取った敵編成を辞書に登録する
-                        result[$"{pointName}-{patternIndex}"] = fleet;
+                        result[$"{pointName}-{patternIndex}{(finalFlg ? " (Final)": "")}"] = fleet;
 
                         // 次のループに向けた処理
                             if (firstFlg)
