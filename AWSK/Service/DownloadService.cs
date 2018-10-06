@@ -184,7 +184,7 @@ namespace AWSK.Service {
         }
 
         /// <summary>
-        /// 装備リストをデッキビルダーからダウンロードする
+        /// 装備リストをWikiaからダウンロードする
         /// </summary>
         /// <returns>装備リスト</returns>
         public async Task<List<Weapon>> downloadWeaponDataFromWikiaAsync() {
@@ -265,7 +265,7 @@ namespace AWSK.Service {
                         antiAir = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
                     }
                     if (rawStatDic.ContainsKey("Icon_Interception")) {
-                        intersept = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
+                        intersept = int.Parse(rawStatDic["Icon_Interception"].Replace("+", ""));
                     }
 
                     // 戦闘行動半径を取得する
