@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace AWSK {
-    static class Constant {
+    public static class Constant {
         /// <summary>
         /// staticコンストラクタ
         /// </summary>
@@ -23,7 +23,7 @@ namespace AWSK {
         /// <summary>
         /// 艦種enumを艦種文字列に変換する
         /// </summary>
-        public static Dictionary<KammusuType, string> KammusuTypeDic =
+        public static readonly Dictionary<KammusuType, string> KammusuTypeDic =
             new Dictionary<KammusuType, string>{
                 { KammusuType.Other, "その他" },
                 { KammusuType.DD, "駆逐艦" },
@@ -57,6 +57,35 @@ namespace AWSK {
         public static Dictionary<string, KammusuType> KammusuTypeReverseDic = null;
 
         /// <summary>
+        /// 艦種文字列を艦種enumに変換する(Wikia用)
+        /// </summary>
+        public static readonly Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
+            = new Dictionary<string, KammusuType>{
+                {"AP", KammusuType.AO},
+                {"AV", KammusuType.AV},
+                {"BB", KammusuType.BB},
+                {"BBV", KammusuType.BBV},
+                {"CA", KammusuType.CA},
+                {"CAV", KammusuType.CAV},
+                {"CL", KammusuType.CL},
+                {"CLT", KammusuType.CLT},
+                {"CV", KammusuType.CV},
+                {"CVL", KammusuType.CVL},
+                {"DD", KammusuType.DD},
+                {"FBB", KammusuType.CC},
+                {"SS", KammusuType.SS},
+        };
+
+        /// <summary>
+        /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
+        /// </summary>
+        public static readonly HashSet<string> AFSet = new HashSet<string> {
+            "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
+            "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
+            "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
+        };
+
+        /// <summary>
         /// 装備種を表すenum
         /// </summary>
         public enum WeaponType {
@@ -66,7 +95,7 @@ namespace AWSK {
         /// <summary>
         /// 装備種enumを装備文字列に変換する
         /// </summary>
-        public static Dictionary<WeaponType, string> WeaponTypeDic =
+        public static readonly Dictionary<WeaponType, string> WeaponTypeDic =
             new Dictionary<WeaponType, string>{
                 { WeaponType.Other, "その他" },
                 { WeaponType.PF, "艦上戦闘機" },
@@ -84,21 +113,9 @@ namespace AWSK {
         };
 
         /// <summary>
-        /// 最大のスロット数
+        /// 装備種文字列を装備種enumに変換する(Wikia用)
         /// </summary>
-        public static int MAX_SLOT_COUNT = 5;
-
-        /// <summary>
-        /// 深海棲艦における「航空戦艦」の中で陸上型なリスト
-        /// </summary>
-        public static HashSet<string> AFSet = new HashSet<string> {
-            "飛行場姫", "港湾棲姫", "離島棲鬼", "北方棲姫", "中間棲姫",
-            "港湾水鬼", "泊地水鬼", "港湾棲姫", "集積地棲姫", "集積地棲姫-壊",
-            "離島棲姫", "港湾夏姫", "港湾夏姫-壊", "北端上陸姫", "集積地夏姫",
-        };
-
-        //Other, PF, PB, PA, JPB, PS, WF, WB, WS, LFB, LB, LA, LF
-        public static Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
+        public static readonly Dictionary<string, WeaponType> WeaponTypeReverseDicWikia
             = new Dictionary<string, WeaponType>{
                 {"Carrier-based Fighter Aircraft", WeaponType.PF},
                 {"Carrier-based Dive Bomber", WeaponType.PB},
@@ -113,21 +130,79 @@ namespace AWSK {
                 {"Land-based Fighter", WeaponType.LF},
         };
 
-        public static Dictionary<string, KammusuType> KammusuTypeReverseDicWikia
-            = new Dictionary<string, KammusuType>{
-                {"AP", KammusuType.AO},
-                {"AV", KammusuType.AV},
-                {"BB", KammusuType.BB},
-                {"BBV", KammusuType.BBV},
-                {"CA", KammusuType.CA},
-                {"CAV", KammusuType.CAV},
-                {"CL", KammusuType.CL},
-                {"CLT", KammusuType.CLT},
-                {"CV", KammusuType.CV},
-                {"CVL", KammusuType.CVL},
-                {"DD", KammusuType.DD},
-                {"FBB", KammusuType.CC},
-                {"SS", KammusuType.SS},
+        /// <summary>
+        /// 基地航空隊に使用できる装備種一覧
+        /// </summary>
+        public static readonly HashSet<WeaponType> BAUWeaponTypeSet
+            = new HashSet<WeaponType> {
+                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
+                WeaponType.PS, WeaponType.WF, WeaponType.WB, WeaponType.WS,
+                WeaponType.LFB, WeaponType.LB, WeaponType.LA, WeaponType.LF
         };
+
+        /// <summary>
+        /// 航空戦に参加する装備種一覧
+        /// </summary>
+        public static readonly HashSet<WeaponType> AAVWeaponTypeSet
+            = new HashSet<WeaponType> {
+                WeaponType.PF, WeaponType.PB, WeaponType.PA, WeaponType.JPB,
+                WeaponType.WF, WeaponType.WB,
+                WeaponType.LB, WeaponType.LA, WeaponType.LF
+        };
+
+        /// <summary>
+        /// 最大のスロット数
+        /// </summary>
+        public static readonly int MAX_SLOT_COUNT = 5;
+
+        /// <summary>
+        /// 艦戦・水戦制空ボーナス
+        /// </summary>
+        public static readonly int[] PfWfBonus = new int[] { 0, 0, 2, 5, 9, 14, 14, 22, 22 };
+
+        /// <summary>
+        /// 水爆制空ボーナス
+        /// </summary>
+        public static readonly int[] WbBonus = new int[] { 0, 0, 1, 1, 1, 3, 3, 6, 6 };
+
+        /// <summary>
+        /// 内部熟練ボーナス
+        /// </summary>
+        public static readonly int[] MasBonus = new int[] { 0, 10, 25, 40, 55, 70, 85, 100, 120 };
+
+        public static readonly string[] MasStringList = { "", "|", "||", "|||", "/", "//", "///", ">>" };
+
+        /// <summary>
+        /// データベースの状態(既にデータが存在する・ダウンロード成功・ダウンロード失敗)
+        /// </summary>
+        public enum DataStoreStatus { Exist, Success, Failed }
+
+        /// <summary>
+        /// 制空状況(制空権確保～制空権喪失、種類数)
+        /// </summary>
+        public enum AirWarStatus { Best, Good, Even, Bad, Worst, Size }
+
+        /// <summary>
+        /// 制空状況enumを制空状況文字列に変換する
+        /// </summary>
+        public static readonly Dictionary<AirWarStatus, string> AirWarStatusDic
+            = new Dictionary<AirWarStatus, string>{
+                { AirWarStatus.Best, "確保" },
+                { AirWarStatus.Good, "優勢" },
+                { AirWarStatus.Even, "均衡" },
+                { AirWarStatus.Bad, "劣勢" },
+                { AirWarStatus.Worst, "喪失" },
+            };
+
+        /// <summary>
+        /// ゲーム内で登場する最大のスロットサイズ
+        /// </summary>
+        public static readonly int MaxSlotSize = 300;
+
+        public static readonly Dictionary<string, int> MapLevelDoc
+            = new Dictionary<string, int> {
+                { "甲", 0 }, { "乙", 1 }, { "丙", 2 }, { "丁", 3 }
+            };
     }
 }
+;

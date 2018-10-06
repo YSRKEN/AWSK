@@ -1,0 +1,52 @@
+﻿<Window x:Class="AWSK.View.PresetLoaderView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Topmost="True" Title="{Binding Title.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Height="450" Width="400">
+    <Grid Margin="5,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <!-- 出撃マップ -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="5,5,5,5" Text="マップ" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="0" Grid.Column="1" Margin="5,5,5,5"
+                  ItemsSource="{Binding MapList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedIndex="{Binding MapSelectIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- 敵の難易度 -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="5,5,5,5" Text="難易度" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="1" Grid.Column="1" Margin="5,5,5,5"
+                  ItemsSource="{Binding LevelList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedIndex="{Binding LevelSelectIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- 海域内のマス -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="5,5,5,5" Text="マス" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" Margin="5,5,5,5"
+                  ItemsSource="{Binding PointList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedIndex="{Binding PointSelectIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="5,5,5,5" Text="マップ画像" VerticalAlignment="Center"/>
+        <Image Grid.Row="3" Grid.Column="1" Margin="5,5,5,5"
+               Source="{Binding MapImageUrl.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- 敵の内容 -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="5,5,5,5" Text="内容" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Margin="5,5,5,5" IsReadOnly="True"
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto"
+                 Text="{Binding EnemyInfo.Value, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- 決定ボタン -->
+        <Button Grid.Row="5" Grid.Column="1" Margin="5,5,5,5" Content="決定" Command="{Binding SetEnemyFleetCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+    </Grid>
+</Window>

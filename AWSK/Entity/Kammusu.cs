@@ -5,13 +5,14 @@ namespace AWSK.Models {
     /// <summary>
     /// 艦娘を表現するクラス
     /// </summary>
-    class Kammusu {
+    public class Kammusu {
         /// <summary>
         /// コンストラクタ
         /// </summary>
         public Kammusu() {
             Id = 0;
             Name = "なし";
+            Level = 1;
             Type = KammusuType.Other;
             AntiAir = 0;
             SlotList = new List<int>();
@@ -31,6 +32,7 @@ namespace AWSK.Models {
         public Kammusu(int id, string name, KammusuType type, int antiAir, List<int> slotList, bool kammusuFlg) {
             Id = id;
             Name = name;
+            Level = 1;
             Type = type;
             AntiAir = antiAir;
             SlotList = slotList;
@@ -50,6 +52,11 @@ namespace AWSK.Models {
         /// 艦船名
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// レベル
+        /// </summary>
+        public int Level { get; set; }
 
         /// <summary>
         /// 艦種

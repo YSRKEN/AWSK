@@ -324,6 +324,7 @@
 					<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
 					<MenuItem Header="編成を読込" Command="{Binding LoadEnemyUnitCommand}" />
 					<MenuItem Header="編成を保存" Command="{Binding SaveEnemyUnitCommand}" />
+                    <MenuItem Header="編成を検索" Command="{Binding OpenPresetLoaderCommand}" />
 				</ContextMenu>
 			</GroupBox.ContextMenu>
 			<Grid>
@@ -369,6 +370,7 @@
 										<MenuItem Header="詳細を表示" Command="{Binding ShowEnemyUnitCommand}" />
 										<MenuItem Header="編成を読込" Command="{Binding LoadEnemyUnitCommand}" />
 										<MenuItem Header="編成を保存" Command="{Binding SaveEnemyUnitCommand}" />
+                                        <MenuItem Header="編成を検索" Command="{Binding OpenPresetLoaderCommand}" />
 									</ContextMenu>
 								</ComboBox.ContextMenu>
 							</ComboBox>
