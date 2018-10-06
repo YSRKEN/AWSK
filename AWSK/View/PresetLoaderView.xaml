@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" Topmost="True" Title="敵編成検索画面" Height="280" Width="300">
+        mc:Ignorable="d" Topmost="True" Title="敵編成検索画面" Height="300" Width="300">
     <Grid Margin="5,5,5,5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -20,15 +20,18 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="5,5,5,5" Text="マップ"/>
         <ComboBox Grid.Row="0" Grid.Column="1" Margin="5,5,5,5"
                   ItemsSource="{Binding MapList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                  SelectedIndex="0"/>
+                  SelectedIndex="{Binding MapSelectIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- 敵の難易度 -->
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="5,5,5,5" Text="難易度"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" Margin="5,5,5,5"
+                  ItemsSource="{Binding LevelList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedIndex="{Binding LevelSelectIndex.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!-- 海域内のマス -->
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="5,5,5,5" Text="マス"/>
-        <ComboBox Grid.Row="1" Grid.Column="1" Margin="5,5,5,5"/>
-
-        <!-- 敵の編成 -->
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="5,5,5,5" Text="編成"/>
-        <ComboBox Grid.Row="2" Grid.Column="1" Margin="5,5,5,5"/>
+        <ComboBox Grid.Row="1" Grid.Column="1" Margin="5,5,5,5"
+                  ItemsSource="{Binding PointList, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!-- 敵の内容 -->
         <TextBlock Grid.Row="3" Grid.Column="0" Margin="5,5,5,5" Text="内容"/>

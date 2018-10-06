@@ -1,5 +1,6 @@
 ﻿using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using AWSK.Model;
 using AWSK.Models;
 using Codeplex.Data;
 using System;
@@ -551,6 +552,113 @@ namespace AWSK.Service {
                         continue;
                     }
                     result[pair.Key] = pair.Value;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// URLから
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<string, Fleet>> downloadPointList(string url, string levelName) {
+            var result = new Dictionary<string, Fleet>();
+            var database = DataBaseService.Instance;
+
+            // URLと難易度選択から、マス毎の編成を取り出す
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync(url);
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+
+                // 「マップのマスと敵編成一覧」情報を取り出す
+                var scrollableDivList = doc.QuerySelectorAll("div.scrollable");
+                var scrollableDiv = scrollableDivList.Count() == 1  //「マップのマスと敵編成一覧」の数によって分岐
+                    ? scrollableDivList[0]
+                    : scrollableDivList[MapLevelDoc[levelName]];
+
+                // 「マップのマスと敵編成一覧」をパースして順次代入する
+                var pointTableList = scrollableDiv.QuerySelectorAll("table");
+                foreach(var pointTable in pointTableList) {
+                    // 戦闘しないテーブルは無視する
+                    string thText = pointTable.QuerySelector("th").TextContent;
+                    if (thText.Contains("Empty Node")) {
+                        continue;
+                    }
+
+                    // テーブルの中でtdを持つtr一覧を取得し、マス名と敵編成を読み取る
+                    var trList = pointTable.QuerySelectorAll("tr");
+                    string pointName = "";
+                    int patternIndex = 1;
+                    bool firstFlg = true;
+                    foreach(var trTag in trList) {
+                        // tdを持たないtrは無視する
+                        var tdList = trTag.QuerySelectorAll("td");
+                        if (tdList.Count() == 0) {
+                            continue;
+                        }
+
+                        // 最初のtrは、tdとしてマス名を含むので取得する
+                        if (firstFlg) {
+                            pointName = tdList[0].TextContent.Replace("\n", "");
+                        }
+
+                        // 敵編成が記録されているtdの位置を判断する
+                        int tempIndex = -1;
+                        for(int i = 0; i < tdList.Count(); ++i) {
+                            if (tdList[i].QuerySelectorAll("a.link-internal").Count() > 0) {
+                                tempIndex = i;
+                                break;
+                            }
+                        }
+                        if (tempIndex == -1) {
+                            continue;
+                        }
+
+                        // 余計なタグを削除する
+                        var spanSpanList = tdList[tempIndex].QuerySelectorAll("span > span");
+                        foreach(var spanTag in spanSpanList) {
+                            spanTag.Remove();
+                        }
+
+                        var aList = tdList[tempIndex].QuerySelectorAll("a.link-internal");
+                        var enemyList = new List<Kammusu>();
+                        var fleet = new Fleet();
+                        foreach (var aTag in aList) {
+                            int enemyId = int.Parse(Regex.Replace(aTag.GetAttribute("title"), ".*\\((\\d+)\\):.*", "$1"));
+                            enemyList.Add(database.FindByKammusuId(enemyId, true));
+                        }
+                        if(enemyList.Count <= 6) {
+                            // 通常艦隊の場合
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            foreach(var enemy in enemyList) {
+                                fleet.KammusuList[0].Add(enemy);
+                            }
+                        } else {
+                            // 連合艦隊の場合
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            for(int i = 0; i < 6; ++i) {
+                                fleet.KammusuList[0].Add(enemyList[i]);
+                            }
+                            for (int i = 6; i < enemyList.Count; ++i) {
+                                fleet.KammusuList[1].Add(enemyList[i]);
+                            }
+                        }
+
+                        // 読み取った敵編成を辞書に登録する
+                        result[$"{pointName}-{patternIndex}"] = fleet;
+
+                        // 次のループに向けた処理
+                            if (firstFlg)
+                            firstFlg = false;
+                        ++patternIndex;
+                    }
                 }
             }
             return result;

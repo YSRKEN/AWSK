@@ -198,6 +198,11 @@ namespace AWSK {
         /// ゲーム内で登場する最大のスロットサイズ
         /// </summary>
         public static readonly int MaxSlotSize = 300;
+
+        public static readonly Dictionary<string, int> MapLevelDoc
+            = new Dictionary<string, int> {
+                { "甲", 0 }, { "乙", 1 }, { "丙", 2 }, { "丁", 3 }
+            };
     }
 }
 ;

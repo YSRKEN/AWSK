@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static AWSK.Constant;
 
 namespace AWSK.Model {
     /// <summary>
@@ -23,15 +24,37 @@ namespace AWSK.Model {
         public ObservableCollection<string> MapList { get; } = new ObservableCollection<string>();
 
         /// <summary>
+        /// 出撃マップの選択
+        /// </summary>
+        public ReactiveProperty<int> MapSelectIndex { get; } = new ReactiveProperty<int>(-1);
+
+        /// <summary>
+        /// 難易度一覧
+        /// </summary>
+        public ObservableCollection<string> LevelList { get; } = new ObservableCollection<string>(MapLevelDoc.Keys);
+
+        /// <summary>
+        /// 難易度の選択
+        /// </summary>
+        public ReactiveProperty<int> LevelSelectIndex { get; } = new ReactiveProperty<int>(0);
+
+        /// <summary>
+        ///  マス一覧
+        /// </summary>
+        public ObservableCollection<string> PointList { get; } = new ObservableCollection<string>();
+
+        /// <summary>
         /// async/awaitを伴う初期化
         /// </summary>
         private async void initialize() {
-            // マップ一覧を取得
+            // マップ情報を取得
             var list = await model.GetMapList();
             if (list.Count == 0) {
                 MessageBox.Show("マップ情報をダウンロードできませんでした。", "AWSK", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            // マップ情報をリストに登録する
             foreach (string mapName in list) {
                 MapList.Add(mapName);
             }
@@ -42,6 +65,25 @@ namespace AWSK.Model {
         /// </summary>
         public PresetLoaderViewModel() {
             initialize();
+
+            // イベントを登録する
+            MapSelectIndex.Subscribe(async value => {
+                // 入力バリデーション
+                if (MapSelectIndex.Value < 0 || MapList.Count <= MapSelectIndex.Value) {
+                    return;
+                }
+
+                // マス情報をダウンロードし、リストに登録する
+                PointList.Clear();
+                var list = await model.GetPointList(MapList[MapSelectIndex.Value], LevelList[LevelSelectIndex.Value]);
+                if (list.Count == 0) {
+                    MessageBox.Show("マス情報をダウンロードできませんでした。", "AWSK", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                foreach (string pointName in list) {
+                    PointList.Add(pointName);
+                }
+            });
         }
     }
 }

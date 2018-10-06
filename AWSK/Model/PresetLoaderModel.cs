@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace AWSK.Model
 {
-    class PresetLoaderModel
-    {
+    class PresetLoaderModel {
         /// <summary>
         /// 出撃するマップ一覧と、それに対応するURLの対応表
         /// </summary>
-        private Dictionary<string, string> mapDic = new Dictionary<string, string>();
+        private Dictionary<string, string> mapDic = null;
+
+        private Dictionary<string, Fleet> pointDic = null;
 
         /// <summary>
         /// ダウンロードサービス
@@ -26,9 +27,27 @@ namespace AWSK.Model
         /// <returns></returns>
         public async Task<List<string>> GetMapList() {
             try {
-                mapDic = await download.downloadMapList();
+                if (mapDic == null) {
+                    mapDic = await download.downloadMapList();
+                }
                 return mapDic.Keys.ToList();
-            }catch(Exception e) {
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return new List<string>();
+            }
+        }
+
+        public async Task<List<string>> GetPointList(string mapName, string levelName) {
+            // マップ情報が取れていないか、渡された入力がおかしい場合に弾く
+            if (mapDic == null || !mapDic.ContainsKey(mapName)) {
+                return new List<string>();
+            }
+
+            // マス一覧を返す
+            try {
+                pointDic = await download.downloadPointList(mapDic[mapName], levelName);
+                return pointDic.Keys.ToList();
+            } catch (Exception e) {
                 Console.WriteLine(e);
                 return new List<string>();
             }
