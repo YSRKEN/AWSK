@@ -1,9 +1,11 @@
-﻿using Reactive.Bindings;
+﻿using AWSK.ViewModels;
+using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -57,6 +59,8 @@ namespace AWSK.Model {
         /// 敵編成の内容
         /// </summary>
         public ReactiveProperty<string> EnemyInfo { get; } = new ReactiveProperty<string>("");
+
+        public ReactiveCommand SetEnemyFleetCommand { get; }
 
         /// <summary>
         /// async/awaitを伴う初期化
@@ -124,10 +128,13 @@ namespace AWSK.Model {
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public PresetLoaderViewModel() {
+        public PresetLoaderViewModel(SetEnemyFleetDelegate setEnemyFleetDelegate) {
             Title.Value = "読み込み中...";
             initialize();
             Title.Value = "敵編成検索画面";
+
+            // 変数を設定する
+            SetEnemyFleetCommand = EnemyInfo.Select(s => s != "").ToReactiveCommand();
 
             // イベントを登録する
             MapSelectIndex.Subscribe(async value => {
@@ -147,6 +154,13 @@ namespace AWSK.Model {
             });
             PointSelectIndex.Subscribe(value => {
                 RefreshEnemyInfo();
+            });
+            SetEnemyFleetCommand.Subscribe(() => {
+                if (PointSelectIndex.Value < 0 || PointList.Count <= PointSelectIndex.Value) {
+                    return;
+                }
+                var fleet = model.GetEnemyFleet(PointList[PointSelectIndex.Value]);
+                setEnemyFleetDelegate(fleet);
             });
         }
     }

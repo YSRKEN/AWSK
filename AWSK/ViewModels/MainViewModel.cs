@@ -14,6 +14,7 @@ using System.Windows;
 using static AWSK.Constant;
 
 namespace AWSK.ViewModels {
+    public delegate void SetEnemyFleetDelegate(Fleet fleet);
     public class MainViewModel {
         #region プロパティ(ReactiveProperty)
         // trueにすると画面を閉じる
@@ -80,7 +81,7 @@ namespace AWSK.ViewModels {
         public ReactiveCommand OpenPresetLoaderCommand { get; }
         #endregion
 
-        private MainModel model = new MainModel();
+        private MainModel model;
 
         private DataBaseService dataBase = DataBaseService.Instance;
         private SimulationService simulation = SimulationService.Instance;
@@ -325,24 +326,31 @@ namespace AWSK.ViewModels {
                         // テキストとして読み込んでパース
                         string output = sr.ReadToEnd();
                         var enemyData = new Fleet(output);
-                        // 敵艦隊の情報を初期化
-                        for (int ki = 0; ki < 6; ++ki) {
-                            EnemyUnitIndex[ki].Value = 0;
-                        }
-                        // 敵艦隊の情報を書き込む
-                        if (enemyData.KammusuList.Count > 0) {
-                            for (int ki = 0; ki < enemyData.KammusuList[0].Count; ++ki) {
-                                var kammusu = enemyData.KammusuList[0][ki];
-                                int typeIndex = EnemyTypeList.IndexOf(KammusuTypeDic[kammusu.Type]);
-                                int kammusuIndex = EnemyList.IndexOf($"{kammusu.Name} [{kammusu.Id}]");
-                                EnemyTypeIndex[ki].Value = typeIndex;
-                                EnemyUnitIndex[ki].Value = kammusuIndex;
-                            }
-                        }
+                        SetEnemyFleet(enemyData);
                     }
                 } catch (Exception e) {
                     Console.WriteLine(e.ToString());
                     MessageBox.Show("ファイルを開けませんでした", "AWSK");
+                }
+            }
+        }
+        /// <summary>
+        /// 敵艦隊を引数の艦隊で上書きする
+        /// </summary>
+        /// <param name="fleet">敵艦隊</param>
+        private void SetEnemyFleet(Fleet fleet) {
+            // 敵艦隊の情報を初期化
+            for (int ki = 0; ki < 6; ++ki) {
+                EnemyUnitIndex[ki].Value = 0;
+            }
+            // 敵艦隊の情報を書き込む
+            if (fleet.KammusuList.Count > 0) {
+                for (int ki = 0; ki < fleet.KammusuList[0].Count; ++ki) {
+                    var kammusu = fleet.KammusuList[0][ki];
+                    int typeIndex = EnemyTypeList.IndexOf(KammusuTypeDic[kammusu.Type]);
+                    int kammusuIndex = EnemyList.IndexOf($"{kammusu.Name} [{kammusu.Id}]");
+                    EnemyTypeIndex[ki].Value = typeIndex;
+                    EnemyUnitIndex[ki].Value = kammusuIndex;
                 }
             }
         }
@@ -492,6 +500,7 @@ namespace AWSK.ViewModels {
 
         // コンストラクタ
         public MainViewModel() {
+            model = new MainModel(SetEnemyFleet);
             // その他初期化
             Initialize();
             // ReactivePropertyを設定

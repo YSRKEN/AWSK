@@ -5,7 +5,7 @@ namespace AWSK.Models {
     /// <summary>
     /// 装備を表現するクラス
     /// </summary>
-    class Weapon {
+    public class Weapon {
         /// <summary>
         /// コンストラクタ
         /// </summary>

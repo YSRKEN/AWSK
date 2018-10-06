@@ -88,5 +88,17 @@ namespace AWSK.Model
                 return "";
             }
         }
+
+        /// <summary>
+        /// 敵編成を取り出す
+        /// </summary>
+        /// <param name="pointName">マス名</param>
+        /// <returns>敵編成</returns>
+        public Fleet GetEnemyFleet(string pointName) {
+            if (pointDic == null || !pointDic.ContainsKey(pointName)) {
+                return new Fleet();
+            }
+            return pointDic[pointName];
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace AWSK.Model {
     /// <summary>
     /// 艦隊を表現するクラス
     /// </summary>
-    class Fleet {
+    public class Fleet {
         /// <summary>
         /// 艦隊に含まれている艦娘一覧
         /// </summary>

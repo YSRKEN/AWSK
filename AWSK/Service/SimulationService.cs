@@ -183,6 +183,9 @@ namespace AWSK.Service {
         public int CalcAntiAirValue(List<Weapon> weaponList, List<int> slotData, bool wsFlg = false) {
             int sum = 0;
             for (int wi = 0; wi < weaponList.Count; ++wi) {
+                if (weaponList[wi] == null)
+                    continue;
+
                 // 加算
                 sum += CalcAntiAirValue(weaponList[wi], slotData[wi], wsFlg);
             }

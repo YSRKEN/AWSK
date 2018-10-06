@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace AWSK {
-    static class Constant {
+    public static class Constant {
         /// <summary>
         /// staticコンストラクタ
         /// </summary>
