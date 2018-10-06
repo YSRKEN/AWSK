@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using static AWSK.Constant;
 
 namespace AWSK.Model {
@@ -49,6 +50,8 @@ namespace AWSK.Model {
         ///  マスの選択
         /// </summary>
         public ReactiveProperty<int> PointSelectIndex { get; } = new ReactiveProperty<int>(0);
+
+        public ReactiveProperty<string> MapImageUrl { get; } = new ReactiveProperty<string>();
 
         /// <summary>
         /// 敵編成の内容
@@ -105,6 +108,20 @@ namespace AWSK.Model {
         }
 
         /// <summary>
+        /// マップ画像のURLを返す
+        /// </summary>
+        /// <returns>マップ画像のURL(エラー時は空白文字列)</returns>
+        private async Task<string> GetMapImageUrl() {
+            // 入力バリデーション
+            if (MapSelectIndex.Value < 0 || MapList.Count <= MapSelectIndex.Value) {
+                return "";
+            }
+
+            // ダウンロード開始
+            return await model.GetMapImageUrl(MapList[MapSelectIndex.Value]);
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public PresetLoaderViewModel() {
@@ -117,6 +134,7 @@ namespace AWSK.Model {
                 // マス情報をダウンロードし、リストに登録する
                 Title.Value = "読み込み中...";
                 await RefreshPointList();
+                MapImageUrl.Value = await GetMapImageUrl();
                 Title.Value = "敵編成検索画面";
                 RefreshEnemyInfo();
             });

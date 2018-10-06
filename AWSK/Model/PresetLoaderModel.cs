@@ -70,5 +70,23 @@ namespace AWSK.Model
             }
             return pointDic[pointName].ToString();
         }
+
+        /// <summary>
+        /// マップの画像URLを返す
+        /// </summary>
+        /// <returns>マップの画像URL</returns>
+        public async Task<string> GetMapImageUrl(string mapName) {
+            // マップ情報が取れていないか、渡された入力がおかしい場合に弾く
+            if (mapDic == null || !mapDic.ContainsKey(mapName)) {
+                return "";
+            }
+
+            try {
+                return await download.downloadMapImageUrl(mapDic[mapName]);
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                return "";
+            }
+        }
     }
 }
