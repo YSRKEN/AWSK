@@ -37,6 +37,12 @@ namespace AWSK.Model
             }
         }
 
+        /// <summary>
+        /// マス一覧を取得する
+        /// </summary>
+        /// <param name="mapName">マップ名</param>
+        /// <param name="levelName">難易度</param>
+        /// <returns>マス一覧</returns>
         public async Task<List<string>> GetPointList(string mapName, string levelName) {
             // マップ情報が取れていないか、渡された入力がおかしい場合に弾く
             if (mapDic == null || !mapDic.ContainsKey(mapName)) {
@@ -51,6 +57,18 @@ namespace AWSK.Model
                 Console.WriteLine(e);
                 return new List<string>();
             }
+        }
+
+        /// <summary>
+        /// 敵編成を表すテキストを取り出す
+        /// </summary>
+        /// <param name="pointName">マス名</param>
+        /// <returns>敵編成を表すテキスト</returns>
+        public string GetEnemyInfo(string pointName) {
+            if (pointDic == null || !pointDic.ContainsKey(pointName)) {
+                return "";
+            }
+            return pointDic[pointName].ToString();
         }
     }
 }

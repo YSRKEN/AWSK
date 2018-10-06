@@ -51,6 +51,11 @@ namespace AWSK.Model {
         public ReactiveProperty<int> PointSelectIndex { get; } = new ReactiveProperty<int>(0);
 
         /// <summary>
+        /// 敵編成の内容
+        /// </summary>
+        public ReactiveProperty<string> EnemyInfo { get; } = new ReactiveProperty<string>("");
+
+        /// <summary>
         /// async/awaitを伴う初期化
         /// </summary>
         private async void initialize() {
@@ -89,6 +94,17 @@ namespace AWSK.Model {
         }
 
         /// <summary>
+        /// 敵編成の表示を更新する
+        /// </summary>
+        /// <returns></returns>
+        private void RefreshEnemyInfo() {
+            if (PointSelectIndex.Value < 0 || PointList.Count <= PointSelectIndex.Value) {
+                return;
+            }
+            EnemyInfo.Value = model.GetEnemyInfo(PointList[PointSelectIndex.Value]);
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public PresetLoaderViewModel() {
@@ -102,12 +118,17 @@ namespace AWSK.Model {
                 Title.Value = "読み込み中...";
                 await RefreshPointList();
                 Title.Value = "敵編成検索画面";
+                RefreshEnemyInfo();
             });
             LevelSelectIndex.Subscribe(async value => {
                 // マス情報をダウンロードし、リストに登録する
                 Title.Value = "読み込み中...";
                 await RefreshPointList();
                 Title.Value = "敵編成検索画面";
+                RefreshEnemyInfo();
+            });
+            PointSelectIndex.Subscribe(value => {
+                RefreshEnemyInfo();
             });
         }
     }

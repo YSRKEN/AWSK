@@ -82,6 +82,9 @@ namespace AWSK.Model {
                     // 装備とスロット数情報を出力
                     for (int ii = 0; ii < kammusu.WeaponList.Count; ++ii) {
                         var weapon = kammusu.WeaponList[ii];
+                        if (weapon == null) {
+                            continue;
+                        }
                         if (ii != 0)
                             output.Append(",");
 
