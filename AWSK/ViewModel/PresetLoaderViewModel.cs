@@ -18,6 +18,8 @@ namespace AWSK.Model {
 
         private readonly PresetLoaderModel model = new PresetLoaderModel();
 
+        public ReactiveProperty<string> Title { get; } = new ReactiveProperty<string>("敵編成検索画面");
+
         /// <summary>
         ///  出撃マップ一覧
         /// </summary>
@@ -90,16 +92,22 @@ namespace AWSK.Model {
         /// コンストラクタ
         /// </summary>
         public PresetLoaderViewModel() {
+            Title.Value = "読み込み中...";
             initialize();
+            Title.Value = "敵編成検索画面";
 
             // イベントを登録する
             MapSelectIndex.Subscribe(async value => {
                 // マス情報をダウンロードし、リストに登録する
+                Title.Value = "読み込み中...";
                 await RefreshPointList();
+                Title.Value = "敵編成検索画面";
             });
             LevelSelectIndex.Subscribe(async value => {
                 // マス情報をダウンロードし、リストに登録する
+                Title.Value = "読み込み中...";
                 await RefreshPointList();
+                Title.Value = "敵編成検索画面";
             });
         }
     }
