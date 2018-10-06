@@ -44,6 +44,11 @@ namespace AWSK.Model {
         public ObservableCollection<string> PointList { get; } = new ObservableCollection<string>();
 
         /// <summary>
+        ///  マスの選択
+        /// </summary>
+        public ReactiveProperty<int> PointSelectIndex { get; } = new ReactiveProperty<int>(0);
+
+        /// <summary>
         /// async/awaitを伴う初期化
         /// </summary>
         private async void initialize() {
@@ -61,6 +66,27 @@ namespace AWSK.Model {
         }
 
         /// <summary>
+        /// マス情報をダウンロードし、リストに登録する
+        /// </summary>
+        private async Task RefreshPointList() {
+            // 入力バリデーション
+            if (MapSelectIndex.Value < 0 || MapList.Count <= MapSelectIndex.Value || LevelSelectIndex.Value < 0 || LevelList.Count <= LevelSelectIndex.Value) {
+                return;
+            }
+
+            // ダウンロード開始
+            PointList.Clear();
+            var list = await model.GetPointList(MapList[MapSelectIndex.Value], LevelList[LevelSelectIndex.Value]);
+            if (list.Count == 0) {
+                MessageBox.Show("マス情報をダウンロードできませんでした。", "AWSK", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            foreach (string pointName in list) {
+                PointList.Add(pointName);
+            }
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public PresetLoaderViewModel() {
@@ -68,21 +94,12 @@ namespace AWSK.Model {
 
             // イベントを登録する
             MapSelectIndex.Subscribe(async value => {
-                // 入力バリデーション
-                if (MapSelectIndex.Value < 0 || MapList.Count <= MapSelectIndex.Value) {
-                    return;
-                }
-
                 // マス情報をダウンロードし、リストに登録する
-                PointList.Clear();
-                var list = await model.GetPointList(MapList[MapSelectIndex.Value], LevelList[LevelSelectIndex.Value]);
-                if (list.Count == 0) {
-                    MessageBox.Show("マス情報をダウンロードできませんでした。", "AWSK", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                foreach (string pointName in list) {
-                    PointList.Add(pointName);
-                }
+                await RefreshPointList();
+            });
+            LevelSelectIndex.Subscribe(async value => {
+                // マス情報をダウンロードし、リストに登録する
+                await RefreshPointList();
             });
         }
     }
