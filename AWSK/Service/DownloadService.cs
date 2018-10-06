@@ -184,7 +184,7 @@ namespace AWSK.Service {
         }
 
         /// <summary>
-        /// 装備リストをデッキビルダーからダウンロードする
+        /// 装備リストをWikiaからダウンロードする
         /// </summary>
         /// <returns>装備リスト</returns>
         public async Task<List<Weapon>> downloadWeaponDataFromWikiaAsync() {
@@ -265,7 +265,7 @@ namespace AWSK.Service {
                         antiAir = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
                     }
                     if (rawStatDic.ContainsKey("Icon_Interception")) {
-                        intersept = int.Parse(rawStatDic["Icon_AA"].Replace("+", ""));
+                        intersept = int.Parse(rawStatDic["Icon_Interception"].Replace("+", ""));
                     }
 
                     // 戦闘行動半径を取得する
@@ -577,7 +577,24 @@ namespace AWSK.Service {
                 doc = parser.Parse(rawData);
 
                 // 「マップのマスと敵編成一覧」情報を取り出す
-                var scrollableDivList = doc.QuerySelectorAll("div.scrollable");
+                var scrollableDivList = doc.QuerySelectorAll("div.scrollable").ToList();
+                if (scrollableDivList.Count() == 0) {
+                    // 5-5のように、フォーマットから外れるマップに対する個別的な対処
+                    var divList = doc.QuerySelectorAll("div");
+                    foreach(var divTag in divList) {
+                        if (!divTag.HasAttribute("style")) {
+                            continue;
+                        }
+                        string style = divTag.GetAttribute("style");
+                        if (style.Contains("max-height:") && style.Contains("overflow-y:auto") && style.Contains("overflow-x:hidden")) {
+                            scrollableDivList = new List<AngleSharp.Dom.IElement> { divTag };
+                            break;
+                        }
+                    }
+                    if (scrollableDivList.Count == 0){
+                        throw new FormatException("入力データが当ソフトウェアに対応していません");
+                    }
+                }
                 var scrollableDiv = scrollableDivList.Count() == 1  //「マップのマスと敵編成一覧」の数によって分岐
                     ? scrollableDivList[0]
                     : scrollableDivList[MapLevelDoc[levelName]];
@@ -705,7 +722,12 @@ namespace AWSK.Service {
                         continue;
                     }
                     if (imgTag.GetAttribute("alt").Contains("Map")) {
-                        return imgTag.GetAttribute("data-src");
+                        if (imgTag.HasAttribute("data-src")) {
+                            return imgTag.GetAttribute("data-src");
+                        }
+                        else if (imgTag.HasAttribute("src")) {
+                            return imgTag.GetAttribute("src");
+                        }
                     }
                 }
             }
