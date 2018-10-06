@@ -1,5 +1,6 @@
 ﻿using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using AWSK.Model;
 using AWSK.Models;
 using Codeplex.Data;
 using System;
@@ -386,7 +387,7 @@ namespace AWSK.Service {
                 var parser = new HtmlParser();
                 doc = parser.Parse(rawData);
                 var tempSelect = doc.QuerySelectorAll("div > table > tbody > tr");
-                foreach(var record in tempSelect) {
+                foreach (var record in tempSelect) {
                     var tdList = record.GetElementsByTagName("td").ToList();
                     if (tdList.Count < 20) {
                         continue;
@@ -408,7 +409,7 @@ namespace AWSK.Service {
                         rawSlot.Select(s => int.Parse(s)).ToList(), false);
                     Console.WriteLine(rawName);
                     var defaultWeaponList = new List<int>();
-                    foreach(string url in rawDefaultWeapon) {
+                    foreach (string url in rawDefaultWeapon) {
                         if (!Regex.IsMatch(url, "^/wiki")) {
                             continue;
                         }
@@ -458,7 +459,7 @@ namespace AWSK.Service {
                         bool kammusuFlg = int.Parse(values[15]) == 1;
                         var kammusu = new Kammusu(id, name, type, antiAir, new List<int>(), kammusuFlg);
                         var defaultWeaponList = new List<int>();
-                        for(int i = 0; i < slotSize; ++i) {
+                        for (int i = 0; i < slotSize; ++i) {
                             int slot = int.Parse(values[5 + i]);
                             int defaultWeapon = int.Parse(values[10 + i]);
                             kammusu.SlotList.Add(slot);
@@ -469,6 +470,246 @@ namespace AWSK.Service {
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// 出撃するマップ一覧と、それに対応するURLを算出して返す。
+        /// 対象とするマップは、恒常マップと、最新のイベントのマップ。
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Dictionary<string, string>> downloadMapList() {
+            var result = new Dictionary<string, string>();
+
+            // 海域ページからマップ一覧を取り出すAPI
+            Func<IHtmlDocument, Dictionary<string, string>> func = (doc) => {
+                var dic = new Dictionary<string, string>();
+                var eventDiv = doc.GetElementById("EventTemplate");
+                var tabLis = eventDiv.QuerySelectorAll("ul > li");
+                foreach (var tabLi in tabLis) {
+                    var aTag = tabLi.GetElementsByTagName("a")[0];
+                    string mapLink = $"http://kancolle.wikia.com{aTag.GetAttribute("href")}";
+                    string mapName = aTag.TextContent;
+                    dic[mapName] = mapLink;
+                }
+                return dic;
+            };
+
+            // 通常海域
+            for (int i = 1; i <= 7; ++i) {
+                using (var client = new HttpClient()) {
+                    // テキストデータをダウンロード
+                    string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/World_{i}");
+
+                    // テキストデータをパース
+                    var doc = default(IHtmlDocument);
+                    var parser = new HtmlParser();
+                    doc = parser.Parse(rawData);
+
+                    // 情報を取り出す
+                    var temp = func(doc);
+                    foreach (var pair in temp) {
+                        result[pair.Key] = pair.Value;
+                    }
+                }
+            }
+
+            // イベント海域
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync($"http://kancolle.wikia.com/wiki/Events/Main");
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+
+                // 情報を取り出す
+                var wikitableList = doc.QuerySelectorAll("table");
+                string eventUrl = "";
+                foreach (var wikitable in wikitableList) {
+                    var firstTh = wikitable.QuerySelector("th");
+                    if (firstTh.TextContent != "Event") {
+                        continue;
+                    }
+                    var trList = wikitable.QuerySelectorAll("tr");
+                    foreach (var trTag in trList) {
+                        var eventTitleTag = trTag.QuerySelector("td > b > a");
+                        if (eventTitleTag != null) {
+                            eventUrl = eventTitleTag.GetAttribute("href");
+                        }
+                    }
+                }
+
+                // イベントURLから情報を取り出す
+                if (eventUrl == "") {
+                    return result;
+                }
+                rawData = await client.GetStringAsync($"http://kancolle.wikia.com{eventUrl}");
+                doc = parser.Parse(rawData);
+                var temp = func(doc);
+                foreach (var pair in temp) {
+                    if (pair.Key.Substring(0, 2) != "E-") {
+                        continue;
+                    }
+                    result[pair.Key] = pair.Value;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// URLから
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<string, Fleet>> downloadPointList(string url, string levelName) {
+            var result = new Dictionary<string, Fleet>();
+            var database = DataBaseService.Instance;
+
+            // URLと難易度選択から、マス毎の編成を取り出す
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync(url);
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+
+                // 「マップのマスと敵編成一覧」情報を取り出す
+                var scrollableDivList = doc.QuerySelectorAll("div.scrollable");
+                var scrollableDiv = scrollableDivList.Count() == 1  //「マップのマスと敵編成一覧」の数によって分岐
+                    ? scrollableDivList[0]
+                    : scrollableDivList[MapLevelDoc[levelName]];
+
+                // 「マップのマスと敵編成一覧」をパースして順次代入する
+                var pointTableList = scrollableDiv.QuerySelectorAll("table");
+                foreach (var pointTable in pointTableList) {
+                    // 戦闘しないテーブルは無視する
+                    string thText = pointTable.QuerySelector("th").TextContent;
+                    if (thText.Contains("Empty Node")) {
+                        continue;
+                    }
+
+                    // テーブルの中でtdを持つtr一覧を取得し、マス名と敵編成を読み取る
+                    var trList = pointTable.QuerySelectorAll("tr");
+                    string pointName = "";
+                    int patternIndex = 1;
+                    bool firstFlg = true;
+                    foreach (var trTag in trList) {
+                        // tdを持たないtrは無視する
+                        var tdList = trTag.QuerySelectorAll("td");
+                        if (tdList.Count() == 0) {
+                            continue;
+                        }
+
+                        // 最初のtrは、tdとしてマス名を含むので取得する
+                        if (firstFlg) {
+                            pointName = tdList[0].TextContent.Replace("\n", "");
+                        }
+
+                        // 敵編成が記録されているtdの位置を判断する
+                        int tempIndex = -1;
+                        for (int i = 0; i < tdList.Count(); ++i) {
+                            if (tdList[i].QuerySelectorAll("a.link-internal").Count() > 0) {
+                                tempIndex = i;
+                                break;
+                            }
+                        }
+                        if (tempIndex == -1) {
+                            continue;
+                        }
+
+                        // 余計なタグを削除する
+                        var spanSpanList = tdList[tempIndex].QuerySelectorAll("span > span");
+                        foreach (var spanTag in spanSpanList) {
+                            spanTag.Remove();
+                        }
+
+                        // 敵編成を読み取る
+                        var aList = tdList[tempIndex].QuerySelectorAll("a.link-internal");
+                        var enemyList = new List<Kammusu>();
+                        var fleet = new Fleet();
+                        foreach (var aTag in aList) {
+                            int enemyId = int.Parse(Regex.Replace(aTag.GetAttribute("title"), ".*\\((\\d+)\\):.*", "$1"));
+                            enemyList.Add(database.FindByKammusuId(enemyId, true));
+                        }
+                        if (enemyList.Count <= 6) {
+                            // 通常艦隊の場合
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            foreach (var enemy in enemyList) {
+                                fleet.KammusuList[0].Add(enemy);
+                            }
+                        } else {
+                            // 連合艦隊の場合
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            fleet.KammusuList.Add(new List<Kammusu>());
+                            for (int i = 0; i < 6; ++i) {
+                                fleet.KammusuList[0].Add(enemyList[i]);
+                            }
+                            for (int i = 6; i < enemyList.Count; ++i) {
+                                fleet.KammusuList[1].Add(enemyList[i]);
+                            }
+                        }
+
+                        // ラスダンで編成が変わる場合の対策
+                        var formationTd = tdList[tempIndex - 1];
+                        bool finalFlg = formationTd.TextContent.Contains("(Final)");
+
+                        // 読み取った敵編成を辞書に登録する
+                        result[$"{pointName}-{patternIndex}{(finalFlg ? " (Final)" : "")}"] = fleet;
+
+                        // 次のループに向けた処理
+                        if (firstFlg)
+                            firstFlg = false;
+                        ++patternIndex;
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// マップの画像URLを返す
+        /// </summary>
+        /// <param name="url">マップの画像URL</param>
+        /// <returns></returns>
+        public async Task<string> downloadMapImageUrl(string url) {
+            // URLから、マップの画像URLを取り出す
+            using (var client = new HttpClient()) {
+                // テキストデータをダウンロード
+                string rawData = await client.GetStringAsync(url);
+
+                // テキストデータをパース
+                var doc = default(IHtmlDocument);
+                var parser = new HtmlParser();
+                doc = parser.Parse(rawData);
+
+                // 目当ての画像を探す
+                var imgList = doc.QuerySelectorAll("img");
+                foreach(var imgTag in imgList) {
+                    if (!imgTag.HasAttribute("width")) {
+                        continue;
+                    }
+                    if (int.TryParse(imgTag.GetAttribute("width"), out int temp)) {
+                        if (temp < 500) {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+                    if (!imgTag.HasAttribute("height")) {
+                        continue;
+                    }
+                    if (!imgTag.HasAttribute("alt")) {
+                        continue;
+                    }
+                    if (imgTag.GetAttribute("alt").Contains("Map")) {
+                        return imgTag.GetAttribute("data-src");
+                    }
+                }
+            }
+            return "";
         }
     }
 }

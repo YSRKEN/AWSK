@@ -9,7 +9,7 @@ namespace AWSK.Model {
     /// <summary>
     /// 艦隊を表現するクラス
     /// </summary>
-    class Fleet {
+    public class Fleet {
         /// <summary>
         /// 艦隊に含まれている艦娘一覧
         /// </summary>
@@ -82,6 +82,9 @@ namespace AWSK.Model {
                     // 装備とスロット数情報を出力
                     for (int ii = 0; ii < kammusu.WeaponList.Count; ++ii) {
                         var weapon = kammusu.WeaponList[ii];
+                        if (weapon == null) {
+                            continue;
+                        }
                         if (ii != 0)
                             output.Append(",");
 

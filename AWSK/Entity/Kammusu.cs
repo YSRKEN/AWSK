@@ -5,7 +5,7 @@ namespace AWSK.Models {
     /// <summary>
     /// 艦娘を表現するクラス
     /// </summary>
-    class Kammusu {
+    public class Kammusu {
         /// <summary>
         /// コンストラクタ
         /// </summary>
