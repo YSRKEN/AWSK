@@ -105,6 +105,9 @@ namespace AWSK.ViewModels {
                     string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value].Split("：".ToCharArray())[0];
                     // 装備名から装備情報を得る
                     var weapon = dataBase.FindByWeaponName(name);
+                    if (weapon == null) {
+                        continue;
+                    }
                     weapon.Mas = BasedAirUnitMas[ui][wi].Value;
                     weapon.Rf = BasedAirUnitRf[ui][wi].Value;
                     basedAirUnit.WeaponList.Add(weapon);
@@ -158,6 +161,9 @@ namespace AWSK.ViewModels {
             if (bauIndex[index] < 0) {
                 return 0;
             }
+            if (bauData.BasedAirUnitList.Count <= bauIndex[index] || bauData.SlotList.Count <= bauIndex[index]) {
+                return 0;
+            }
             return simulation.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]]);
         }
         // 基地航空隊の指定されたインデックスにおける戦闘行動半径を返す
@@ -165,6 +171,9 @@ namespace AWSK.ViewModels {
             var bauData = GetBasedAirUnitData();
             var bauIndex = GetBasedAirUnitIndex();
             if (bauIndex[index] < 0) {
+                return 0;
+            }
+            if (bauData.BasedAirUnitList.Count <= bauIndex[index]) {
                 return 0;
             }
             return simulation.CalcBAURange(bauData.BasedAirUnitList[bauIndex[index]].WeaponList);
@@ -183,6 +192,10 @@ namespace AWSK.ViewModels {
                 string name = BasedAirUnitList[BasedAirUnitIndex[ui][wi].Value].Split("：".ToCharArray())[0];
                 // 装備名から装備情報を得る
                 var weapon = dataBase.FindByWeaponName(name);
+                if (weapon == null) {
+                    output += "装備名：なし";
+                    break;
+                }
                 weapon.Mas = BasedAirUnitMas[ui][wi].Value;
                 weapon.Rf = BasedAirUnitRf[ui][wi].Value;
                 int slot = weapon.IsSearcher ? 4 : 18;
