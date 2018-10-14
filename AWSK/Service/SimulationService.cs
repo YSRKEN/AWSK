@@ -242,7 +242,7 @@ namespace AWSK.Service {
             // 「基地航空隊の制空値を記録した配列」を事前に準備する
             var friendAntiAirValue = new List<int>();
             for (int si = 0; si < friend.BasedAirUnitList.Count; ++si) {
-                friendAntiAirValue.Add(CalcAntiAirValue(friend.BasedAirUnitList[si].WeaponList, friend.SlotList[si]));
+                friendAntiAirValue.Add(CalcAntiAirValue(friend.BasedAirUnitList[si].WeaponList, friend.SlotList[si], true));
             }
 
             // シミュレーションを行う
@@ -267,7 +267,7 @@ namespace AWSK.Service {
                 }
 
                 // 最終制空値を読み取る
-                int aav = CalcAntiAirValue(enemy, enemySlotData, true);
+                int aav = CalcAntiAirValue(enemy, enemySlotData, false);
                 if (finalAAV.ContainsKey(aav)) {
                     ++finalAAV[aav];
                 } else {
