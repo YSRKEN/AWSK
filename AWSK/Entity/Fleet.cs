@@ -127,7 +127,7 @@ namespace AWSK.Model {
                 for (int j = 0; j < KammusuList[i].Count; ++j) {
                     if (j != 0)
                         output.Append(",");
-                    output.AppendFormat("%d", KammusuList[i][j].Id);
+                    output.AppendFormat("{0}", KammusuList[i][j].Id);
                 }
                 output.Append("]}");
             }
