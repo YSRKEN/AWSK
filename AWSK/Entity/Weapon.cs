@@ -134,7 +134,7 @@ namespace AWSK.Models {
             if (AAVWeaponTypeSet.Contains(Type)){
                 return true;
             }
-            if (wsFlg && Type != WeaponType.WS) {
+            if (wsFlg && (Type == WeaponType.PS || Type == WeaponType.WS || Type == WeaponType.LFB)) {
                 return true;
             }
             return false;
