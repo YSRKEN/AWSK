@@ -164,7 +164,7 @@ namespace AWSK.ViewModels {
             if (bauData.BasedAirUnitList.Count <= bauIndex[index] || bauData.SlotList.Count <= bauIndex[index]) {
                 return 0;
             }
-            return simulation.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]]);
+            return simulation.CalcAntiAirValue(bauData.BasedAirUnitList[bauIndex[index]].WeaponList, bauData.SlotList[bauIndex[index]], true);
         }
         // 基地航空隊の指定されたインデックスにおける戦闘行動半径を返す
         private int GetBasedAirUnitRange(int index) {
