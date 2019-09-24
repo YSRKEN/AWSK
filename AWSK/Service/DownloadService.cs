@@ -396,6 +396,7 @@ namespace AWSK.Service {
                     string rawName = tdList[4].TextContent.Replace("\n", "").Replace(" ", "");
                     string rawType = tdList[0].TextContent.Replace("\n", "").Replace(" ", "");
                     string rawAntiAir = tdList[9].TextContent;
+                    int antiAir = rawAntiAir.Contains("nil") ? 0 : int.Parse(rawAntiAir);
                     var rawSlot = tdList[18].TextContent.Replace("\n", "").Split(',').ToList();
                     if (rawSlot.Count == 1 && rawSlot[0] == "") {
                         rawSlot = new List<string>();
@@ -405,7 +406,7 @@ namespace AWSK.Service {
                     }
                     var rawDefaultWeapon = tdList[19].GetElementsByTagName("a").Select(e => e.GetAttribute("href")).ToList();
                     var kammusu = new Kammusu(int.Parse(rawId), rawName,
-                        KammusuTypeReverseDicWikia[rawType], int.Parse(rawAntiAir),
+                        KammusuTypeReverseDicWikia[rawType], antiAir,
                         rawSlot.Select(s => int.Parse(s)).ToList(), false);
                     Console.WriteLine(rawName);
                     var defaultWeaponList = new List<int>();
